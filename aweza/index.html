@@ -1,63 +1,42 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-ZA">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- HEAD-META: owned by the SEO/brand agent (title, description, social tags, favicon, theme-color) -->
   <title>AWEZA | South African Streetwear</title>
-  <meta name="description" content="AWEZA: cool tees for teens and adults, designed in South Africa.">
+  <meta name="description" content="AWEZA: bold graphic tees designed in South Africa.">
+  <!-- /HEAD-META -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/nav.css">
+  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/shop.css">
+  <link rel="stylesheet" href="css/product.css">
+  <link rel="stylesheet" href="css/cart.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/motion.css">
 </head>
 <body>
-  <div class="promo">Free delivery over R800 · Designed in Mzansi</div>
+  <!-- Mount points. Each module fills its own; do not move them. -->
+  <div id="nav-root"></div>
+  <main id="app" tabindex="-1"></main>
+  <div id="footer-root"></div>
+  <div id="cart-root"></div>
+  <div id="overlay-root"></div>
 
-  <header class="nav">
-    <button class="icon-btn menu-btn" aria-label="Menu" id="menuBtn">
-      <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-    </button>
-    <a href="#/" class="logo">AWEZA</a>
-    <nav class="nav-links" id="navLinks"></nav>
-    <button class="icon-btn cart-btn" aria-label="Open cart" id="cartBtn">
-      <svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
-      <span class="cart-count" id="cartCount" hidden>0</span>
-    </button>
-  </header>
-
-  <!-- Mobile menu -->
-  <div class="overlay" id="overlay"></div>
-  <aside class="menu-drawer" id="menuDrawer" aria-label="Menu">
-    <div class="drawer-head">
-      <span class="logo">AWEZA</span>
-      <button class="icon-btn" data-close aria-label="Close menu"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    </div>
-    <nav class="menu-links" id="menuLinks"></nav>
-  </aside>
-
-  <!-- Cart -->
-  <aside class="cart-drawer" id="cartDrawer" aria-label="Cart">
-    <div class="drawer-head">
-      <h2>Bag</h2>
-      <button class="icon-btn" data-close aria-label="Close cart"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    </div>
-    <div class="cart-items" id="cartItems"></div>
-    <div class="cart-foot" id="cartFoot"></div>
-  </aside>
-
-  <main id="app"></main>
-
-  <footer class="footer">
-    <div class="footer-cols">
-      <div><h4>AWEZA</h4><p>Streetwear designed in South Africa, for Mzansi and the world.</p></div>
-      <div><h4>Help</h4><a href="#/help">Delivery</a><a href="#/help">Returns</a><a href="#/help">Size guide</a></div>
-      <div><h4>Follow</h4><a href="#">Instagram</a><a href="#">TikTok</a></div>
-    </div>
-    <p class="fine">© <span id="year"></span> AWEZA. All rights reserved.</p>
-  </footer>
-
-  <div class="toast" id="toast"></div>
-
-  <script src="products.js"></script>
-  <script src="app.js"></script>
+  <script src="data/products.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/home.js"></script>
+  <script src="js/shop.js"></script>
+  <script src="js/product.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/pages.js"></script>
+  <script src="js/motion.js"></script>
+  <script src="js/boot.js"></script>
 </body>
 </html>

@@ -1,0 +1,279 @@
+{
+ "ceo-of-bad-decisions": {
+  "printify_product_id": "6adf97ca78edb91ce70d22c8",
+  "blueprint_id": 6,
+  "print_provider_id": 99,
+  "sizes": {
+   "S": {
+    "variant_id": 12102,
+    "cost_usd_cents": 1672
+   },
+   "XL": {
+    "variant_id": 12103,
+    "cost_usd_cents": 1672
+   },
+   "L": {
+    "variant_id": 12100,
+    "cost_usd_cents": 1672
+   },
+   "M": {
+    "variant_id": 12101,
+    "cost_usd_cents": 1672
+   },
+   "2XL": {
+    "variant_id": 12104,
+    "cost_usd_cents": 1882
+   },
+   "3XL": {
+    "variant_id": 12105,
+    "cost_usd_cents": 1995
+   },
+   "4XL": {
+    "variant_id": 24031,
+    "cost_usd_cents": 2042
+   },
+   "5XL": {
+    "variant_id": 24164,
+    "cost_usd_cents": 2045
+   }
+  }
+ },
+ "signature-lips": {
+  "printify_product_id": "6adf973a87d17f67bf09cf72",
+  "blueprint_id": 6,
+  "print_provider_id": 99,
+  "sizes": {
+   "S": {
+    "variant_id": 12102,
+    "cost_usd_cents": 2235
+   },
+   "XL": {
+    "variant_id": 12103,
+    "cost_usd_cents": 2235
+   },
+   "L": {
+    "variant_id": 12100,
+    "cost_usd_cents": 2235
+   },
+   "M": {
+    "variant_id": 12101,
+    "cost_usd_cents": 2235
+   },
+   "2XL": {
+    "variant_id": 12104,
+    "cost_usd_cents": 2442
+   },
+   "3XL": {
+    "variant_id": 12105,
+    "cost_usd_cents": 2545
+   },
+   "4XL": {
+    "variant_id": 24031,
+    "cost_usd_cents": 2598
+   },
+   "5XL": {
+    "variant_id": 24164,
+    "cost_usd_cents": 2616
+   }
+  }
+ },
+ "zero-exes": {
+  "printify_product_id": "6adf96a8260c17a8ff05d494",
+  "blueprint_id": 6,
+  "print_provider_id": 99,
+  "sizes": {
+   "S": {
+    "variant_id": 12102,
+    "cost_usd_cents": 1672
+   },
+   "XL": {
+    "variant_id": 12103,
+    "cost_usd_cents": 1672
+   },
+   "L": {
+    "variant_id": 12100,
+    "cost_usd_cents": 1672
+   },
+   "M": {
+    "variant_id": 12101,
+    "cost_usd_cents": 1672
+   },
+   "2XL": {
+    "variant_id": 12104,
+    "cost_usd_cents": 1882
+   },
+   "3XL": {
+    "variant_id": 12105,
+    "cost_usd_cents": 1995
+   },
+   "4XL": {
+    "variant_id": 24031,
+    "cost_usd_cents": 2042
+   },
+   "5XL": {
+    "variant_id": 24164,
+    "cost_usd_cents": 2045
+   }
+  }
+ },
+ "captain-save": {
+  "printify_product_id": "6adf9615c392daed6500e7f0",
+  "blueprint_id": 6,
+  "print_provider_id": 99,
+  "sizes": {
+   "S": {
+    "variant_id": 12102,
+    "cost_usd_cents": 1593
+   },
+   "XL": {
+    "variant_id": 12103,
+    "cost_usd_cents": 1593
+   },
+   "L": {
+    "variant_id": 12100,
+    "cost_usd_cents": 1593
+   },
+   "M": {
+    "variant_id": 12101,
+    "cost_usd_cents": 1593
+   },
+   "2XL": {
+    "variant_id": 12104,
+    "cost_usd_cents": 1802
+   },
+   "3XL": {
+    "variant_id": 12105,
+    "cost_usd_cents": 1915
+   },
+   "4XL": {
+    "variant_id": 24031,
+    "cost_usd_cents": 1965
+   },
+   "5XL": {
+    "variant_id": 24164,
+    "cost_usd_cents": 1968
+   }
+  }
+ },
+ "sweet-cupcake": {
+  "printify_product_id": "6adf952c250930614e0f5c15",
+  "blueprint_id": 6,
+  "print_provider_id": 99,
+  "sizes": {
+   "S": {
+    "variant_id": 12102,
+    "cost_usd_cents": 1672
+   },
+   "XL": {
+    "variant_id": 12103,
+    "cost_usd_cents": 1672
+   },
+   "L": {
+    "variant_id": 12100,
+    "cost_usd_cents": 1672
+   },
+   "M": {
+    "variant_id": 12101,
+    "cost_usd_cents": 1672
+   },
+   "2XL": {
+    "variant_id": 12104,
+    "cost_usd_cents": 1882
+   },
+   "3XL": {
+    "variant_id": 12105,
+    "cost_usd_cents": 1995
+   },
+   "4XL": {
+    "variant_id": 24031,
+    "cost_usd_cents": 2042
+   },
+   "5XL": {
+    "variant_id": 24164,
+    "cost_usd_cents": 2045
+   }
+  }
+ },
+ "need-a-hug": {
+  "printify_product_id": "6adf93fe250930614e0f5b4f",
+  "blueprint_id": 6,
+  "print_provider_id": 99,
+  "sizes": {
+   "S": {
+    "variant_id": 12102,
+    "cost_usd_cents": 1672
+   },
+   "XL": {
+    "variant_id": 12103,
+    "cost_usd_cents": 1672
+   },
+   "L": {
+    "variant_id": 12100,
+    "cost_usd_cents": 1672
+   },
+   "M": {
+    "variant_id": 12101,
+    "cost_usd_cents": 1672
+   },
+   "2XL": {
+    "variant_id": 12104,
+    "cost_usd_cents": 1882
+   },
+   "3XL": {
+    "variant_id": 12105,
+    "cost_usd_cents": 1995
+   },
+   "4XL": {
+    "variant_id": 24031,
+    "cost_usd_cents": 2042
+   },
+   "5XL": {
+    "variant_id": 24164,
+    "cost_usd_cents": 2045
+   }
+  }
+ },
+ "mini-lips": {
+  "printify_product_id": "6adf3e096048caed7507d374",
+  "blueprint_id": 12,
+  "print_provider_id": 99,
+  "sizes": {
+   "M": {
+    "variant_id": 18541,
+    "cost_usd_cents": 1129
+   },
+   "L": {
+    "variant_id": 18542,
+    "cost_usd_cents": 1129
+   },
+   "S": {
+    "variant_id": 18540,
+    "cost_usd_cents": 1129
+   },
+   "XL": {
+    "variant_id": 18543,
+    "cost_usd_cents": 1129
+   },
+   "XS": {
+    "variant_id": 18539,
+    "cost_usd_cents": 1129
+   },
+   "2XL": {
+    "variant_id": 18544,
+    "cost_usd_cents": 1385
+   },
+   "3XL": {
+    "variant_id": 18545,
+    "cost_usd_cents": 1622
+   },
+   "4XL": {
+    "variant_id": 18546,
+    "cost_usd_cents": 1862
+   },
+   "5XL": {
+    "variant_id": 101776,
+    "cost_usd_cents": 2024
+   }
+  }
+ }
+}
