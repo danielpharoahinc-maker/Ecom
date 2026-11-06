@@ -187,9 +187,9 @@ The real AWEZA logo is a bold, high-contrast Clarendon/Century-style SERIF wordm
 
 ## 6. Imagery treatment
 
-All photos are **1000x1000 square JPGs**: white tees, red/black prints, pure white backgrounds on `front`, `back`, `person-1`, `person-2`, `folded`, `duo`; grey studio backgrounds on `lifestyle` and `hanging-1`. Most graphics are on the **back** (products whose `images[0]` is `back`).
+Product photos are square JPGs: white tees, red/black prints. Flats (`front`, `back`, `folded`) sit on pure white; `hanging-1` on grey; `male-*` and `collar` are model/detail shots. Most graphics are on the **back** (check which of `front.jpg`/`back.jpg` carries the big print; `AW.ui.printSide(p)` returns "back" for every product except `captain-save`, `need-a-hug`, `mini-lips`).
 
-**Male-first imagery (owner directive).** The integrator is adding male-model photos of the real tees as `images/<product-id>/male-*.jpg` (e.g. `male-1.jpg`, `male-2.jpg`) and will update `images` arrays in data/products.js. Code must never assume filenames beyond what `product.images` lists. Use `AW.ui.modelShot(product)` (agent 01) to pick the model image: first `male-*` in `product.images`, else `person-1`, else `images[0]`. The female Printify mockups (`person-*`, `lifestyle`, `duo`) are secondary: never in hero/marketing areas, allowed only deeper in PDP galleries. Wherever this doc says `person-1` or `duo` below, read "`AW.ui.modelShot(product)`".
+**Male-first imagery (owner directive, DONE).** Every `images/<product-id>/` now holds male-model shots: `male-front-1..5`, `male-back-1..3`, `male-duo`, `male-duo-2`, `male-sleeve` (signature-lips only), `collar`, plus flats `front`, `back`, `folded`, `hanging-1`. Not every product has every file: **only use what `product.images` lists** (arrays are male-first). Female mockups were removed. `AW.ui.modelShot(product, "front"|"back")` returns the first matching `male-front-*`/`male-back-*`, else `images[0]`.
 
 **Print artwork** (`images/brand/art/`, cropped JPGs on white, show with `mix-blend-mode: multiply` on light surfaces so the white disappears; on dark sections place them on a `--c-tile` or white panel):
 - `lips-logo.jpg` (724x644): THE hero centrepiece and recurring signature.
@@ -202,7 +202,7 @@ All photos are **1000x1000 square JPGs**: white tees, red/black prints, pure whi
 
 **The tile trick (makes cheap mockups look like a studio shoot):** every product image sits in a `.media` box with `background: var(--c-tile)` and the `<img>` uses `mix-blend-mode: multiply`. Pure white becomes the warm off-white tile, so every shot looks like one consistent grey-white studio set, and letterboxing is invisible.
 - **Contain shots** (`front`, `back`, `folded`): `object-fit: contain` with `padding: 6%` inside the tile, so sleeves are never clipped and the tee "floats".
-- **Cover shots** (`person-1`, `person-2`, `duo`, `lifestyle`, `hanging-1`): `object-fit: cover`, `object-position: 50% 20%` (keep faces/chests in frame).
+- **Cover shots** (every `male-*`, `collar`, `hanging-1`): `object-fit: cover`, `object-position: 50% 25%` (keep chests/prints in frame).
 - `AW.ui.fitFor(src)` returns `"contain"` or `"cover"` by filename. Everyone uses it.
 - Tiles keep their light colour even in dark sections. On black, a light tile reads like a framed print. That's intended.
 - Never add drop shadows, borders or rounded corners to product images. Radius `--r-0`. Edges are crisp.
@@ -210,16 +210,17 @@ All photos are **1000x1000 square JPGs**: white tees, red/black prints, pure whi
 **Which angle where**
 | Context | Primary | Secondary |
 |---|---|---|
-| Product card (4:5) | `images[0]` (contain: the print side) | hover/focus swap to `person-1` (cover) |
+| Product card (4:5) | `images[0]` (the male model shot; cover) | hover/focus swap to the print side: `back.jpg` if the product's print is on the back, else `front.jpg` (contain). `AW.ui.cardImages(p)` decides. |
 | PDP gallery (1:1) | all `images` in order | none |
 | Home collection panels | see map below | none |
 | Bag line / search result (1:1, small) | `images[0]` (contain) | none |
 | Social share / OG | brand agent composes | none |
 
 **Home collection panel map** (by product id, stable):
-- `signature` → `signature-lips` `back.jpg` (contain, the lips, big) with `duo.jpg` as the desktop hover image
-- `bad-decisions` → `ceo-of-bad-decisions` `back.jpg` (contain), hover `duo.jpg`
-- `no-filter` → `captain-save` `person-1.jpg` (cover), hover `front.jpg`
+- `signature` → `signature-lips` first `male-back-*` (cover), hover `male-sleeve.jpg`
+- `bad-decisions` → `ceo-of-bad-decisions` first `male-back-*` (cover), hover `back.jpg`
+- `no-filter` → `captain-save` first `male-front-*` (cover), hover `front.jpg`
+(Resolve from `product.images` at runtime; fall back to `images[0]`.)
 
 **Ratios:** cards `4/5`, PDP and thumbs `1/1`, editorial `3/4` (mobile) / `4/5` or `1/1` (desktop). Always set `aspect-ratio` on `.media` (no layout shift), plus `width="1000" height="1000"` on every `<img>`.
 
@@ -230,7 +231,7 @@ All photos are **1000x1000 square JPGs**: white tees, red/black prints, pure whi
 - **Container:** `.container` = `max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gutter)`.
 - **Sections:** `.section` = `padding-block: var(--section-y)`. Big empty space between sections is part of the look. Don't fill it.
 - **Product grid** (`.product-grid`, owned by agent 01, used by home/shop/pdp): 2 columns < 900px, 3 columns 900 to 1439px, 4 columns ≥ 1440px. Gaps `--grid-gap-x` / `--grid-gap-y`. On phones products flow **downward** in 2 columns: no horizontal product carousels anywhere on mobile.
-- **Display type is allowed to be huge** and to touch the gutters. Headlines in Anton may wrap word-by-word on phones; that's fine. Never let a single word overflow at 375px: test the longest collection name ("BAD DECISIONS CLUB") at `--fs-d1`.
+- **Display type is allowed to be huge** and to touch the gutters. Headlines in DM Serif Display may wrap word-by-word on phones; that's fine. Never let a single word overflow at 375px: test the longest collection name ("BAD DECISIONS CLUB") at `--fs-d1`.
 - **Hairlines** (`1px solid var(--c-line)`) organise everything: no boxes, no cards with shadows.
 - No horizontal page scroll at 375px, ever. Use `overflow-x: clip` on wide decorative elements (marquee, mega wordmark), never on `body`.
 
@@ -242,7 +243,11 @@ All return **HTML strings** unless stated. All escape their own text inputs with
 AW.ui.img(src, { alt, ratio = "1/1", fit = AW.ui.fitFor(src), eager = false, className = "", sizes }) -> string
     <div class="media media--{fit} {className}" style="aspect-ratio:{ratio}"><img ... width=1000 height=1000></div>
 AW.ui.fitFor(src) -> "contain" | "cover"
-AW.ui.altFor(product, src) -> "CEO of Bad Decisions Tee, back view"   (front|back|on model|lifestyle|folded|hanging|two models)
+AW.ui.printSide(product) -> "back" | "front"
+AW.ui.modelShot(product, side = printSide) -> src   (first male-<side>-*, else first male-*, else images[0])
+AW.ui.cardImages(product) -> { primary, alt }        (primary = modelShot, alt = flat print side)
+AW.ui.artFor(productId) -> src | null                 (print artwork map, §6)
+AW.ui.altFor(product, src) -> "CEO of Bad Decisions Tee, back view"   (front|back|worn front|worn back|two models|sleeve detail|collar detail|folded|hanging)
 AW.ui.card(product, { size = "md" | "lg", eager = false, quickAdd = true, index = 0 }) -> string
 AW.ui.btn(label, { href, variant = "primary"|"secondary"|"ghost"|"inverse"|"link", size = "sm"|"md"|"lg",
                    icon, iconAfter, block = false, attrs = "" }) -> string   (<a> if href, else <button type="button">)
@@ -255,7 +260,7 @@ AW.ui.badge(text, { tone = "red" | "ink" | "white" }) -> string
 AW.ui.chip(label, { active = false, attrs = "" }) -> string      (<button class="chip" aria-pressed>)
 AW.ui.eyebrow(text) -> string
 AW.ui.sectionHead({ eyebrow, title, accent, link: { label, href } }) -> string
-AW.ui.logo({ size = "md" }) -> string   (AWEZA wordmark in Anton + optional lips glyph)
+AW.ui.logo({ size = "md" }) -> string   (AWEZA wordmark in DM Serif Display + ™ + optional "Time of your life")
 AW.ui.lockScroll(on: boolean)           (reference-counted body scroll lock; safe for nested drawers)
 AW.ui.trapFocus(containerEl) -> release()  (Tab cycles inside; returns function to undo)
 AW.ui.toast(msg)                        (alias of AW.toast; renderer listens on AW.on("toast"))
@@ -277,7 +282,7 @@ Primitives in base.css: `.btn` (+ `--primary|--secondary|--ghost|--inverse|--lin
 5. **Reduced motion = no movement.** With `prefers-reduced-motion: reduce`: no transforms, no parallax, no marquee movement, no curtain, no fly-to-bag; opacity fades ≤ 120ms at most. motion.js adds `html.mo-reduced` and never adds `mo-ready` hiding.
 6. **Cheap.** Only `transform`, `opacity`, `clip-path`. IntersectionObserver for reveals, one rAF loop for parallax that only runs while a parallax element is in view. No scroll listeners doing layout reads.
 
-**Libraries (now allowed, loaded only by the integrator in index.html):** GSAP 3.12.5 + ScrollTrigger (`https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js`, `.../3.12.5/ScrollTrigger.min.js`) and Lenis 1.1.13 (`https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js`), as `window.gsap`, `window.ScrollTrigger`, `window.Lenis`. Rules:
+**Libraries (allowed; SELF-HOSTED in `vendor/` and already included in index.html before data/products.js; CDNs are blocked):** GSAP 3.12.5 + ScrollTrigger and Lenis 1.1.13, as `window.gsap`, `window.ScrollTrigger`, `window.Lenis`. Rules:
 - Always feature-detect (`const G = window.gsap, ST = window.ScrollTrigger;`) and fall back to CSS/IO/WAAPI. The site must work fully without them.
 - **motion.js owns** Lenis setup (smooth wheel on fine pointers only; native touch scroll on phones; off in reduced motion), `gsap.registerPlugin(ScrollTrigger)`, wiring Lenis to ScrollTrigger (`lenis.on("scroll", ScrollTrigger.update)` + gsap ticker), and `ScrollTrigger.refresh()` after each route render and after images load. It exposes `AW.motion.lenis` (or null), `AW.motion.scrollTo(target)`, `AW.motion.stop()/start()` (drawers call these to freeze smooth scroll while open; `AW.ui.lockScroll` calls them automatically).
 - **Page agents** may create their own ScrollTriggers/timelines for signature moments, but must collect them and kill them on `AW.on("route")` (`trigger.kill()`, `tl.kill()`), and must use `gsap.matchMedia()` so pinned/horizontal effects run only ≥1024px and never under reduced motion.
@@ -308,7 +313,7 @@ AW.motion.reduced -> boolean
 
 **Page transitions (signature moment):** motion.js intercepts same-origin clicks on `a[href^="#/"]` (no modifier keys, not `target=_blank`, not the current hash). It plays a **curtain**: a full-screen ink panel `.mo-curtain` (with a small red lips glyph centred) wipes up from the bottom (`--dur-2`, `--ease-in`), then sets `location.hash`. On `AW.on("route")` the curtain wipes off the top (`--dur-3`, `--ease-out`) while `#app` fades/rises in 16px. Total navigation overhead ≤ 300ms before new content. Back/forward buttons (hashchange without click) skip the curtain and just do the enter animation. Reduced motion: no curtain, instant.
 
-**First-visit intro (once per session, sessionStorage `aw-intro`):** ink screen, "AWEZA" in `--fs-mega` Anton rises letter by letter (chars split, 40ms stagger), red lips glyph pops (spring), then the whole panel slides up revealing the home collections, ≤ 1.4s total, skippable by any tap/key, never shown on reduced motion or on non-home routes.
+**First-visit intro (once per session, sessionStorage `aw-intro`):** ink screen, "AWEZA" in `--fs-mega` DM Serif Display rises letter by letter (chars split, 40ms stagger), red lips glyph pops (spring), then the whole panel slides up revealing the home collections, ≤ 1.4s total, skippable by any tap/key, never shown on reduced motion or on non-home routes.
 
 **Micro-interactions (owned by the named agent, using motion tokens):**
 - Bag count bumps (scale 1 → 1.35 → 1, `--ease-spring`) on `cart:added` (nav).
@@ -329,7 +334,7 @@ AW.motion.reduced -> boolean
 ### Home (`#/`)
 1. **Lips hero (signature moment).** White, grain overlay. `lips-logo.jpg` HUGE (mobile: ~92vw wide, desktop: ~62vw, multiply blend), slightly off-centre right; headline "Say it with your *back*." in DM Serif Display `--fs-d1` set asymmetrically top-left, overlapping the lips; eyebrow, brand line "Time of your life." in italic, CTA "Shop the drop". Desktop (GSAP, ≥1024): section pins for ~120% of viewport height; on scroll the lips scale from 0.82 to 1.25 and drift, the headline splits apart (lines move in opposite directions), then the lips "open" onto the collections (clip-path circle shrink or wipe). Mobile: no pin; lips scale gently with a light parallax (`data-parallax`), headline lines rise in. The collections begin within the first 1.2 screens on phones (owner: front page opens on collections).
 2. **Collections.** One panel per collection, in `AW.collections` order, numbered 01/02/03. Asymmetric: panels are not equal boxes (vary image size/offset, name alignment left/right).
-   - Mobile: panels stack **downward**, each ~78svh (so the next one peeks). Panel = full-width tile with the mapped image, giant collection name in Anton `--fs-d1` overlapping the image bottom, index numeral, tagline in Instrument Serif, "Shop the collection →" link, product count ("3 tees"). Panel 02 uses `data-theme="dark"` (ink background, image sits in an inset tile) to create rhythm: light / dark / light.
+   - Mobile: panels stack **downward**, each ~78svh (so the next one peeks). Panel = full-width tile with the mapped image, giant collection name in DM Serif Display `--fs-d1` overlapping the image bottom, index numeral, tagline in serif italic, "Shop the collection →" link, product count ("3 tees"). Panel 02 uses `data-theme="dark"` (ink background, image sits in an inset tile) to create rhythm: light / dark / light.
    - Desktop ≥1024: the three panels sit side by side as tall columns (height `calc(100svh - var(--header-h) - var(--promo-h))`, min 620px). Hover/focus a column: it grows (flex 1 → 1.7, `--dur-4 --ease-out`), its image swaps to the hover image, the others dim slightly (opacity .55 on their images). Whole column is one link.
    - Load: columns rise in with stagger, images clip-reveal, names split-rise.
 3. **Marquee band** (ink, Archivo 800 uppercase `--fs-h1`, white, red lips glyph separators, `data-marquee`).
@@ -340,22 +345,22 @@ AW.motion.reduced -> boolean
 8. **Promise strip:** 4 items with icons, hairline-separated, left-aligned: Printed to order · Delivery across SA · Secure checkout · Sizes XS–5XL.
 
 ### Shop (`#/shop`, `#/shop/<collection-id>`, `#/shop/all`)
-- Header block: eyebrow (count, e.g. "7 tees"), title in Anton `--fs-d1` (collection name or "SHOP ALL"), tagline in accent italic.
+- Header block: eyebrow (count, e.g. "7 tees"), title in DM Serif Display `--fs-d1` (collection name or "SHOP ALL"), tagline in accent italic.
 - Sticky toolbar under the header (`top: var(--nav-offset)`): horizontally scrollable collection chips (All + each collection; navigates), Sort select (Featured / Newest / Price low–high / Price high–low), Filter button opening a size filter sheet (sizes from all products; shows products available in the chosen size). Count updates live.
 - Grid: `.product-grid`; after the 4th card on "all", insert one **editorial tile** (dark, spans 1 cell on mobile, 2 on desktop) with a cheeky line and link to a collection.
 - Changing sort/filter re-renders the grid with a quick fade (cards keep `data-reveal`).
 - Empty state: "Nothing in that size yet. Bold request." + clear filters.
 
 ### Product (`#/product/<id>`)
-- **Mobile:** full-bleed square gallery (scroll-snap, swipe sideways), counter pill "1 / 8" bottom-right, progress dashes bottom, **Front/Back toggle pill** top-left that jumps to the front or back slide. Under the gallery: collection eyebrow (link), name in Anton `--fs-h1`, price (updates with size upcharge), summary, size grid, size-guide link, Add to Bag (full width, `data-magnetic`), accordions (Details incl. `fit`, Delivery, Returns, Care), trust row. **Sticky buy bar** slides up from the bottom when the main Add button leaves the viewport: thumb, name, price, Add to Bag (if no size: scrolls to sizes and shakes them).
+- **Mobile:** full-bleed square gallery (scroll-snap, swipe sideways), counter pill "1 / 8" bottom-right, progress dashes bottom, **Front/Back toggle pill** top-left that jumps to the front or back slide. Under the gallery: collection eyebrow (link), name in DM Serif Display `--fs-h1`, price (updates with size upcharge), summary, size grid, size-guide link, Add to Bag (full width, `data-magnetic`), accordions (Details incl. `fit`, Delivery, Returns, Care), trust row. **Sticky buy bar** slides up from the bottom when the main Add button leaves the viewport: thumb, name, price, Add to Bag (if no size: scrolls to sizes and shakes them).
 - **Desktop ≥1024:** two columns. Left (≈ 58%): main square image with arrow buttons + keyboard arrows, vertical thumbnail rail to its left. Right (≈ 42%): sticky info panel (`top: calc(var(--nav-offset) + var(--sp-6))`).
 - **Zoom:** tap/click main image → full-screen viewer in `#overlay-root` (ink background), image at 2× with pan following pointer/drag, swipe/arrow between images, Esc/close button, focus trapped.
 - **Related:** "Complete the statement": same collection first, then others, max 4, `.product-grid`.
 
 ### Bag drawer (`#cart-root`)
 - Right-side drawer `--drawer-w` (full width on phones), scrim `--c-scrim` with fade; panel slides in `translateX(100%) → 0` over `--dur-4 --ease-out`; lines stagger in. Esc, scrim click and close button close it; focus trapped; focus returns to opener.
-- Header: "YOUR BAG" in Anton + count. Free-delivery progress (red fill animates to new width). Lines: 1:1 thumb (contain), name, size, colour, qty stepper (−/+, 44px targets), remove (trash icon), line total. Footer (sticky in panel): subtotal, delivery ("Free" or price), total, **Checkout** (primary, block), "Keep shopping" (link). Small "You might also like" (2 products not in the bag, compact cards) when there's room.
-- Empty: Anton "YOUR BAG IS EMPTY." + accent "Bold of you." + collection chips.
+- Header: "YOUR BAG" in DM Serif Display + count. Free-delivery progress (red fill animates to new width). Lines: 1:1 thumb (contain), name, size, colour, qty stepper (−/+, 44px targets), remove (trash icon), line total. Footer (sticky in panel): subtotal, delivery ("Free" or price), total, **Checkout** (primary, block), "Keep shopping" (link). Small "You might also like" (2 products not in the bag, compact cards) when there's room.
+- Empty: DM Serif Display "YOUR BAG IS EMPTY." + accent "Bold of you." + collection chips.
 
 ### Checkout (`#/checkout`, plus `#/checkout/success`, `#/checkout/cancelled`, `#/checkout/failed`)
 - Calm, focused, no promo noise. Mobile: collapsible "Show order summary · R1 298" bar on top, then the form. Desktop: form left (max 640px), summary right (sticky, tile background).
@@ -363,10 +368,10 @@ AW.motion.reduced -> boolean
 - Pay button: "Pay R1 298" with lock icon. Calls `window.AW_PAY(order)` if defined (shows loading state); otherwise shows the "Payments are launching soon" panel. The order shape is fixed in §11.
 
 ### Footer (`#footer-root`, dark)
-- Top: newsletter (headline "FIRST DIBS ON NEW DROPS.", email field + button; no backend: show success toast and keep nothing; note TODO). Columns (accordions on mobile, columns on desktop): Shop (collections from data), Help (Delivery, Returns, Size guide, FAQ), AWEZA (About, Terms, Privacy), Follow (icons, links `#` placeholders). Business info block (ECT Act placeholders). Bottom: **mega wordmark "AWEZA"** in Anton `--fs-mega`, edge to edge, clipped by its line box, lips glyph in red; © year, "Prices include VAT where applicable" (placeholder note for owner).
+- Top: newsletter (headline "FIRST DIBS ON NEW DROPS.", email field + button; no backend: show success toast and keep nothing; note TODO). Columns (accordions on mobile, columns on desktop): Shop (collections from data), Help (Delivery, Returns, Size guide, FAQ), AWEZA (About, Terms, Privacy), Follow (icons, links `#` placeholders). Business info block (ECT Act placeholders). Bottom: **mega wordmark "AWEZA"** in DM Serif Display `--fs-mega`, edge to edge, clipped by its line box, lips glyph in red; © year, "Prices include VAT where applicable" (placeholder note for owner).
 
 ### Content pages (`#/about`, `#/help`, `#/size-guide`, `#/terms`, `#/privacy`, `#/returns`, `#/404`)
-Editorial template: Anton page title `--fs-d1`, accent subtitle, `--maxw-text` body, hairline-separated sections, sticky side index on desktop for long pages. Legal pages carry a visible "DRAFT: for owner review" banner.
+Editorial template: DM Serif Display page title `--fs-d1`, accent subtitle, `--maxw-text` body, hairline-separated sections, sticky side index on desktop for long pages. Legal pages carry a visible "DRAFT: for owner review" banner.
 
 ## 11. Cross-module contracts
 
@@ -413,7 +418,7 @@ Integrator only: js/core.js, js/boot.js, index.html (except HEAD-META), mount po
 
 ## 13. Shared engineering rules
 
-- Vanilla JS, classic scripts, each file one IIFE: `(() => { const AW = window.AW; ... })();`. No modules, imports, frameworks, libraries, external scripts, npm.
+- Vanilla JS, classic scripts, each file one IIFE: `(() => { const AW = window.AW; ... })();`. No modules, imports, frameworks, external/CDN scripts, npm. Only libraries: the vendored GSAP/ScrollTrigger/Lenis (§9), feature-detected.
 - Use only token custom properties for colour, type, spacing, radius, shadow, z-index, easing and duration. Literal values only for 1px hairlines, percentages and the breakpoints above.
 - Scope every selector with your prefix. Only agent 01 styles bare elements and primitives. Never style another agent's classes.
 - Defensive coding: other modules may be missing while you build. `const ui = AW.ui || {}`; fall back to minimal local markup if a helper is absent. Never create or edit another agent's files.
