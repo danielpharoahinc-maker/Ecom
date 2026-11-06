@@ -478,3 +478,17 @@
   .home-promise__title { font-size: var(--fs-body); }
   .home-promise__body { font-size: var(--fs-sm); }
 }
+
+/* hover-swap guards: an alt image with no src never shows; under reduced motion swap by visibility
+   (motion.css forces opacity:1 on images inside [data-reveal] there). */
+.home-col__img--alt:not([src]) { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .home-col__img--alt { visibility: hidden; }
+}
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+  .home-col:hover .home-col__img--alt[src], .home-col:focus-visible .home-col__img--alt[src] { visibility: visible; }
+  .home-col:hover .home-col__media:has(.home-col__img--alt[src]) .home-col__img:not(.home-col__img--alt) { visibility: hidden; }
+}
+@media (min-width: 1024px) {
+  .home-hero:not(.home-hero--pinned) .home-hero__lips { scale: .86; }
+}
