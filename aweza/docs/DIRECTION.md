@@ -277,6 +277,12 @@ Primitives in base.css: `.btn` (+ `--primary|--secondary|--ghost|--inverse|--lin
 5. **Reduced motion = no movement.** With `prefers-reduced-motion: reduce`: no transforms, no parallax, no marquee movement, no curtain, no fly-to-bag; opacity fades ≤ 120ms at most. motion.js adds `html.mo-reduced` and never adds `mo-ready` hiding.
 6. **Cheap.** Only `transform`, `opacity`, `clip-path`. IntersectionObserver for reveals, one rAF loop for parallax that only runs while a parallax element is in view. No scroll listeners doing layout reads.
 
+**Libraries (now allowed, loaded only by the integrator in index.html):** GSAP 3.12.5 + ScrollTrigger (`https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js`, `.../3.12.5/ScrollTrigger.min.js`) and Lenis 1.1.13 (`https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js`), as `window.gsap`, `window.ScrollTrigger`, `window.Lenis`. Rules:
+- Always feature-detect (`const G = window.gsap, ST = window.ScrollTrigger;`) and fall back to CSS/IO/WAAPI. The site must work fully without them.
+- **motion.js owns** Lenis setup (smooth wheel on fine pointers only; native touch scroll on phones; off in reduced motion), `gsap.registerPlugin(ScrollTrigger)`, wiring Lenis to ScrollTrigger (`lenis.on("scroll", ScrollTrigger.update)` + gsap ticker), and `ScrollTrigger.refresh()` after each route render and after images load. It exposes `AW.motion.lenis` (or null), `AW.motion.scrollTo(target)`, `AW.motion.stop()/start()` (drawers call these to freeze smooth scroll while open; `AW.ui.lockScroll` calls them automatically).
+- **Page agents** may create their own ScrollTriggers/timelines for signature moments, but must collect them and kill them on `AW.on("route")` (`trigger.kill()`, `tl.kill()`), and must use `gsap.matchMedia()` so pinned/horizontal effects run only ≥1024px and never under reduced motion.
+- Expected signature scroll moments: pinned home hero where the lips scale/reveal (03), desktop horizontal-scroll product rail (03), split text rising (07 via `data-reveal="lines"`), image clip-path reveals (07), magnetic buttons (07), fly-to-bag (07).
+
 **Data-attribute contract (other agents put these in their markup; motion.js does the rest)**
 
 | Attribute | Values | Effect |
@@ -321,17 +327,17 @@ AW.motion.reduced -> boolean
 - **Footer** (pages): ink (`data-theme="dark"`), see §10 Footer.
 
 ### Home (`#/`)
-1. **Intro line** (compact, ~18svh on mobile): eyebrow "Designed in South Africa. Printed to order." + headline in Anton `--fs-d2`: "SAY IT WITH YOUR *back*." (accent word in Instrument Serif italic, lowercase).
-2. **Collections (the opening, signature moment).** One panel per collection, in `AW.collections` order, numbered 01/02/03.
+1. **Lips hero (signature moment).** White, grain overlay. `lips-logo.jpg` HUGE (mobile: ~92vw wide, desktop: ~62vw, multiply blend), slightly off-centre right; headline "Say it with your *back*." in DM Serif Display `--fs-d1` set asymmetrically top-left, overlapping the lips; eyebrow, brand line "Time of your life." in italic, CTA "Shop the drop". Desktop (GSAP, ≥1024): section pins for ~120% of viewport height; on scroll the lips scale from 0.82 to 1.25 and drift, the headline splits apart (lines move in opposite directions), then the lips "open" onto the collections (clip-path circle shrink or wipe). Mobile: no pin; lips scale gently with a light parallax (`data-parallax`), headline lines rise in. The collections begin within the first 1.2 screens on phones (owner: front page opens on collections).
+2. **Collections.** One panel per collection, in `AW.collections` order, numbered 01/02/03. Asymmetric: panels are not equal boxes (vary image size/offset, name alignment left/right).
    - Mobile: panels stack **downward**, each ~78svh (so the next one peeks). Panel = full-width tile with the mapped image, giant collection name in Anton `--fs-d1` overlapping the image bottom, index numeral, tagline in Instrument Serif, "Shop the collection →" link, product count ("3 tees"). Panel 02 uses `data-theme="dark"` (ink background, image sits in an inset tile) to create rhythm: light / dark / light.
    - Desktop ≥1024: the three panels sit side by side as tall columns (height `calc(100svh - var(--header-h) - var(--promo-h))`, min 620px). Hover/focus a column: it grows (flex 1 → 1.7, `--dur-4 --ease-out`), its image swaps to the hover image, the others dim slightly (opacity .55 on their images). Whole column is one link.
    - Load: columns rise in with stagger, images clip-reveal, names split-rise.
-3. **Marquee band** (ink, Anton `--fs-h1`, white, red lips glyph separators, `data-marquee`).
-4. **New & Bestsellers:** section head + `.product-grid` of products with a badge (then fill to 4). 2 columns on phones.
-5. **The Back Story** (editorial): big back-print image (`ceo-of-bad-decisions` back, `data-parallax="0.1"`) beside sticky text: "The front is polite. The back says what you meant." + a vertical list of the back-print tees as text links with hover image preview on desktop.
-6. **Signature spotlight** (dark): `signature-lips` back image huge in a tile, Anton "THE LIPS THAT STARTED IT ALL", price, Add to Bag → PDP, link to the Signature Line.
-7. **The full drop:** all products in `.product-grid`.
-8. **Promise strip:** 4 items with icons, hairline-separated: Printed to order · Delivery across SA · Secure checkout · Sizes XS–5XL.
+3. **Marquee band** (ink, Archivo 800 uppercase `--fs-h1`, white, red lips glyph separators, `data-marquee`).
+4. **The Rail:** all products. Desktop ≥1024: pinned horizontal-scroll rail (GSAP), large cards of varying width, a big counter "01/07", the section title fixed at left. Mobile (and no-GSAP fallback): normal 2-column `.product-grid` flowing downward (owner rule: no sideways product carousels on phones).
+5. **The Back Story** (editorial, asymmetric): `ceo-print.jpg` artwork huge and cropped off the edge (multiply), beside sticky text: "The front is polite. The back says what you meant." + a vertical list of back-print tees as big serif text links with a hover image preview following the cursor on desktop. (Only non-face prints: ceo, zero-exes, signature.)
+6. **Signature spotlight** (dark, grain): the lips again on a white panel, cropped tight to the teeth, "The lips that started it all." price, link to PDP and the Signature Line.
+7. **Next drop teaser:** `hotdog-print.jpg` tall on the right, "Next drop. Cooking." style line (brand agent may refine), "Get first dibs" scrolls to the footer newsletter. No price, no Add to Bag.
+8. **Promise strip:** 4 items with icons, hairline-separated, left-aligned: Printed to order · Delivery across SA · Secure checkout · Sizes XS–5XL.
 
 ### Shop (`#/shop`, `#/shop/<collection-id>`, `#/shop/all`)
 - Header block: eyebrow (count, e.g. "7 tees"), title in Anton `--fs-d1` (collection name or "SHOP ALL"), tagline in accent italic.
@@ -417,3 +423,13 @@ Integrator only: js/core.js, js/boot.js, index.html (except HEAD-META), mount po
 - Responsive: verify at 375, 390, 768, 1024 and 1440 wide. No horizontal page scroll at 375px.
 - Verify with Playwright (see your brief): `python3 -m http.server <your port>` from /home/user/Ecom/aweza, `require('playwright')`, `chromium.launch()`, viewports 390x844 and 1440x900, zero console errors from your files, screenshots in your scratchpad folder, look at them, iterate until it looks premium. Kill only the server PID you started.
 - No git commits. Finish with a report: files changed, what you built, contract needs for the integrator, known issues.
+
+## 14. Anti-template rules (owner: "it must not look like AI slop")
+
+- **No generic gradients**, glassmorphism, neon glows, emoji, sparkle icons, rounded "SaaS" cards with soft shadows, or three-equal-columns-of-icons as a main feature.
+- **Not centred-everything.** Default alignment is left. Use asymmetric 12-column compositions on desktop (e.g. image spans cols 1–7, text cols 9–12 offset down by `--sp-9`). Break the grid on purpose once per section (an image bleeding off the edge, a headline overlapping an image).
+- **Vary rhythm.** No two consecutive sections share the same layout. Grids may mix card sizes (`AW.ui.card(p, {size:"lg"})` spanning 2 cells) instead of identical tiles.
+- **Huge type, real close-ups.** Use the print artwork and tight crops of the print (`object-position` on the chest/back graphic) as editorial imagery, not only full flat-lays.
+- **Tactile details:** grain on hero/dark sections, hairline rules with small Archivo labels ("Fig. 01", "Drop 01 / 2026", "Printed in small batches"), numbered sections, the ™ on the wordmark, a hand-placed rotated sticker label (Archivo 800 on red, max one per page) like a price tag on the Signature spotlight.
+- **Copy has a point of view** (see §2). If a line could appear on any other store, rewrite it.
+- **Space is confidence.** Fewer elements, larger. When in doubt, remove.
