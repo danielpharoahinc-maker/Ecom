@@ -413,7 +413,10 @@
     // Keep the active chip in view inside its own scroller (never scrolls the page).
     const track = AW.$(".shop-chips-track", root);
     const act = track && AW.$('[aria-pressed="true"]', track);
-    if (act && track.scrollWidth > track.clientWidth) track.scrollLeft = Math.max(0, act.offsetLeft - 16);
+    if (act && track.scrollWidth > track.clientWidth) {
+      const tr = track.getBoundingClientRect(), ar = act.getBoundingClientRect();
+      if (ar.right > tr.right - 48) track.scrollLeft += ar.right - tr.right + 48; // only if hidden, never crop the first chip for nothing
+    }
 
     root.addEventListener("click", e => {
       const go = e.target.closest("[data-shop-go]");

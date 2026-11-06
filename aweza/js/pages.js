@@ -182,15 +182,16 @@
     // Highlight the section in view.
     const links = [...root.querySelectorAll(".pg-index a")];
     if (links.length && "IntersectionObserver" in window) {
+      const vis = new Set();
       const io = new IntersectionObserver(entries => {
-        entries.forEach(en => {
-          if (!en.isIntersecting) return;
-          const id = en.target.id.replace(/^pg-/, "");
-          links.forEach(a => {
-            const on = a.dataset.pgJump === id;
-            a.classList.toggle("is-current", on);
-            on ? a.setAttribute("aria-current", "true") : a.removeAttribute("aria-current");
-          });
+        entries.forEach(en => en.isIntersecting ? vis.add(en.target) : vis.delete(en.target));
+        const first = [...root.querySelectorAll(".pg-sec")].find(s => vis.has(s));
+        if (!first) return;
+        const id = first.id.replace(/^pg-/, "");
+        links.forEach(a => {
+          const on = a.dataset.pgJump === id;
+          a.classList.toggle("is-current", on);
+          on ? a.setAttribute("aria-current", "true") : a.removeAttribute("aria-current");
         });
       }, { rootMargin: "-30% 0px -60% 0px" });
       root.querySelectorAll(".pg-sec").forEach(s => io.observe(s));

@@ -706,7 +706,7 @@
     failed: {
       fig: "Payment failed",
       title: "That didn't <em>go through.</em>",
-      lede: "That payment did not go through. Nothing was charged. Try again or use another card.",
+      lede: "Nothing was charged. Your bag is still here. Try again or use another card.",
       actions: btn("Try again", { href: "#/checkout", size: "lg", iconAfter: "arrow-right" }) + `<a class="co-textlink" href="#/help">Get help</a>`,
     },
   };

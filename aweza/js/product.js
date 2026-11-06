@@ -203,13 +203,13 @@
               </div>
               <div class="pdp-sizes${sizes.length > 8 ? " pdp-sizes--5" : ""}" role="radiogroup" aria-labelledby="pdp-size-label">${sizeBtns}</div>
               <p class="pdp-msg" role="status" aria-live="polite"></p>
-              <p class="pdp-fit">Classic fit. If you like it roomy, size up.${sizes.some(z => ups[z]) ? `<span class="pdp-up-note">2XL and up cost a little more. More shirt, more ink.</span>` : ""}</p>
               <button type="button" class="btn btn--primary btn--lg btn--block pdp-add" data-magnetic="0.2">
                 <span class="pdp-add-in">
                   <span class="pdp-add-a">Add to Bag <span class="pdp-add-p">${rand(AW.priceFor(p))}</span></span>
                   <span class="pdp-add-b" aria-hidden="true">${icon("check", 18)} Added</span>
                 </span>
               </button>
+              <p class="pdp-fit">Classic fit. If you like it roomy, size up.${sizes.some(z => ups[z]) ? `<span class="pdp-up-note">2XL and up cost a little more. More shirt, more ink.</span>` : ""}</p>
               <p class="pdp-note">${icon("truck", 16)}<span>Free delivery over ${rand(conf.freeDeliveryOver || 1500)}. Printed to order.</span></p>
             </div>
 
@@ -483,14 +483,16 @@
     };
     if ("IntersectionObserver" in window) {
       const io = new IntersectionObserver(es => es.forEach(en => {
-        if (en.target === addBtn) pastBtn = !en.isIntersecting && en.boundingClientRect.top < 0;
-        else footerIn = en.isIntersecting;
+        footerIn = en.isIntersecting;
         syncBar();
       }), { threshold: 0 });
-      io.observe(addBtn);
+      // root extended far downward: the button only "leaves" once it is above the viewport
+      const io2 = new IntersectionObserver(es => es.forEach(en => { pastBtn = !en.isIntersecting; syncBar(); }),
+        { threshold: 0, rootMargin: "0px 0px 100000px 0px" });
+      io2.observe(addBtn);
       const ft = document.getElementById("footer-root");
       if (ft) io.observe(ft);
-      cleanups.push(() => io.disconnect());
+      cleanups.push(() => { io.disconnect(); io2.disconnect(); });
     }
     // Hide while the bag drawer is open
     const cartRoot = document.getElementById("cart-root");

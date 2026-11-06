@@ -88,7 +88,7 @@
     position: absolute; margin: 0; width: min(62vw, 112svh);
     right: -3vw; top: calc((100svh - var(--hero-top)) * .5); translate: 0 -50%;
   }
-  .home-hero__fig { position: absolute; margin: 0; right: calc(var(--gutter) + 120px); bottom: calc(var(--hero-top) + var(--sp-7) + 4px); }
+  .home-hero__fig { position: absolute; margin: 0; right: calc(var(--gutter) + 160px); bottom: calc(var(--hero-top) + var(--sp-7) + 4px); }
   .home-hero__foot {
     position: absolute; left: var(--gutter); bottom: calc(var(--hero-top) + var(--sp-7));
     max-width: 380px; margin: 0;

@@ -74,7 +74,7 @@
   /* ---------- reveals ---------- */
   const seen = new WeakSet();
   const firstSeen = new WeakMap();
-  let io = null;
+  let io = null, imgIO = null;
   let hold = 0;
   const held = new Set();
 
@@ -89,6 +89,11 @@
       });
       if (batch.length) revealBatch(batch);
     }, "reveal-io"), { threshold: [0, 0.15], rootMargin: "0px 0px -8% 0px" });
+    // clip-path inset(100%) makes the intersection ratio 0, so img reveals fire on box entry instead.
+    imgIO = new IntersectionObserver(safe(entries => {
+      const batch = entries.filter(en => en.isIntersecting).map(en => en.target);
+      if (batch.length) revealBatch(batch);
+    }, "reveal-img-io"), { threshold: 0, rootMargin: "0px 0px -16% 0px" });
     return io;
   }
 
@@ -98,7 +103,8 @@
     if (reduced || !enabled) { el.classList.add("is-in"); return; }
     if (el.getAttribute("data-reveal") === "lines") split(el);
     if (el.hasAttribute("data-count-to")) prepCount(el);
-    if (io) io.observe(el); else reveal(el, 0);
+    if (!io) { reveal(el, 0); return; }
+    (el.getAttribute("data-reveal") === "img" ? imgIO : io).observe(el);
   }
 
   function revealBatch(list) {
@@ -121,7 +127,7 @@
 
   function reveal(el, extra) {
     if (!el || el.classList.contains("is-in")) return;
-    if (io) io.unobserve(el);
+    if (io) { io.unobserve(el); imgIO.unobserve(el); }
     const own = parseFloat(el.getAttribute("data-reveal-delay"));
     const delay = (isFinite(own) ? own : 0) + (extra || 0);
     const type = el.getAttribute("data-reveal");
@@ -144,12 +150,15 @@
   function safetyNet() {
     if (!enabled) return;
     const t = now(), vh = window.innerHeight, vw = window.innerWidth;
+    const atEnd = window.scrollY + vh >= doc.documentElement.scrollHeight - 4;
     const list = doc.querySelectorAll("[data-reveal]:not(.is-in)");
     for (let i = 0; i < list.length && i < 300; i++) {
       const el = list[i];
       if (!seen.has(el)) prepReveal(el);
       const r = el.getBoundingClientRect();
       const inView = r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < vh && r.right > 0 && r.left < vw;
+      if (r.height > 0 && r.bottom < 0 && !hold) { reveal(el, 0); continue; } // scrolled past it: just show it
+      if (atEnd && inView && !hold) { reveal(el, 0); continue; } // page end: it can never reach the trigger line
       if (!inView) { firstSeen.delete(el); continue; }
       const f = firstSeen.get(el);
       if (f == null) firstSeen.set(el, t);
@@ -836,7 +845,13 @@
     if (app && ST) app.addEventListener("load", e => { if (e.target && e.target.nodeName === "IMG") stRefresh(); }, true);
     if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(safe(() => { marquees.forEach(s => buildMarquee(s)); stRefresh(0); pDirty = true; }, "fonts"));
     window.addEventListener("resize", () => { pDirty = true; }, { passive: true });
-    window.addEventListener("scroll", () => { pDirty = true; }, { passive: true });
+    let endQueued = false;
+    window.addEventListener("scroll", () => {
+      pDirty = true;
+      if (endQueued || window.scrollY + window.innerHeight < doc.documentElement.scrollHeight - 4) return;
+      endQueued = true;
+      raf(() => { endQueued = false; try { safetyNet(); } catch (_) {} });
+    }, { passive: true });
     window.addEventListener("load", () => stRefresh(0));
   } catch (e) {
     warn("disabled", e);
