@@ -179,6 +179,11 @@
   transition: color var(--dur-2) var(--ease-out);
 }
 .bag-remove:hover { color: var(--c-fg); }
+@media (max-width: 419px) {
+  .bag-line { grid-template-columns: var(--sp-5) 80px minmax(0, 1fr); }
+  .bag-remove { width: var(--tap); justify-content: center; padding: 0; }
+  .bag-remove span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
 .bag-remove:focus-visible { outline: 2px solid var(--c-focus); outline-offset: 2px; }
 
 /* staggered entrance when the drawer opens */
