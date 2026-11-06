@@ -19,20 +19,21 @@ AW.collections = [
 (() => {
   const img = (slug, names) => names.map(n => `images/${slug}/${n}.jpg`);
   const STD = ["S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
-  const BACK_FIRST = ["back", "front", "person-1", "lifestyle", "person-2", "folded", "hanging-1", "duo"];
-  const FRONT_FIRST = ["front", "person-1", "lifestyle", "back", "person-2", "folded", "hanging-1", "duo"];
+  // Male models first (AWEZA's audience is mostly men). Flat shots and details after.
+  const BACK_FIRST = ["male-back-1", "male-front-1", "back", "front", "male-back-3", "male-duo", "male-front-3", "collar"];
+  const FRONT_FIRST = ["male-front-1", "male-front-3", "front", "male-duo", "male-front-5", "back", "collar"];
 
   AW.products = [
     {
       id: "signature-lips", name: "AWEZA Signature Lips Tee", collection: "signature", price: 749,
       colourName: "White", badge: "Signature", sizes: STD, fit: "Gildan 5000 heavy cotton, classic fit",
-      images: img("signature-lips", BACK_FIRST),
+      images: img("signature-lips", [...BACK_FIRST, "male-sleeve"]),
       summary: "Our signature: red lips with AWEZA across the teeth on the back, a clean script logo on the chest and a flag patch on the sleeve.",
     },
     {
       id: "mini-lips", name: "Mini Lips Tee", collection: "signature", price: 549,
       colourName: "White", badge: "New", sizes: ["XS", ...STD], fit: "Bella+Canvas 3001 soft jersey, retail fit",
-      images: img("mini-lips", ["front", "person-1", "lifestyle", "person-2", "back", "folded", "hanging-1", "duo"]),
+      images: img("mini-lips", ["male-front-1", "male-front-3", "front", "male-duo", "male-front-5", "back", "collar"]),
       summary: "A small pair of lips on a soft, lightweight tee. Quiet on purpose.",
     },
     {
