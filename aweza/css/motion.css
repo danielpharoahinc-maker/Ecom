@@ -122,7 +122,7 @@ html.mo-ready [data-reveal="lines"]:not(.is-in) .mo-split-char { translate: 0 ca
   padding: .06em .04em .1em; margin: -.06em -.04em -.1em;
 }
 .mo-intro-ch { display: inline-block; }
-.mo-intro-tm { font-size: .18em; vertical-align: top; margin-left: .12em; line-height: 1; position: relative; top: .5em; }
+.mo-intro-tm { font-size: .18em; vertical-align: top; margin-left: .04em; line-height: 1; position: relative; top: .5em; }
 .mo-intro-line {
   margin: var(--sp-4, 1rem) 0 0;
   font-family: var(--font-accent, Georgia, serif);

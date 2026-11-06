@@ -125,7 +125,7 @@
       <div><dt>Phone</dt><dd>${ph("Phone")}</dd></div>
     </dl>`;
   const list = items => `<ul class="pg-list">${items.map(i => `<li>${i}</li>`).join("")}</ul>`;
-  const steps = items => `<ol class="pg-steps">${items.map(i => `<li>${i}</li>`).join("")}</ol>`;
+  const steps = items => `<ol class="pg-steps">${items.map(i => `<li><div>${i}</div></li>`).join("")}</ol>`;
   const qa = items => `<div class="pg-faq">${items.map(([q, a], i) => `
     <details class="accordion pg-qa">
       <summary><span class="pg-qa-q">${esc(q)}</span></summary>

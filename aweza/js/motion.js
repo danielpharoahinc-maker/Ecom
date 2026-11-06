@@ -690,7 +690,7 @@
     const $ = s => el.querySelector(s);
     const anims = [];
     const A = (node, k, o) => { if (node) anims.push(node.animate(k, Object.assign({ fill: "both" }, o))); };
-    el.querySelectorAll(".mo-intro-ch").forEach((c, i) => A(c, [{ transform: "translate3d(0,110%,0)" }, { transform: "none" }], { duration: 640, delay: 60 + i * 40, easing: EASE.out }));
+    el.querySelectorAll(".mo-intro-ch").forEach((c, i) => A(c, [{ transform: c.classList.contains("mo-intro-tm") ? "translate3d(0,8em,0)" : "translate3d(0,110%,0)" }, { transform: "none" }], { duration: 640, delay: 60 + i * 40, easing: EASE.out }));
     A($(".mo-intro-lipswrap"), [{ transform: "scale(0) rotate(-14deg)", opacity: 0 }, { transform: "scale(1) rotate(0deg)", opacity: 1 }], { duration: 520, delay: 380, easing: EASE.spring });
     A($(".mo-intro-line"), [{ opacity: 0, transform: "translate3d(0,10px,0)" }, { opacity: 1, transform: "none" }], { duration: 420, delay: 560, easing: EASE.out });
     A($(".mo-intro-meta"), [{ opacity: 0 }, { opacity: 1 }], { duration: 400, delay: 200, easing: EASE.out });

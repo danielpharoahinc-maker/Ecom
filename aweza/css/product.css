@@ -76,14 +76,14 @@
   mix-blend-mode: multiply;
 }
 .pdp-art-cap {
-  position: absolute; left: var(--sp-4); right: var(--sp-4); top: var(--sp-4);
+  position: absolute; left: var(--sp-4); right: var(--sp-4); bottom: calc(var(--sp-3) + 40px);
   display: flex; justify-content: space-between; gap: var(--sp-3);
   padding-top: var(--sp-2);
   border-top: 1px solid var(--c-ink);
   font: var(--fw-semi) var(--fs-micro) / 1 var(--font-body);
   letter-spacing: var(--ls-caps); text-transform: uppercase; color: var(--c-ink);
 }
-@media (min-width: 1024px) { .pdp-art-cap { left: var(--sp-6); right: var(--sp-6); top: var(--sp-6); } }
+@media (min-width: 1024px) { .pdp-art-cap { left: var(--sp-6); right: var(--sp-6); bottom: var(--sp-6); } }
 
 /* Front / Back pill */
 .pdp-sides {
