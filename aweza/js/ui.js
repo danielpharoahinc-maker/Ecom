@@ -253,7 +253,7 @@
       + ui.price(p)
       + (colName ? '<p class="card-meta">' + esc(colName) + '</p>' : "")
       + '</div></a>'
-      + '<div class="card-over"">'
+      + '<div class="card-over">'
       + (p.badge ? ui.badge(p.badge, { tone: badgeTone(p.badge) }) : "")
       + '<span class="card-no" aria-hidden="true">' + no + '</span>'
       + quick

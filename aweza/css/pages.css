@@ -405,15 +405,15 @@
   overflow: clip; border-top: 1px solid var(--c-line);
 }
 .ft-mega-word {
-  margin: 0; flex: 1; text-align: left; white-space: nowrap;
+  margin: 0; flex: none; text-align: left; white-space: nowrap;
   font-family: var(--font-display); font-weight: var(--fw-regular);
-  font-size: calc((min(100vw, var(--maxw)) - 2 * var(--gutter)) * .345);
-  line-height: .8; letter-spacing: -.02em;
+  font-size: calc((min(100vw, var(--maxw)) - 2 * var(--gutter)) * .28);
+  line-height: .8; letter-spacing: -.01em;
   height: .73em; overflow: clip; padding-top: .06em; margin-bottom: -.02em;
 }
 .ft-mega-tm {
-  position: absolute; right: var(--gutter); top: 8%;
-  font: var(--fw-semi) clamp(12px, 1.6vw, 24px)/1 var(--font-body); color: var(--c-muted);
+  flex: none; margin: 1.2vw 0 0 .6vw;
+  font: var(--fw-regular) clamp(14px, 2.6vw, 44px)/1 var(--font-display); color: var(--c-fg);
 }
 
 .ft-base {

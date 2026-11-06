@@ -362,7 +362,7 @@
   .home-story__art {
     grid-column: 1 / 8; margin: 0 0 0 calc(-1 * var(--gutter)); aspect-ratio: 4 / 5; min-height: 110svh;
   }
-  .home-story__art img { left: -30%; width: 150%; height: 86%; top: 7%; }
+  .home-story__art img { left: -26%; width: 136%; height: 84%; top: 8%; }
   .home-story__text { grid-column: 8 / 13; padding: var(--sp-9) 0 0; position: sticky; top: calc(var(--nav-offset) + var(--sp-6)); }
   .home-story__title { font-size: clamp(2.75rem, 4.6vw, 5rem); }
   .home-story__name { font-size: clamp(1.75rem, 2.6vw, 2.75rem); }

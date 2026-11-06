@@ -267,7 +267,9 @@
 @media (max-width: 1023px) {
   .pdp-tax { display: none; }
   .pdp-info { padding-top: var(--sp-4); }
-  .pdp-buy { margin-top: var(--sp-4); }
+  .pdp-buy { margin-top: var(--sp-2); }
+  .pdp-meta { padding-bottom: var(--sp-2); }
+  .pdp-info { padding-top: var(--sp-3) !important; }
   .pdp-size { min-height: 48px; }
 }
 
