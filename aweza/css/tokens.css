@@ -1,0 +1,93 @@
+/* AWEZA design tokens. OWNED BY AGENT 01 (design system).
+   The token block below is DIRECTION.md section 5, verbatim. Names are a contract:
+   add tokens if needed, never rename or remove. Fonts load here and nowhere else. */
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Archivo:wght@400;500;600;700;800&display=swap");
+
+:root {
+  /* colour: raw */
+  --c-ink: #0A0A0A;  --c-white: #FFFFFF;  --c-tile: #F1F1EE;
+  --c-g100: #F6F6F4; --c-g200: #E6E6E3;  --c-g300: #CFCFCB;
+  --c-g600: #5C5C59; --c-g800: #252524;
+  --c-red: #D7191F;  --c-red-deep: #A90F14; --c-ok: #127A3A;
+  /* colour: semantic (flip in dark) */
+  --c-bg: var(--c-white);   --c-fg: var(--c-ink);
+  --c-muted: var(--c-g600); --c-line: var(--c-g200);
+  --c-surface: var(--c-g100);              /* inputs, chips, quiet panels */
+  --c-inverse-bg: var(--c-ink); --c-inverse-fg: var(--c-white);
+  --c-focus: var(--c-ink);
+  --c-scrim: rgba(10,10,10,.48);
+
+  /* type */
+  --font-display: "DM Serif Display", "Century Schoolbook", Georgia, serif;
+  --font-body: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-accent: "DM Serif Display", Georgia, serif;   /* always with font-style: italic */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  --fs-mega: clamp(4.5rem, 19vw, 17rem);   /* footer wordmark, intro */
+  --fs-d1:  clamp(3.25rem, 11vw, 9rem);    /* hero/collection names */
+  --fs-d2:  clamp(2.5rem, 7vw, 5.5rem);    /* section statements */
+  --fs-h1:  clamp(2rem, 4.2vw, 3.5rem);    /* page titles, PDP name */
+  --fs-h2:  clamp(1.5rem, 2.6vw, 2.25rem);
+  --fs-h3:  1.25rem;
+  --fs-lg:  1.125rem; --fs-body: 1rem; --fs-sm: .875rem;
+  --fs-xs:  .75rem;   --fs-micro: .6875rem;
+  --lh-display: .9; --lh-snug: 1.2; --lh-body: 1.55;
+  --ls-display: .005em; --ls-caps: .14em; --ls-tight: -.01em;
+  --fw-regular: 400; --fw-medium: 500; --fw-semi: 600; --fw-bold: 700;
+
+  /* space (4px base) */
+  --sp-1: .25rem; --sp-2: .5rem; --sp-3: .75rem; --sp-4: 1rem;
+  --sp-5: 1.5rem; --sp-6: 2rem;  --sp-7: 3rem;   --sp-8: 4rem;
+  --sp-9: 6rem;   --sp-10: 8rem;
+  --gutter: clamp(16px, 4vw, 56px);
+  --section-y: clamp(64px, 11vw, 168px);
+  --grid-gap-x: clamp(8px, 1.2vw, 20px);
+  --grid-gap-y: clamp(28px, 3vw, 48px);
+  --maxw: 1680px; --maxw-text: 66ch;
+
+  /* layout */
+  --promo-h: 36px; --header-h: 56px;
+  --nav-offset: var(--header-h);  /* nav.js updates to 0px when header hides */
+  --buybar-h: 72px; --drawer-w: min(440px, 100vw);
+  --tap: 44px;                     /* minimum touch target */
+
+  /* radii: crisp edges, pill actions */
+  --r-0: 0; --r-xs: 2px; --r-sm: 4px; --r-md: 8px; --r-pill: 999px;
+
+  /* shadows */
+  --sh-1: 0 1px 2px rgba(10,10,10,.06);
+  --sh-2: 0 10px 30px rgba(10,10,10,.10);
+  --sh-3: 0 30px 80px rgba(10,10,10,.22);
+
+  /* z layers */
+  --z-base: 1; --z-raised: 10; --z-sticky: 100; --z-header: 200;
+  --z-buybar: 250; --z-scrim: 400; --z-drawer: 500; --z-modal: 600;
+  --z-toast: 700; --z-curtain: 800; --z-skip: 900;
+
+  /* motion */
+  --ease-out: cubic-bezier(.16, 1, .3, 1);      /* default: expo out */
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --ease-in: cubic-bezier(.7, 0, .84, 0);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1); /* tiny overshoot: badges, ticks */
+  --dur-1: 120ms; --dur-2: 240ms; --dur-3: 420ms; --dur-4: 720ms; --dur-5: 1100ms;
+  --stagger: 70ms;
+}
+@media (min-width: 1024px) { :root { --header-h: 72px; } }
+[data-theme="dark"] {
+  --c-bg: var(--c-ink); --c-fg: var(--c-white);
+  --c-muted: #A6A6A2; --c-line: rgba(255,255,255,.16);
+  --c-surface: var(--c-g800); --c-focus: var(--c-white);
+  --c-inverse-bg: var(--c-white); --c-inverse-fg: var(--c-ink);
+  background: var(--c-bg); color: var(--c-fg);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-1: 1ms; --dur-2: 1ms; --dur-3: 1ms; --dur-4: 1ms; --dur-5: 1ms; --stagger: 0ms; }
+}
+
+/* Additions (agent 01). Safe to use everywhere. */
+:root {
+  --fs-display-min: 22px;          /* display serif never renders smaller than this */
+  --c-sheen: rgba(255,255,255,.22);/* button hover sheen band */
+  --ui-sbw: 0px;                   /* scrollbar width compensation, set by AW.ui.lockScroll */
+  color-scheme: light;
+}
+[data-theme="dark"] { --c-sheen: rgba(10,10,10,.12); color-scheme: dark; }

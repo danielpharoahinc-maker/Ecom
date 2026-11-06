@@ -1,0 +1,48 @@
+# AWEZA on Netlify: static site + two serverless functions.
+# See docs/DEPLOY.md for the full owner guide and environment variables.
+
+[build]
+  publish = "."
+  # Plain static site: no build step.
+  command = ""
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  # The functions price orders from the same files the storefront uses.
+  included_files = ["data/**"]
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Never publish the owner tooling or server source as static files.
+[[redirects]]
+  from = "/scripts/*"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/netlify/*"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/docs/*"
+  to = "/404"
+  status = 404
+  force = true
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/data/printify-variants.json"
+  [headers.values]
+    Cache-Control = "public, max-age=300"
