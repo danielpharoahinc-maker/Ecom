@@ -37,12 +37,12 @@
     spotLine: "The Signature Line",
     nextLabel: "Drop 02 / Coming soon",
     nextTitle: "Next drop.",
-    nextAccent: "Still on the braai.",
-    nextBody: "No price yet. No spoilers either. Get on the list and you see it first.",
+    nextAccent: "Still cooking.",
+    nextBody: "Something hot is coming off the grill. Get first dibs before it lands.",
     nextCta: "Get first dibs",
     fig3: "Fig. 04: Work in progress",
   };
-  const MARQUEE = ["Bad decisions", "Good cotton", "No filter", "Made in Mzansi", "Say it with your back"];
+  const MARQUEE = ["Bad decisions", "Good cotton", "No filter", "Made in Mzansi", "Say it with your back", "Printed to order", "Time of your life"];
   const PROMISES = () => [
     { icon: "truck", title: "Delivery across SA", body: `Free over ${AW.rand(AW.config.freeDeliveryOver)}. Tracked to your door.` },
     { icon: "shield", title: "Secure checkout", body: "Card payments, handled properly." },
@@ -140,8 +140,8 @@
           <div class="home-hero__lips-par" data-parallax="0.08">
             <img class="home-hero__lips-img" src="${LIPS}" alt="AWEZA signature red lips with AWEZA written across the teeth" width="724" height="644" loading="eager" fetchpriority="high" decoding="async">
           </div>
-          <figcaption class="home-hero__fig"><span class="home-hero__fig-rule" aria-hidden="true"></span><span class="home-label">${esc(COPY.fig1)}</span></figcaption>
         </figure>
+        <p class="home-hero__fig"><span class="home-hero__fig-rule" aria-hidden="true"></span><span class="home-label">${esc(COPY.fig1)}</span></p>
         <div class="home-hero__foot">
           <p class="home-hero__brandline">${esc(COPY.brandLine)}</p>
           <p class="home-hero__support">${esc(COPY.heroSupport)}</p>

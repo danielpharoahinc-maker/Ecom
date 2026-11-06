@@ -127,9 +127,9 @@
   const list = items => `<ul class="pg-list">${items.map(i => `<li>${i}</li>`).join("")}</ul>`;
   const steps = items => `<ol class="pg-steps">${items.map(i => `<li>${i}</li>`).join("")}</ol>`;
   const qa = items => `<div class="pg-faq">${items.map(([q, a], i) => `
-    <details class="accordion pg-qa"${i === 0 ? "" : ""}>
-      <summary><span class="pg-qa-q">${esc(q)}</span><span class="pg-qa-ico" aria-hidden="true"></span></summary>
-      <div class="pg-qa-a">${a}</div>
+    <details class="accordion pg-qa">
+      <summary><span class="pg-qa-q">${esc(q)}</span></summary>
+      <div class="accordion-body pg-qa-a">${a}</div>
     </details>`).join("")}</div>`;
   const setTitle = t => { document.title = t ? `${t} | AWEZA` : "AWEZA"; };
 

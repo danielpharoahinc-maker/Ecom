@@ -2,6 +2,14 @@
    Primitives: .btn .chip .card .media .price .badge .eyebrow .field .select .accordion
                .container .section .product-grid .t-* .link-draw .ui-*            */
 
+/* icon masks, shared */
+:root {
+  --ui-i-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='square'%3E%3Cpath d='m6 9.25 6 6 6-6'/%3E%3C/svg%3E");
+  --ui-i-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='m4.75 12.5 4.5 4.5 10-10'/%3E%3C/svg%3E");
+  --ui-i-check-bold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='square'%3E%3Cpath d='m4.75 12.5 4.5 4.5 10-10'/%3E%3C/svg%3E");
+  --ui-i-alert: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm-.9 3.5.2 6h1.4l.2-6H7.1zM8 10.8a1 1 0 1 0 0 2 1 1 0 0 0 0-2z'/%3E%3C/svg%3E");
+}
+
 /* ---------- reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; }
@@ -314,8 +322,8 @@ html.ui-ready .media > img:not(.is-loaded) { opacity: 0; }
   width: 18px; height: 18px; top: auto;
   opacity: 1;
   background: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='m4.75 12.5 4.5 4.5 10-10'/%3E%3C/svg%3E") center / contain no-repeat;
-          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='m4.75 12.5 4.5 4.5 10-10'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: var(--ui-i-check) center / contain no-repeat;
+          mask: var(--ui-i-check) center / contain no-repeat;
   animation: ui-pop var(--dur-3) var(--ease-spring);
 }
 .btn.is-done .btn-label { transform: none; }
@@ -427,8 +435,8 @@ html.ui-ready .media > img:not(.is-loaded) { opacity: 0; }
   width: 14px; height: 14px;
   margin-top: 1px;
   background: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm-.9 3.5.2 6h1.4l.2-6H7.1zM8 10.8a1 1 0 1 0 0 2 1 1 0 0 0 0-2z'/%3E%3C/svg%3E") center / contain no-repeat;
-          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm-.9 3.5.2 6h1.4l.2-6H7.1zM8 10.8a1 1 0 1 0 0 2 1 1 0 0 0 0-2z'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: var(--ui-i-alert) center / contain no-repeat;
+          mask: var(--ui-i-alert) center / contain no-repeat;
 }
 .field [aria-invalid="true"], .input[aria-invalid="true"], .select[aria-invalid="true"], .field.is-invalid input {
   border-color: var(--c-red);
@@ -462,8 +470,8 @@ html.ui-ready .media > img:not(.is-loaded) { opacity: 0; }
   cursor: pointer;
 }
 .field-check input::after { content: ""; width: 12px; height: 12px; background: var(--c-bg); transform: scale(0); transition: transform var(--dur-2) var(--ease-spring);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='square'%3E%3Cpath d='m4.75 12.5 4.5 4.5 10-10'/%3E%3C/svg%3E") center / contain no-repeat;
-          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='square'%3E%3Cpath d='m4.75 12.5 4.5 4.5 10-10'/%3E%3C/svg%3E") center / contain no-repeat; }
+  -webkit-mask: var(--ui-i-check-bold) center / contain no-repeat;
+          mask: var(--ui-i-check-bold) center / contain no-repeat; }
 .field-check input:checked { background: var(--c-fg); }
 .field-check input:checked::after { transform: scale(1); }
 
@@ -491,8 +499,8 @@ details.accordion > summary::after {
   flex: none;
   width: 16px; height: 16px;
   background: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='square'%3E%3Cpath d='m6 9.25 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
-          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='square'%3E%3Cpath d='m6 9.25 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: var(--ui-i-chevron) center / contain no-repeat;
+          mask: var(--ui-i-chevron) center / contain no-repeat;
   transition: transform var(--dur-3) var(--ease-out);
 }
 details.accordion[open] > summary::after { transform: rotate(180deg); }

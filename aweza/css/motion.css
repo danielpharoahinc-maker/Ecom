@@ -1,0 +1,206 @@
+/* AWEZA motion system. Agent 07. Prefix .mo-*. Pairs with js/motion.js (contract: DIRECTION §9).
+   Nothing here hides content unless html.mo-ready is present (motion.js adds it once running). */
+
+:root { --mo-css: 1; }
+
+/* ---------- reveals ---------- */
+html.mo-ready [data-reveal]:not(.mo-done) {
+  transition-property: opacity, translate, scale, clip-path;
+  transition-duration: var(--dur-4, 720ms);
+  transition-timing-function: var(--ease-out, cubic-bezier(.16, 1, .3, 1));
+  transition-delay: var(--mo-delay, 0ms);
+}
+html.mo-ready [data-reveal]:not(.is-in) { opacity: 0; translate: 0 24px; }
+html.mo-ready [data-reveal="fade"]:not(.is-in) { translate: none; }
+html.mo-ready [data-reveal="scale"]:not(.is-in) { translate: none; scale: .94; }
+html.mo-ready [data-reveal="left"]:not(.is-in) { translate: -40px 0; }
+html.mo-ready [data-reveal="right"]:not(.is-in) { translate: 40px 0; }
+
+/* img: clip-path wipe upward, inner image settles from 1.08 */
+html.mo-ready [data-reveal="img"]:not(.mo-done) {
+  transition-duration: var(--dur-5, 1100ms);
+  transition-timing-function: var(--ease-in-out, cubic-bezier(.65, 0, .35, 1));
+}
+html.mo-ready [data-reveal="img"]:not(.is-in) { opacity: 1; translate: none; clip-path: inset(100% 0 0 0); }
+html.mo-ready [data-reveal="img"].is-in:not(.mo-done) { clip-path: inset(0 0 0 0); }
+html.mo-ready [data-reveal="img"]:not(.mo-done) img {
+  transition-property: scale, opacity;
+  transition-duration: calc(var(--dur-5, 1100ms) * 1.3), var(--dur-3, 420ms);
+  transition-timing-function: var(--ease-out, cubic-bezier(.16, 1, .3, 1));
+  transition-delay: var(--mo-delay, 0ms), 0ms;
+}
+html.mo-ready [data-reveal="img"]:not(.is-in) img,
+html.mo-ready img[data-reveal="img"]:not(.is-in) { scale: 1.08; }
+
+/* lines: host stays put, words/chars rise from behind their masks */
+html.mo-ready [data-reveal="lines"]:not(.is-in) { opacity: 1; translate: none; }
+html.mo-ready [data-reveal="lines"]:not([data-split-done]):not(.is-in),
+html.mo-ready [data-reveal="lines"][data-split-done="skip"]:not(.is-in) { opacity: 0; }
+.mo-split-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding: .1em .05em .14em;
+  margin: -.1em -.05em -.14em;
+}
+.mo-split-piece { display: inline-block; }
+html.mo-ready [data-reveal="lines"]:not(.mo-done) .mo-split-piece {
+  transition: translate var(--dur-5, 1100ms) var(--ease-out, cubic-bezier(.16, 1, .3, 1));
+}
+html.mo-ready [data-reveal="lines"]:not(.is-in) .mo-split-piece { translate: 0 calc(100% + .26em); }
+html.mo-ready [data-reveal="lines"]:not(.is-in) .mo-split-char { translate: 0 calc(100% + .3em); }
+.mo-sr {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Programmatic focus after a route change should not paint a ring around the page. */
+#app[tabindex="-1"]:focus { outline: none; }
+
+/* ---------- marquee ---------- */
+.mo-marquee { overflow: hidden; overflow-x: clip; }
+.mo-marquee-track { display: flex; flex-wrap: nowrap; gap: inherit; width: max-content; will-change: transform; }
+.mo-marquee-group { display: flex; flex: none; flex-wrap: nowrap; align-items: center; gap: inherit; white-space: nowrap; }
+
+/* ---------- page curtain ---------- */
+.mo-curtain {
+  position: fixed; inset: 0;
+  z-index: var(--z-curtain, 800);
+  display: grid; place-items: center;
+  background: var(--c-ink, #0A0A0A);
+  color: var(--c-white, #FFFFFF);
+  transform: translate3d(0, 100%, 0);
+  visibility: hidden;
+  pointer-events: none;
+}
+.mo-curtain.is-active { visibility: visible; pointer-events: auto; }
+.mo-curtain-mark { display: grid; justify-items: center; gap: var(--sp-3, .75rem); }
+.mo-curtain-lips { width: 56px; height: auto; color: var(--c-red, #D7191F); display: block; }
+.mo-curtain-line {
+  font-family: var(--font-accent, Georgia, serif);
+  font-style: italic;
+  font-size: var(--fs-sm, .875rem);
+  color: var(--c-white, #FFFFFF);
+  opacity: .72;
+  letter-spacing: .01em;
+}
+
+/* ---------- first-visit intro ---------- */
+.mo-intro {
+  position: fixed; inset: 0;
+  z-index: var(--z-curtain, 800);
+  background: var(--c-ink, #0A0A0A);
+  color: var(--c-white, #FFFFFF);
+  overflow: hidden;
+  cursor: pointer;
+}
+.mo-intro::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: var(--grain, none);
+  mix-blend-mode: screen; opacity: .08;
+}
+.mo-intro-inner {
+  position: absolute;
+  left: var(--gutter, 24px); right: var(--gutter, 24px);
+  bottom: clamp(72px, 14vh, 160px);
+}
+.mo-intro-lipswrap {
+  width: clamp(64px, 12vw, 148px);
+  margin: 0 0 var(--sp-4, 1rem) .04em;
+  transform-origin: 30% 70%;
+}
+.mo-intro-lips { display: block; width: 100%; height: auto; color: var(--c-red, #D7191F); }
+.mo-intro-word {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: var(--fs-mega, clamp(4.5rem, 19vw, 17rem));
+  line-height: .86;
+  letter-spacing: var(--ls-tight, -.01em);
+  margin-left: -.04em;
+}
+.mo-intro-mask {
+  display: inline-block; overflow: hidden; white-space: nowrap;
+  padding: .06em .04em .1em; margin: -.06em -.04em -.1em;
+}
+.mo-intro-ch { display: inline-block; }
+.mo-intro-tm { font-size: .18em; vertical-align: top; margin-left: .12em; line-height: 1; position: relative; top: .5em; }
+.mo-intro-line {
+  margin: var(--sp-4, 1rem) 0 0;
+  font-family: var(--font-accent, Georgia, serif);
+  font-style: italic;
+  font-size: var(--fs-h2, clamp(1.5rem, 2.6vw, 2.25rem));
+  line-height: 1;
+}
+.mo-intro-meta, .mo-intro-skip {
+  position: absolute;
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: var(--fs-micro, .6875rem);
+  font-weight: var(--fw-semi, 600);
+  letter-spacing: var(--ls-caps, .14em);
+  text-transform: uppercase;
+  color: var(--c-white, #FFFFFF);
+  opacity: .62;
+}
+.mo-intro-meta { top: calc(var(--sp-5, 1.5rem) + env(safe-area-inset-top, 0px)); left: var(--gutter, 24px); }
+.mo-intro-skip { bottom: var(--sp-5, 1.5rem); right: var(--gutter, 24px); }
+.mo-intro-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+  background: var(--c-white, #FFFFFF); opacity: .5;
+  transform-origin: 0 50%; transform: scaleX(0);
+}
+
+/* ---------- fly to bag ---------- */
+.mo-fly {
+  position: fixed;
+  z-index: var(--z-toast, 700);
+  pointer-events: none;
+  background: var(--c-tile, #F1F1EE);
+  overflow: hidden;
+  will-change: transform, opacity;
+}
+.mo-fly img { width: 100%; height: 100%; display: block; mix-blend-mode: multiply; }
+
+/* ---------- custom cursor (fine pointers; native cursor stays) ---------- */
+.mo-cursor {
+  position: fixed; left: 0; top: 0;
+  z-index: var(--z-toast, 700);
+  pointer-events: none;
+  width: 0; height: 0;
+}
+.mo-cursor-label {
+  position: absolute; left: -42px; top: -42px;
+  width: 84px; height: 84px;
+  border-radius: var(--r-pill, 999px);
+  display: grid; place-items: center;
+  background: var(--c-ink, #0A0A0A);
+  color: var(--c-white, #FFFFFF);
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: var(--fs-micro, .6875rem);
+  font-weight: var(--fw-semi, 600);
+  letter-spacing: var(--ls-caps, .14em);
+  text-transform: uppercase;
+  scale: 0;
+  opacity: 0;
+  transition: scale var(--dur-3, 420ms) var(--ease-out, cubic-bezier(.16, 1, .3, 1)), opacity var(--dur-2, 240ms) var(--ease-out, cubic-bezier(.16, 1, .3, 1));
+}
+.mo-cursor.is-on .mo-cursor-label { scale: 1; opacity: 1; }
+.mo-cursor.is-on.is-down .mo-cursor-label { scale: .86; }
+@media (hover: none), (pointer: coarse) { .mo-cursor { display: none; } }
+
+/* ---------- Lenis (smooth wheel on fine pointers) ---------- */
+html.lenis, html.lenis body { height: auto; }
+html.lenis.lenis-smooth { scroll-behavior: auto !important; }
+html.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+html.lenis.lenis-stopped { overflow: hidden; }
+
+/* ---------- reduced motion: nothing moves, nothing hidden ---------- */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal], [data-reveal] img, .mo-split-piece { opacity: 1 !important; translate: none !important; scale: none !important; clip-path: none !important; }
+  .mo-marquee-track { transform: none !important; }
+  .mo-curtain, .mo-intro, .mo-fly, .mo-cursor { display: none !important; }
+}
+html.mo-reduced .mo-curtain, html.mo-reduced .mo-intro, html.mo-reduced .mo-cursor { display: none !important; }
+
+@media print {
+  [data-reveal], [data-reveal] img, .mo-split-piece { opacity: 1 !important; translate: none !important; scale: none !important; clip-path: none !important; }
+  .mo-curtain, .mo-intro, .mo-fly, .mo-cursor { display: none !important; }
+}

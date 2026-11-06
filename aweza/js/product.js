@@ -180,7 +180,7 @@
               <button type="button" class="pdp-arrow" data-step="1" aria-label="Next image">${icon("arrow-right", 18)}</button>
             </div>
             <div class="pdp-dashes" aria-hidden="true">${dashes}</div>
-            <span class="pdp-zoomhint" aria-hidden="true">${icon("zoom", 16)} Tap to zoom</span>
+            <span class="pdp-zoomhint" aria-hidden="true">${icon("zoom", 16)} Zoom in</span>
           </div>
         </section>
 
@@ -190,8 +190,10 @@
               <a class="pdp-col" href="#/shop/${esc(p.collection)}">${esc(col.name)}</a>
               <span class="pdp-no">No. ${pad2(idx + 1)} / ${pad2(AW.products.length)}</span>
             </div>
-            <h1 class="pdp-name">${esc(p.name)}</h1>
-            <p class="pdp-price" data-price><span class="pdp-price-v">${rand(AW.priceFor(p))}</span></p>
+            <div class="pdp-title">
+              <h1 class="pdp-name">${esc(p.name)}</h1>
+              <p class="pdp-price" data-price><span class="pdp-price-v">${rand(AW.priceFor(p))}</span></p>
+            </div>
             <p class="pdp-tax">${esc(p.colourName || "White")} · Print on the ${side} · VAT included</p>
 
             <div class="pdp-buy">
@@ -201,7 +203,7 @@
               </div>
               <div class="pdp-sizes${sizes.length > 8 ? " pdp-sizes--5" : ""}" role="radiogroup" aria-labelledby="pdp-size-label">${sizeBtns}</div>
               <p class="pdp-msg" role="status" aria-live="polite"></p>
-              <p class="pdp-fit">Classic cut. If you like it roomy, size up.</p>
+              <p class="pdp-fit">Classic fit. If you like it roomy, size up.${sizes.some(z => ups[z]) ? `<span class="pdp-up-note">2XL and up cost a little more. More shirt, more ink.</span>` : ""}</p>
               <button type="button" class="btn btn--primary btn--lg btn--block pdp-add" data-magnetic="0.2">
                 <span class="pdp-add-in">
                   <span class="pdp-add-a">Add to Bag <span class="pdp-add-p">${rand(AW.priceFor(p))}</span></span>

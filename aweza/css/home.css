@@ -49,7 +49,7 @@
   to   { opacity: 1; transform: scale(1) rotate(-4deg); }
 }
 .home-hero__fig {
-  position: absolute; right: calc(var(--gutter) + 6vw); bottom: 4%; display: flex; align-items: center; gap: var(--sp-2);
+  position: relative; z-index: 3; margin: calc(-1 * var(--sp-4)) 0 var(--sp-4); justify-content: flex-end; display: flex; align-items: center; gap: var(--sp-2);
 }
 .home-hero__fig-rule { width: 28px; height: 1px; background: var(--c-muted); }
 
@@ -88,7 +88,7 @@
     position: absolute; margin: 0; width: min(62vw, 112svh);
     right: -3vw; top: calc((100svh - var(--hero-top)) * .5); translate: 0 -50%;
   }
-  .home-hero__fig { right: calc(3vw + var(--gutter)); bottom: 2%; }
+  .home-hero__fig { position: absolute; margin: 0; right: calc(var(--gutter) + 120px); bottom: calc(var(--hero-top) + var(--sp-7) + 4px); }
   .home-hero__foot {
     position: absolute; left: var(--gutter); bottom: calc(var(--hero-top) + var(--sp-7));
     max-width: 380px; margin: 0;
@@ -186,7 +186,7 @@
 .home-col--dark { background: var(--c-bg); color: var(--c-fg); }
 .home-col--dark .home-col__media { width: 84%; align-self: flex-end; }
 .home-col--dark .home-col__body { justify-items: end; text-align: right; }
-.home-col--dark .home-col__name { color: var(--c-white); mix-blend-mode: difference; }
+.home-col--dark .home-col__name { margin-top: var(--sp-4); }
 .home-col--3 .home-col__media { width: 90%; }
 .home-col--3 .home-col__body { padding-left: 6vw; }
 
@@ -231,7 +231,7 @@
   background: var(--c-white); color: var(--c-white);
 }
 .home-marquee__track {
-  display: flex; width: max-content; min-width: 112%; margin-left: -6%;
+  display: block; width: 112%; margin-left: -6%; overflow: hidden;
   background: var(--c-ink); padding-block: var(--sp-5); transform: rotate(-2.2deg);
 }
 .home-marquee__set { display: flex; align-items: center; gap: var(--sp-6); padding-right: var(--sp-6); flex: none; }
@@ -362,7 +362,7 @@
   .home-story__art {
     grid-column: 1 / 8; margin: 0 0 0 calc(-1 * var(--gutter)); aspect-ratio: 4 / 5; min-height: 110svh;
   }
-  .home-story__art img { left: -38%; width: 170%; }
+  .home-story__art img { left: -30%; width: 150%; height: 86%; top: 7%; }
   .home-story__text { grid-column: 8 / 13; padding: var(--sp-9) 0 0; position: sticky; top: calc(var(--nav-offset) + var(--sp-6)); }
   .home-story__title { font-size: clamp(2.75rem, 4.6vw, 5rem); }
   .home-story__name { font-size: clamp(1.75rem, 2.6vw, 2.75rem); }

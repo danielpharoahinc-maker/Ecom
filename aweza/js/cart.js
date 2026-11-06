@@ -176,7 +176,7 @@
           <div class="bag-qty" role="group" aria-label="Quantity, ${esc(v.p.name)} size ${esc(v.size)}">
             <button type="button" class="bag-qty-btn" data-qty="-1" data-i="${v.i}" data-fk="minus:${esc(v.key)}" aria-label="${v.qty === 1 ? "Remove" : "Decrease quantity"}">${ic("minus", 16)}</button>
             <output class="bag-qty-val" aria-live="polite">${v.qty}</output>
-            <button type="button" class="bag-qty-btn" data-qty="1" data-i="${v.i}" data-fk="plus:${esc(v.key)}" aria-label="Increase quantity" ${v.qty >= 20 ? "disabled" : ""}>${ic("plus", 16)}</button>
+            <button type="button" class="bag-qty-btn" data-qty="1" data-i="${v.i}" data-fk="plus:${esc(v.key)}" aria-label="Increase quantity">${ic("plus", 16)}</button>
           </div>
           <button type="button" class="bag-remove" data-remove="${v.i}" data-fk="remove:${esc(v.key)}" aria-label="Remove ${esc(v.p.name)}, size ${esc(v.size)}">${ic("trash", 16)}<span>Remove</span></button>
         </div>
@@ -333,6 +333,7 @@
         const l = AW.cart.lines()[i];
         if (!l) return;
         if (l.qty + d < 1) { removeLine(i, t.closest(".bag-line")); return; }
+        if (l.qty + d > 20) { AW.toast && AW.toast("That's the max per order. Calm down."); return; }
         AW.cart.setQty(i, l.qty + d);
         return;
       }
@@ -379,18 +380,18 @@
     { name: "city", label: "City or town", ac: "address-level2", req: true, sec: "address", half: true },
     { name: "province", label: "Province", ac: "address-level1", req: true, sec: "address", half: true, select: PROVINCES },
     { name: "postalCode", label: "Postal code", ac: "postal-code", im: "numeric", req: true, sec: "address", half: true, max: 4, ph: "0000" },
-    { name: "notes", label: "Delivery notes", sec: "notes", optional: true, area: true, ph: "Gate code, landmark, best time. Anything that helps." },
+    { name: "notes", label: "Delivery notes", sec: "notes", optional: true, area: true, ph: "Gate code, landmarks, the dog's name." },
   ];
   const MSG = {
-    email: ["We need your email for the order confirmation.", "That email looks off. Check it once more."],
-    phone: ["We need a mobile number for the courier.", "Use a South African mobile, like 082 123 4567."],
+    email: ["We need your email for the order confirmation.", "That email looks off."],
+    phone: ["We need a mobile number for the courier.", "We need a working SA number for the courier."],
     firstName: ["What should we call you?"],
     lastName: ["Your surname, for the courier."],
     line1: ["We need this to deliver your tee."],
     suburb: ["Which suburb are we heading to?"],
     city: ["Which city or town?"],
     province: ["Pick your province."],
-    postalCode: ["We need your postal code.", "Postal codes are exactly 4 digits."],
+    postalCode: ["We need your postal code.", "Four digits, please."],
   };
 
   const normPhone = raw => {
@@ -429,7 +430,7 @@
     let control;
     if (f.select) {
       control = `<select class="select co-input" ${common}>
-          <option value="" ${val ? "" : "selected"} disabled>Choose a province</option>
+          <option value="" ${val ? "" : "selected"} disabled>Select a province</option>
           ${f.select.map(o => `<option ${o === val ? "selected" : ""}>${esc(o)}</option>`).join("")}
         </select>`;
     } else if (f.area) {
@@ -448,8 +449,8 @@
 
   const SECTIONS = [
     { id: "contact", n: "01", title: "Contact", note: "Where we send the receipt." },
-    { id: "address", n: "02", title: "Delivery", note: "South Africa only, for now." },
-    { id: "notes", n: "03", title: "Anything else", note: "For the courier, not for us." },
+    { id: "address", n: "02", title: "Delivery address", note: "South Africa only, for now." },
+    { id: "notes", n: "03", title: "Delivery notes", note: "For the courier, not for us." },
   ];
 
   const summaryLines = vs => vs.map(v => `
@@ -625,6 +626,8 @@
         btn.classList.add("is-loading");
         btn.disabled = true;
         btn.setAttribute("aria-busy", "true");
+        alertEl.className = "co-alert co-alert--status"; alertEl.setAttribute("role", "status");
+        alertEl.textContent = "Taking you to secure payment..."; alertEl.hidden = false;
         try {
           await window.AW_PAY(order);
           // A successful AW_PAY redirects. If it resolves without leaving, give control back.
@@ -633,6 +636,7 @@
           btn.classList.remove("is-loading");
           btn.disabled = false;
           btn.removeAttribute("aria-busy");
+          alertEl.className = "co-alert"; alertEl.setAttribute("role", "alert");
           const msg = (err && err.message) || "Something went wrong on our side. Try again in a moment.";
           alertEl.innerHTML = `${ic("alert", 18)}<span><strong>That didn't go through.</strong> ${esc(msg)}</span>`;
           alertEl.hidden = false;
@@ -684,8 +688,8 @@
     },
     success: {
       fig: "Order confirmed",
-      title: "You've got <em>good taste.</em>",
-      lede: "Order in. Payment through. Now we get to work.",
+      title: "Paid. Good <em>decision.</em>",
+      lede: "Your order is in. We print it fresh, so give it a few working days. A confirmation is on its way to your inbox.",
       steps: [
         ["Printed to order", "Your tee gets printed now, just for you. No warehouse of leftovers."],
         ["On its way", "Delivered across South Africa in [X–Y working days]."],
@@ -702,7 +706,7 @@
     failed: {
       fig: "Payment failed",
       title: "That didn't <em>go through.</em>",
-      lede: "The payment was declined or timed out. Your bag is still here, so give it another go.",
+      lede: "That payment did not go through. Nothing was charged. Try again or use another card.",
       actions: btn("Try again", { href: "#/checkout", size: "lg", iconAfter: "arrow-right" }) + `<a class="co-textlink" href="#/help">Get help</a>`,
     },
   };

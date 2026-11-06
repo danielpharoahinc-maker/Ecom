@@ -477,6 +477,7 @@
   color: var(--c-fg); font-size: var(--fs-sm); line-height: var(--lh-snug);
 }
 .co-alert[hidden] { display: none; }
+.co-alert--status { border-color: var(--c-line); color: var(--c-muted); }
 .co-alert svg { flex: none; color: var(--c-red); }
 .co-alert strong { font-weight: var(--fw-semi); }
 .co-pay.is-loading { cursor: progress; }

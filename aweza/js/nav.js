@@ -130,14 +130,14 @@
   }
 
   function menuItems() {
-    const all = { href: "#/shop/all", label: "Shop All", key: "all", meta: teeWord(products().length), thumbs: "" };
+    const all = { href: "#/shop/all", label: "Shop All", key: "all", meta: teeWord(products().length), tagline: "Every statement we print.", thumbs: "" };
     const cols = collections().map(c => ({ href: `#/shop/${c.id}`, label: c.name, key: c.id, meta: teeWord(countIn(c.id)), tagline: c.tagline, thumbs: thumbStrip(c.id) }));
     return [all, ...cols].map((it, i) => `
       <li class="nav-menu-item" style="--i:${i}">
         <a class="nav-menu-link" href="${it.href}" data-nav-key="${esc(it.key)}">
           <span class="nav-menu-num">${pad2(i + 1)}</span>
-          <span class="nav-menu-mask"><span class="nav-menu-word">${esc(it.label)}</span></span>
-          <span class="nav-menu-meta">${it.tagline ? `<span class="nav-menu-tag">${esc(it.tagline)}</span>` : ""}<span class="nav-menu-count">${esc(it.meta)}</span></span>
+          <span class="nav-menu-mask"><span class="nav-menu-word">${esc(it.label)}<sup class="nav-menu-count"><span class="nav-sr">, </span>${esc(it.meta)}</sup></span></span>
+          ${it.tagline ? `<span class="nav-menu-meta"><span class="nav-menu-tag">${esc(it.tagline)}</span></span>` : ""}
           ${it.thumbs}
         </a>
       </li>`).join("");

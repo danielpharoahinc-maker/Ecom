@@ -323,6 +323,7 @@
     sheet.hidden = false;
     sheet.classList.toggle("is-drop", desktop());
     placeSheet();
+    [160, 460].forEach(t => setTimeout(placeSheet, t)); // the header may slide back in as the page locks
     openedAt = Date.now();
     const btn = page && AW.$("[data-shop-filter]", page.root);
     if (btn) btn.setAttribute("aria-expanded", "true");

@@ -275,8 +275,11 @@
     if (AW.motion && AW.motion.flyToBag && img) { try { AW.motion.flyToBag(img); } catch (err) { /* motion optional */ } }
     b.classList.add("is-done");
     const strip = b.closest(".card-quick");
+    const lab = strip && strip.querySelector(".card-quick-label");
     if (strip) strip.classList.add("is-done");
-    setTimeout(() => { b.classList.remove("is-done"); if (strip) strip.classList.remove("is-done"); }, 1600);
+    if (lab) { lab.dataset.text = lab.dataset.text || lab.textContent; lab.textContent = "Added. Size " + size; }
+    clearTimeout(b._uiT);
+    b._uiT = setTimeout(() => { b.classList.remove("is-done"); if (strip) strip.classList.remove("is-done"); if (lab && lab.dataset.text) lab.textContent = lab.dataset.text; }, 1600);
   });
 
   /* ---------- scroll lock (reference counted) ---------- */
