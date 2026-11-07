@@ -1,0 +1,57 @@
+/* "Turn the shirt" (js/turn.js). Uses only tokens from tokens.css. */
+.turn { background: var(--c-bg); color: var(--c-fg); position: relative; }
+.turn-pin {
+  min-height: 100svh; display: grid; align-items: center; gap: var(--sp-5);
+  padding-block: calc(var(--nav-offset, 0px) + var(--sp-6)) var(--sp-7);
+  padding-inline: var(--gutter); max-width: var(--maxw); margin-inline: auto;
+  grid-template-rows: auto 1fr; overflow: hidden; position: relative;
+}
+.turn-copy { display: grid; gap: var(--sp-3); position: relative; z-index: 2; }
+.turn-title {
+  font-family: var(--font-display); font-weight: 400; line-height: var(--lh-display);
+  letter-spacing: var(--ls-display); font-size: clamp(2.1rem, 8.5vw, var(--fs-d1));
+  display: grid; margin: 0; text-wrap: balance;
+}
+.turn-line { grid-area: 1 / 1; display: block; }
+.turn-meta { display: flex; }
+.turn-link {
+  display: inline-flex; gap: var(--sp-3); align-items: baseline; font-size: var(--fs-body);
+  font-weight: var(--fw-medium); color: var(--c-fg); text-decoration: underline;
+  text-underline-offset: 0.25em; text-decoration-thickness: 1px; min-height: var(--tap);
+  align-items: center;
+}
+.turn-link:hover { text-decoration-thickness: 2px; }
+.turn-link:focus-visible { outline: 2px solid var(--c-focus); outline-offset: 4px; }
+.turn-price { color: var(--c-muted); font-variant-numeric: tabular-nums; }
+.turn-stage { position: relative; display: grid; place-items: center; perspective: 1400px; min-height: 0; }
+.turn-card {
+  position: relative; width: min(100%, 62svh, 640px); aspect-ratio: 1; max-width: 100%;
+  transform-style: preserve-3d; will-change: transform;
+}
+.turn-face {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+  backface-visibility: hidden; mix-blend-mode: multiply; background: var(--c-bg);
+}
+.turn-shadow {
+  position: absolute; bottom: 4%; left: 50%; width: 46%; height: 18px; translate: -50% 0;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.18), transparent); opacity: 0.7;
+  pointer-events: none;
+}
+.turn-progress {
+  position: absolute; left: var(--gutter); right: var(--gutter); bottom: var(--sp-5);
+  height: 1px; background: var(--c-line);
+}
+.turn-progress span { display: block; height: 100%; background: var(--c-fg); transform-origin: left; transform: scaleX(0); }
+
+/* Static fallback: front and back side by side, all copy visible. */
+.turn--static .turn-title { display: grid; gap: var(--sp-2); }
+.turn--static .turn-line { grid-area: auto; }
+.turn--static .turn-card { aspect-ratio: 2 / 1; width: min(100%, 900px); display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+.turn--static .turn-face { position: static; transform: none; }
+.turn--static .turn-shadow, .turn--static .turn-progress { display: none; }
+
+@media (min-width: 900px) {
+  .turn-pin { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-rows: 1fr; }
+  .turn-copy { align-self: center; }
+  .turn-card { width: min(100%, 78svh, 760px); }
+}
