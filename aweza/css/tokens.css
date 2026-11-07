@@ -72,7 +72,7 @@
   --stagger: 70ms;
 }
 @media (min-width: 1024px) { :root { --header-h: 72px; } }
-[data-theme="dark"] {
+:not(html)[data-theme="dark"] {
   --c-bg: var(--c-ink); --c-fg: var(--c-white);
   --c-muted: #A6A6A2; --c-line: rgba(255,255,255,.16);
   --c-surface: var(--c-g800); --c-focus: var(--c-white);
@@ -90,4 +90,4 @@
   --ui-sbw: 0px;                   /* scrollbar width compensation, set by AW.ui.lockScroll */
   color-scheme: light;
 }
-[data-theme="dark"] { --c-sheen: rgba(10,10,10,.12); color-scheme: dark; }
+:not(html)[data-theme="dark"] { --c-sheen: rgba(10,10,10,.12); color-scheme: dark; }

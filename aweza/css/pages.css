@@ -11,7 +11,7 @@
   box-decoration-break: clone; -webkit-box-decoration-break: clone;
   outline: 1px dashed var(--c-g300); outline-offset: -1px;
 }
-[data-theme="dark"] .pg-ph { outline-color: var(--c-line); }
+:not(html)[data-theme="dark"] .pg-ph { outline-color: var(--c-line); }
 
 .pg { background: var(--c-bg); color: var(--c-fg); overflow-x: clip; }
 .pg :focus-visible { outline: 2px solid var(--c-focus); outline-offset: 3px; }

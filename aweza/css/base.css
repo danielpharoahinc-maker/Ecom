@@ -52,7 +52,7 @@ main:focus { outline: none; }
 :focus-visible { outline: 2px solid var(--c-focus); outline-offset: 3px; }
 :focus:not(:focus-visible) { outline: none; }
 ::selection { background: var(--c-ink); color: var(--c-white); }
-[data-theme="dark"] ::selection { background: var(--c-white); color: var(--c-ink); }
+:not(html)[data-theme="dark"] ::selection { background: var(--c-white); color: var(--c-ink); }
 
 /* scroll lock (AW.ui.lockScroll) */
 html.ui-locked { overflow: hidden; }
@@ -187,7 +187,7 @@ em.t-red { font-style: inherit; }
   mix-blend-mode: multiply;
   pointer-events: none;
 }
-[data-theme="dark"].ui-grain::after, [data-theme="dark"] .ui-grain::after { mix-blend-mode: screen; opacity: .09; }
+:not(html)[data-theme="dark"].ui-grain::after, :not(html)[data-theme="dark"] .ui-grain::after { mix-blend-mode: screen; opacity: .09; }
 
 /* ---------- media tile ---------- */
 .media {
@@ -350,7 +350,7 @@ html.ui-ready .media > img:not(.is-loaded) { opacity: 0; }
   transition: background-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out);
 }
 .chip::before { content: ""; position: absolute; inset: -2px 0; } /* 44px hit area */
-[data-theme="dark"] .chip { border-color: var(--c-line); }
+:not(html)[data-theme="dark"] .chip { border-color: var(--c-line); }
 @media (hover: hover) { .chip:hover { border-color: var(--c-fg); } }
 .chip[aria-pressed="true"], .chip[aria-current="page"], .chip.is-active {
   background: var(--c-fg); color: var(--c-bg); border-color: var(--c-fg);
@@ -443,7 +443,7 @@ html.ui-ready .media > img:not(.is-loaded) { opacity: 0; }
   background: var(--c-bg);
 }
 .field-ok { font-size: var(--fs-xs); color: var(--c-ok); display: flex; gap: var(--sp-2); align-items: center; }
-[data-theme="dark"] .field input, [data-theme="dark"] .field textarea, [data-theme="dark"] .input, [data-theme="dark"] .select { border-bottom-color: var(--c-line); }
+:not(html)[data-theme="dark"] .field input, :not(html)[data-theme="dark"] .field textarea, :not(html)[data-theme="dark"] .input, :not(html)[data-theme="dark"] .select { border-bottom-color: var(--c-line); }
 
 /* select: native element, custom chevron */
 .select {
@@ -455,7 +455,7 @@ html.ui-ready .media > img:not(.is-loaded) { opacity: 0; }
   background-size: 16px 16px;
 }
 .select--sm { min-height: var(--tap); padding-block: var(--sp-2); font-size: var(--fs-sm); }
-[data-theme="dark"] .select {
+:not(html)[data-theme="dark"] .select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='1.5' stroke-linecap='square'%3E%3Cpath d='m6 9.25 6 6 6-6'/%3E%3C/svg%3E");
 }
 .select option { color: var(--c-ink); background: var(--c-white); }
@@ -638,7 +638,8 @@ html.ui-touch .card-quick { display: none; }
   font-family: var(--font-display);
   font-size: var(--fs-h2);
   font-weight: var(--fw-regular);
-  line-height: 1;
+  line-height: 1.22;
+  padding-block: .06em;
   letter-spacing: var(--ls-tight);
 }
 .card--lg .card-info .price { font-size: var(--fs-body); align-self: start; padding-top: .3em; }

@@ -108,7 +108,7 @@
     const free = AW.config && AW.config.freeDeliveryOver;
     return [
       free ? `Free delivery over ${AW.rand(free)}` : "Delivery across South Africa",
-      "Printed to order. Shipped across South Africa.",
+      "Printed to order. Shipped nationwide.",
       "Sizes XS to 5XL",
     ];
   };

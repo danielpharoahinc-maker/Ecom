@@ -85,15 +85,15 @@
       entries.forEach(en => {
         if (!en.isIntersecting) return;
         const vh = (en.rootBounds && en.rootBounds.height) || window.innerHeight;
-        if (en.intersectionRatio >= 0.15 || en.intersectionRect.height >= vh * 0.25) batch.push(en.target);
+        if (en.intersectionRect.height > 0 || en.intersectionRatio > 0) batch.push(en.target);
       });
       if (batch.length) revealBatch(batch);
-    }, "reveal-io"), { threshold: [0, 0.15], rootMargin: "0px 0px -8% 0px" });
+    }, "reveal-io"), { threshold: [0], rootMargin: "0px 0px -4% 0px" });
     // clip-path inset(100%) makes the intersection ratio 0, so img reveals fire on box entry instead.
     imgIO = new IntersectionObserver(safe(entries => {
       const batch = entries.filter(en => en.isIntersecting).map(en => en.target);
       if (batch.length) revealBatch(batch);
-    }, "reveal-img-io"), { threshold: 0, rootMargin: "0px 0px -16% 0px" });
+    }, "reveal-img-io"), { threshold: 0, rootMargin: "0px 0px -6% 0px" });
     return io;
   }
 
@@ -162,7 +162,7 @@
       if (!inView) { firstSeen.delete(el); continue; }
       const f = firstSeen.get(el);
       if (f == null) firstSeen.set(el, t);
-      else if (t - f > 3000) { held.delete(el); reveal(el, 0); }
+      else if (t - f > 600) { held.delete(el); reveal(el, 0); }
     }
   }
 
@@ -832,7 +832,7 @@
       observeRoots();
       scan(doc);
       maybeIntro();
-      setInterval(safe(safetyNet, "safety"), 1000);
+      setInterval(safe(safetyNet, "safety"), 300);
     }, "boot");
     if (doc.body) bootDom(); else doc.addEventListener("DOMContentLoaded", bootDom);
 
