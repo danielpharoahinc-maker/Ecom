@@ -40,14 +40,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/nav.css">
-  <link rel="stylesheet" href="css/home.css">
-  <link rel="stylesheet" href="css/turn.css">
-  <link rel="stylesheet" href="css/shop.css">
-  <link rel="stylesheet" href="css/product.css">
   <link rel="stylesheet" href="css/cart.css">
   <link rel="stylesheet" href="css/pages.css">
-  <link rel="stylesheet" href="css/motion.css">
+  <link rel="stylesheet" href="css/rail.css">
 </head>
 <body>
   <!-- Mount points. Each module fills its own; do not move them. -->
@@ -57,21 +52,13 @@
   <div id="cart-root"></div>
   <div id="overlay-root"></div>
 
-  <!-- Animation libraries, self-hosted (GSAP 3.12.5 + ScrollTrigger, Lenis 1.1.13). Feature-detect before use. -->
-  <script src="vendor/gsap.min.js"></script>
-  <script src="vendor/ScrollTrigger.min.js"></script>
-  <script src="vendor/lenis.min.js"></script>
+  <!-- One-page store: the rail (js/rail.js) is the home page; bag, checkout and help pages stay. -->
   <script src="data/products.js"></script>
   <script src="js/core.js"></script>
   <script src="js/ui.js"></script>
-  <script src="js/nav.js"></script>
-  <script src="js/home.js"></script>
-  <script src="js/turn.js"></script>
-  <script src="js/shop.js"></script>
-  <script src="js/product.js"></script>
   <script src="js/cart.js"></script>
   <script src="js/pages.js"></script>
-  <script src="js/motion.js"></script>
+  <script src="js/rail.js"></script>
   <script src="js/pay.js"></script>
   <script src="js/boot.js"></script>
 </body>
