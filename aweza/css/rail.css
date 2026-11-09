@@ -1,23 +1,23 @@
 /* AWEZA one-page rail (js/rail.js).
-   Palette: deep navy for the frame (header, details, footer), a soft light-blue wall behind the rail,
-   and one AWEZA red used sparingly (bag count, Add to bag, active dot). */
+   Palette: Egyptian blue for the frame (header, details, footer), a soft stone-blue wall behind the rail,
+   and scarlet used sparingly (bag count, Add to bag, active dot). */
 :root {
-  --rl-navy: #0f1b2d;          /* header, details panel */
-  --rl-navy-2: #172a44;        /* raised surfaces on navy */
-  --rl-navy-3: #0a1322;        /* footer */
-  --rl-sky: #e7f0fa;           /* top of the wall */
-  --rl-sky-2: #d3e2f2;         /* bottom of the wall */
-  --rl-ice: #b9cde4;           /* light-blue text on navy */
-  --rl-ice-muted: #8ea6c3;
-  --rl-red: #e3262e;
+  --rl-navy: #1034a6;          /* Egyptian blue: header, details panel */
+  --rl-navy-2: #1a40b8;        /* raised surfaces on Egyptian blue */
+  --rl-navy-3: #0b2578;        /* footer, deepest Egyptian blue */
+  --rl-sky: #e3e9ee;           /* stone blue, top of the wall */
+  --rl-sky-2: #bccad5;         /* stone blue, bottom of the wall */
+  --rl-ice: #d3ddf6;           /* pale blue text on Egyptian blue */
+  --rl-ice-muted: #a9bbea;
+  --rl-red: #e8200a;           /* scarlet */
   --rl-bg: var(--rl-sky);
   --rl-ink: var(--rl-navy);
-  --rl-muted: #50637d;
-  --rl-line: #c4d4e6;
-  --rl-metal: linear-gradient(180deg, #e3e9f0 0%, #9fadbd 45%, #6c7b8d 55%, #c3cdd8 100%);
+  --rl-muted: #4d6273;
+  --rl-line: #b3c3cf;
+  --rl-metal: linear-gradient(180deg, #e6ebef 0%, #9fadb8 45%, #6b7c89 55%, #c4ced6 100%);
   /* the bag, checkout and help pages share the same navy and red */
-  --c-ink: #0f1b2d;
-  --c-red: #e3262e;
+  --c-ink: #1034a6;
+  --c-red: #e8200a;
   --rl-w: min(64vw, 280px);              /* width of a shirt facing you; rail.js uses the same numbers */
   --rl-ease: cubic-bezier(.22, .8, .2, 1);
 }
@@ -52,7 +52,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 /* ---------- rail ---------- */
 .rail {
   padding-top: 18px; padding-bottom: 18px; overflow: hidden;
-  background: radial-gradient(120% 80% at 50% 0%, #f4f8fd 0%, var(--rl-sky) 45%, var(--rl-sky-2) 100%);
+  background: radial-gradient(120% 80% at 50% 0%, #f2f5f7 0%, var(--rl-sky) 45%, var(--rl-sky-2) 100%);
 }
 .rail-tag { text-align: center; margin: 0 16px 4px; font-family: var(--font-display); font-size: clamp(22px, 5.6vw, 30px); color: var(--rl-navy); line-height: 1.15; }
 .rail-hint { text-align: center; color: var(--rl-muted); font-size: 14px; margin: 0 16px 16px; }
@@ -102,19 +102,19 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .pick-sizes legend { font-size: 13px; font-weight: 600; margin-bottom: 10px; padding: 0; color: var(--rl-ice); }
 .pick-size-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; }
 .pick-size {
-  min-height: 48px; border: 1px solid #2c4262; background: var(--rl-navy-2); color: #fff;
+  min-height: 48px; border: 1px solid #3a5fd0; background: var(--rl-navy-2); color: #fff;
   font: 500 15px/1.1 var(--font-body); border-radius: 6px; cursor: pointer; display: grid; place-content: center; gap: 2px;
 }
 .pick-size small { font-size: 11px; color: var(--rl-ice-muted); font-weight: 400; }
-.pick-size[aria-pressed="true"] { border-color: var(--rl-ice); background: #22395a; box-shadow: inset 0 0 0 1px var(--rl-ice); }
+.pick-size[aria-pressed="true"] { border-color: var(--rl-ice); background: #2550cc; box-shadow: inset 0 0 0 1px var(--rl-ice); }
 .pick-size:focus-visible, .pick-add:focus-visible, .pick-nav:focus-visible { outline: 2px solid var(--rl-ice); outline-offset: 2px; }
-.pick-note { margin: 0; min-height: 20px; font-size: 14px; color: #ff8a8f; }
+.pick-note { margin: 0; min-height: 20px; font-size: 14px; color: #ffb4a8; }
 .pick-add {
   min-height: 54px; border: 0; border-radius: 999px; background: var(--rl-red); color: #fff;
   font: 600 16px/1 var(--font-body); cursor: pointer; transition: transform .15s, background .2s;
-  box-shadow: 0 8px 22px -10px rgba(227, 38, 46, .7);
+  box-shadow: 0 8px 22px -10px rgba(232, 32, 10, .75);
 }
-.pick-add:hover { background: #c81d25; }
+.pick-add:hover { background: #c91a08; }
 .pick-add:active { transform: scale(.98); }
 .pick-photos {
   display: grid; grid-auto-flow: column; grid-auto-columns: 72%; gap: 8px; overflow-x: auto;
@@ -124,12 +124,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .pick-photos img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; scroll-snap-align: start; background: var(--rl-navy-2); border-radius: 6px; }
 .pick-step { display: flex; justify-content: space-between; align-items: center; margin: 0; color: var(--rl-ice-muted); font-size: 14px; }
 .pick-nav { min-height: 44px; padding: 0 4px; background: none; border: 0; color: #fff; font: 500 15px/1 var(--font-body); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
-.pick-nav:disabled { color: #334a6a; text-decoration: none; cursor: default; }
+.pick-nav:disabled { color: #5a77cf; text-decoration: none; cursor: default; }
 @media (min-width: 900px) { .pick-photos { grid-auto-columns: 46%; } }
 
 /* ---------- footer ---------- */
 .mf {
-  margin-top: 0; border-top: 1px solid #1d3150;
+  margin-top: 0; border-top: 1px solid #1d3f9e;
   padding: 32px max(16px, env(safe-area-inset-right, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
   display: grid; gap: 24px; max-width: 980px; margin-inline: auto; font-size: 14px; line-height: 1.55;
 }
@@ -157,6 +157,6 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   min-height: 48px; border: 1px solid var(--rl-ice); border-radius: 999px; background: transparent; color: var(--rl-ice);
   font: 600 15px/1 var(--font-body); cursor: pointer;
 }
-.pick-turn:hover { background: rgba(185, 205, 228, .08); }
+.pick-turn:hover { background: rgba(211, 221, 246, .1); }
 .pick-turn:focus-visible { outline: 2px solid var(--rl-ice); outline-offset: 2px; }
 .rail-stage.is-3d { height: calc(var(--rl-w) * 1.1 + 24px); }
