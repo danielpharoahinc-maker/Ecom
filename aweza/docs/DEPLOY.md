@@ -100,7 +100,12 @@ Printify bills you in **US dollars**; customers pay in **Rand**. Current numbers
 
 - Product cost per tee: about **US$15.93 to $22.35** for S to XL on the Gildan 5000 designs, up to about $26.16 for 5XL; the Mini Lips Bella+Canvas 3001 is $11.29 to $20.24. Exact per-size costs are in `data/printify-variants.json` (`cost_usd_cents`).
 - Shipping to South Africa (provider 99, "rest of the world" rate): **US$10.39 for the first item, US$4.00 for each extra item**, about 10 days handling plus transit.
-- So one Signature Lips tee in M costs roughly $22.35 + $10.39 = **$32.74**, about **R590 at R18/$** before card fees, against R749 + R149 delivery = R898 collected. Free delivery orders (R1 500+) absorb the shipping themselves.
+- Prices checked against the live Printify costs on 9 November 2026 at **R16.50 per US$** (market rate), with a safety margin at **R17.00** for bank currency-conversion fees:
+  - Standard tees (CEO, Zero Ex's, Sweet Cupcake, Need A Hug): $16.72 + $10.39 shipping = $27.11, about **R461** landed. Sold at R649 + R149 delivery = R798; after Yoco's fee about **R310 profit (39%)** per single-tee order.
+  - Captain Save: $15.93 + $10.39 = $26.32, about **R447** landed; about **R323 profit (41%)**.
+  - Signature Lips (back print + sleeve): $22.35 + $10.39 = $32.74, about **R557** landed. Sold at R749 + R149 = R898; about **R311 profit (35%)**.
+  - Bigger sizes cost Printify more ($2.10 more for 2XL, $3.23 to $3.73 more for 3XL to 5XL, about R36 and R55 to R63). The site's +R50 and +R80 upcharges cover that, so every size keeps a 33% to 41% margin.
+  - Extra tees in the same order ship for $4.00 (about R68) each, and free delivery from R1 500 (three tees) still leaves about R715 profit on the order.
 - Yoco takes its card fee from each payment; Printify may add VAT/duties depending on the destination; the rand moves. Re-check margins whenever you change prices or the exchange rate shifts, and re-run the sync to refresh costs.
 - The server only charges what `data/products.js` says; change prices there, never in the browser.
 

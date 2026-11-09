@@ -232,48 +232,5 @@
     "cost_usd_cents": 2045
    }
   }
- },
- "mini-lips": {
-  "printify_product_id": "6adf3e096048caed7507d374",
-  "blueprint_id": 12,
-  "print_provider_id": 99,
-  "sizes": {
-   "M": {
-    "variant_id": 18541,
-    "cost_usd_cents": 1129
-   },
-   "L": {
-    "variant_id": 18542,
-    "cost_usd_cents": 1129
-   },
-   "S": {
-    "variant_id": 18540,
-    "cost_usd_cents": 1129
-   },
-   "XL": {
-    "variant_id": 18543,
-    "cost_usd_cents": 1129
-   },
-   "XS": {
-    "variant_id": 18539,
-    "cost_usd_cents": 1129
-   },
-   "2XL": {
-    "variant_id": 18544,
-    "cost_usd_cents": 1385
-   },
-   "3XL": {
-    "variant_id": 18545,
-    "cost_usd_cents": 1622
-   },
-   "4XL": {
-    "variant_id": 18546,
-    "cost_usd_cents": 1862
-   },
-   "5XL": {
-    "variant_id": 101776,
-    "cost_usd_cents": 2024
-   }
-  }
  }
 }
