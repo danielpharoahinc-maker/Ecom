@@ -51,8 +51,20 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 /* ---------- rail ---------- */
 .rail {
-  padding-top: 18px; padding-bottom: 18px; overflow: hidden;
-  background: radial-gradient(120% 80% at 50% 0%, #f2f5f7 0%, var(--rl-sky) 45%, var(--rl-sky-2) 100%);
+  /* Egyptian blue from the header melts into the stone-blue wall, and the wall deepens back into
+     Egyptian blue where it meets the details panel, so there are no hard edges anywhere. */
+  padding-top: 92px; padding-bottom: 64px; overflow: hidden;
+  background:
+    radial-gradient(90% 55% at 50% 42%, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg,
+      var(--rl-navy) 0px, #3556b6 26px, #7d93c4 54px, #b4c3d6 80px, var(--rl-sky) 112px,
+      var(--rl-sky) 45%, var(--rl-sky-2) calc(100% - 170px), #8ea2c4 calc(100% - 110px),
+      #4c6cc0 calc(100% - 52px), var(--rl-navy) 100%);
+  background:
+    radial-gradient(90% 55% at 50% 42%, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(in oklab 180deg,
+      var(--rl-navy) 0px, var(--rl-sky) 112px,
+      var(--rl-sky) 45%, var(--rl-sky-2) calc(100% - 170px), var(--rl-navy) 100%);
 }
 .rail-tag { text-align: center; margin: 0 16px 4px; font-family: var(--font-display); font-size: clamp(22px, 5.6vw, 30px); color: var(--rl-navy); line-height: 1.15; }
 .rail-hint { text-align: center; color: var(--rl-muted); font-size: 14px; margin: 0 16px 16px; }
@@ -82,7 +94,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .rail-tee.is-open::after, .rail-tee.is-peek::after { opacity: 0; }
 .rail-tee:focus-visible { outline: 2px solid var(--rl-ink); outline-offset: -2px; }
 .rail-dots { display: flex; justify-content: center; gap: 6px; margin: 4px 0 0; }
-.rail-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--rl-line); transition: background .3s, transform .3s; }
+.rail-dots span { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, .55); transition: background .3s, transform .3s; }
 .rail-dots span.is-on { background: var(--rl-red); transform: scale(1.25); }
 
 /* ---------- picked shirt ---------- */
@@ -129,11 +141,15 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 /* ---------- footer ---------- */
 .mf {
-  margin-top: 0; border-top: 1px solid #1d3f9e;
+  margin-top: 0; border-top: 0;
   padding: 32px max(16px, env(safe-area-inset-right, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
   display: grid; gap: 24px; max-width: 980px; margin-inline: auto; font-size: 14px; line-height: 1.55;
 }
-#mini-foot { background: var(--rl-navy-3); color: var(--rl-ice); }
+#mini-foot {
+  color: var(--rl-ice);
+  background: linear-gradient(180deg, var(--rl-navy) 0px, #0d2c90 90px, var(--rl-navy-3) 220px);
+  background: linear-gradient(in oklab 180deg, var(--rl-navy) 0px, var(--rl-navy-3) 220px);
+}
 .mf-facts { display: grid; gap: 14px; }
 .mf-facts p { margin: 0; color: var(--rl-ice-muted); max-width: 60ch; }
 .mf-facts strong { display: block; color: #fff; font-weight: 600; }
