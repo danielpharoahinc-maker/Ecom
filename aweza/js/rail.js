@@ -103,6 +103,7 @@
     const c = st.sel != null ? st.sel : st.focus;
     const o = st.sel != null ? 1 : st.focus != null ? 0.55 : 0;
     const shift = st.sel != null ? -(st.sel - mid) * gap : 0;   // centre the open shirt
+    const items = [];
     tees.forEach((el, i) => {
       let x = (i - mid) * gap + shift, ang = i < mid ? A : i > mid ? -A : A * 0.98, z = 50 - Math.abs(i - mid), s = 0.94;
       if (c != null) {
@@ -112,6 +113,7 @@
         if (d === 0) { ang = A * (1 - o) * (st.side || 1); s = 0.94 + o * 0.06; z = 200; }
         else x += Math.sign(d) * (o * w * 0.5 + (o ? 10 : 0));
       }
+      items.push({ x, ang, s });
       el.style.setProperty("--x", x.toFixed(1) + "px");
       el.style.setProperty("--ry", ang.toFixed(1) + "deg");
       el.style.setProperty("--s", s.toFixed(3));
@@ -121,6 +123,7 @@
       el.setAttribute("aria-selected", st.sel === i ? "true" : "false");
     });
     st.dots.forEach((d, i) => d.classList.toggle("is-on", i === c));
+    AW.emit("rail:layout", { items, sel: st.sel, focus: st.focus, w });
   }
 
   function select(i, opts = {}) {
@@ -155,6 +158,7 @@
           <p class="pick-note" role="status"></p>
         </fieldset>
         <button type="button" class="pick-add">Add to bag</button>
+        ${AW.rail3d && AW.rail3d.active ? `<button type="button" class="pick-turn" aria-pressed="false">Turn it around</button>` : ""}
         <div class="pick-photos" aria-label="Photos of the ${esc(p.name)}">
           ${photos.map((src, k) => `<img src="${esc(src)}" alt="${esc((AW.ui && AW.ui.altFor) ? AW.ui.altFor(p, src) : p.name)}" width="1000" height="1000" loading="${k < 2 ? "eager" : "lazy"}" decoding="async">`).join("")}
         </div>
@@ -176,6 +180,14 @@
       if (!size) { note.textContent = "Pick a size first."; box.querySelector(".pick-size").focus(); return; }
       AW.cart.add(p.id, size);
       AW.motion.flyToBag();
+    });
+    const turn = box.querySelector(".pick-turn");
+    if (turn) turn.addEventListener("click", () => {
+      const back = turn.getAttribute("aria-pressed") !== "true";
+      turn.setAttribute("aria-pressed", back ? "true" : "false");
+      turn.textContent = back ? "Show the front" : "Turn it around";
+      AW.emit("rail:turn", { back });
+      if (back) st.root.querySelector(".rail-stage").scrollIntoView({ behavior: reduced() ? "auto" : "smooth", block: "center" });
     });
     box.querySelectorAll(".pick-nav").forEach(b => b.addEventListener("click", () => select(st.sel + Number(b.dataset.step))));
     if (opts.focusName) box.querySelector(".pick-name").focus?.();
@@ -256,6 +268,7 @@
     };
     st.stage.addEventListener("pointerdown", () => { st.touched = true; }, { once: true });
     bindStage();
+    AW.emit("rail:mount", { stage: st.stage, list });
     const pre = preselect ? list.findIndex(p => p.id === preselect) : -1;
     if (pre >= 0) select(pre);
     else {

@@ -123,3 +123,14 @@ html, body { background: var(--rl-bg); color: var(--rl-ink); }
   .rail-tee, .rail-tee::after, .rail-dots span { transition: none; }
   .pick-in { animation: none; }
 }
+
+/* ---------- 3D rail (js/rail3d.js) ---------- */
+.rail-gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.rail-stage.is-3d .rail-bar { display: none; }
+.rail-stage.is-3d .rail-tee { opacity: 0; }           /* photos stay as invisible touch targets */
+.pick-turn {
+  min-height: 48px; border: 1px solid var(--rl-ink); border-radius: 999px; background: var(--rl-bg); color: var(--rl-ink);
+  font: 600 15px/1 var(--font-body); cursor: pointer;
+}
+.pick-turn:focus-visible { outline: 2px solid var(--rl-ink); outline-offset: 2px; }
+.rail-stage.is-3d { height: calc(var(--rl-w) * 1.1 + 24px); }
