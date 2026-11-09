@@ -106,7 +106,12 @@
   let glbPromise = null;
   function loadTeeGLB() {
     if (glbPromise) return glbPromise;
-    glbPromise = fetch("models/tee-draped.glb").then(r => { if (!r.ok) throw new Error("glb " + r.status); return r.arrayBuffer(); }).then(buf => {
+    // The GLB is shipped base64-encoded inside JSON so any static host (including the preview link) serves it.
+    glbPromise = fetch("models/tee-draped.json").then(r => { if (!r.ok) throw new Error("model " + r.status); return r.json(); }).then(j => {
+      const bin = atob(j.glb_base64), u8 = new Uint8Array(bin.length);
+      for (let k = 0; k < bin.length; k++) u8[k] = bin.charCodeAt(k);
+      return u8.buffer;
+    }).then(buf => {
       const dv = new DataView(buf);
       if (dv.getUint32(0, true) !== 0x46546c67) throw new Error("not a glb");
       const jsonLen = dv.getUint32(12, true);
