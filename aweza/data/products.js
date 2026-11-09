@@ -20,8 +20,8 @@ AW.collections = [
   const img = (slug, names) => names.map(n => `images/${slug}/${n}.jpg`);
   const STD = ["S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
   // Male models first (AWEZA's audience is mostly men). Flat shots and details after.
-  const BACK_FIRST = ["male-back-1", "male-front-1", "back", "front", "male-back-3", "male-duo", "male-front-3", "collar"];
-  const FRONT_FIRST = ["male-front-1", "male-front-3", "front", "male-duo", "male-front-5", "back", "collar"];
+  const BACK_FIRST = ["male-back-3", "male-front-3", "back", "front", "male-back-2", "male-front-2", "male-duo", "collar"];
+  const FRONT_FIRST = ["male-front-3", "male-front-2", "front", "male-back-3", "male-duo", "back", "collar"];
 
   AW.products = [
     {
