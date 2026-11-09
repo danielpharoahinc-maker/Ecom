@@ -6,7 +6,7 @@
 (() => {
   const AW = window.AW;
   const esc = AW.esc;
-  const ORDER = ["signature-lips", "ceo-of-bad-decisions", "zero-exes", "mini-lips", "captain-save", "need-a-hug", "sweet-cupcake"];
+  const ORDER = ["signature-lips", "ceo-of-bad-decisions", "zero-exes", "captain-save", "need-a-hug", "sweet-cupcake"];
   const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* The bag, checkout and help pages call these if present. No page-wide motion system any more. */

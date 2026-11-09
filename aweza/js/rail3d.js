@@ -25,7 +25,6 @@
     // The real product photos under the rail still show the actual print.
     "captain-save":         { front: [],                                                                back: [{ src: "logo-tagline-black", x: 0, y: 0.47, w: 0.2 }] },
     "need-a-hug":           { front: [{ src: "need-a-hug-print", x: 0, y: 0.19, w: 0.72 }],            back: [{ src: "logo-serif-black", x: 0, y: 0.48, w: 0.15 }] },
-    "mini-lips":            { front: [{ src: "lips-logo", x: 0, y: -0.07, w: 0.12 }],                  back: [] },
   };
 
   /* ---------- the tee silhouette ---------- */
@@ -98,6 +97,45 @@
     return geo;
   }
 
+  /* ---------- Blender shirt ----------
+     models/tee-draped.glb: a tee built in Blender from front and back panels sewn at the sides and
+     shoulders, then dropped under gravity with a cloth simulation so it hangs with real folds.
+     Two primitives: front panel (material 0) and back panel (material 1), with UVs that line up with
+     the print textures above. Metres in the file; the site works in shirt units (0.52 m each). */
+  const BLENDER_M = 0.52;
+  let glbPromise = null;
+  function loadTeeGLB() {
+    if (glbPromise) return glbPromise;
+    glbPromise = fetch("models/tee-draped.glb").then(r => { if (!r.ok) throw new Error("glb " + r.status); return r.arrayBuffer(); }).then(buf => {
+      const dv = new DataView(buf);
+      if (dv.getUint32(0, true) !== 0x46546c67) throw new Error("not a glb");
+      const jsonLen = dv.getUint32(12, true);
+      const json = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 20, jsonLen)));
+      const binStart = 20 + jsonLen + 8;
+      const COMP = { 5126: Float32Array, 5123: Uint16Array, 5125: Uint32Array };
+      const SIZE = { SCALAR: 1, VEC2: 2, VEC3: 3 };
+      const acc = i => {
+        const a = json.accessors[i], v = json.bufferViews[a.bufferView], C = COMP[a.componentType];
+        return new C(buf.slice(binStart + (v.byteOffset || 0) + (a.byteOffset || 0), binStart + (v.byteOffset || 0) + (a.byteOffset || 0) + a.count * SIZE[a.type] * C.BYTES_PER_ELEMENT));
+      };
+      const geos = [null, null];
+      json.meshes[0].primitives.forEach(pr => {
+        const pos = acc(pr.attributes.POSITION), nor = acc(pr.attributes.NORMAL), uv = acc(pr.attributes.TEXCOORD_0);
+        for (let k = 0; k < pos.length; k++) pos[k] /= BLENDER_M;          // metres -> shirt units
+        for (let k = 1; k < uv.length; k += 2) uv[k] = 1 - uv[k];         // glTF flips V; our canvases do not
+        const g = new T.BufferGeometry();
+        g.setAttribute("position", new T.BufferAttribute(pos, 3));
+        g.setAttribute("normal", new T.BufferAttribute(nor, 3));
+        g.setAttribute("uv", new T.BufferAttribute(uv, 2));
+        g.setIndex(new T.BufferAttribute(acc(pr.indices), 1));
+        geos[pr.material === 1 ? 1 : 0] = g;
+      });
+      if (!geos[0] || !geos[1]) throw new Error("missing panel");
+      return geos;
+    });
+    return glbPromise;
+  }
+
   /* ---------- scene ---------- */
   let S = null; // live scene for the mounted rail
 
@@ -113,12 +151,21 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputEncoding = T.sRGBEncoding;
     renderer.setClearColor(0xffffff, 0);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = T.PCFSoftShadowMap;
 
     const scene = new T.Scene();
     const camera = new T.PerspectiveCamera(26, 1, 0.1, 100);
     camera.position.set(0, 0, 10);
     scene.add(new T.HemisphereLight(0xffffff, 0x8c8c8c, 0.62));
     const key = new T.DirectionalLight(0xffffff, 0.95); key.position.set(-3, 4, 4); scene.add(key);
+    key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
+    key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02; key.shadow.radius = 4;
+    scene.add(key.target);
+    // a white wall just behind the rail that only shows the shirts' soft shadows
+    const wall = new T.Mesh(new T.PlaneGeometry(80, 40), new T.ShadowMaterial({ opacity: 0.13 }));
+    wall.position.z = -0.75; wall.receiveShadow = true; scene.add(wall);
     const fill = new T.DirectionalLight(0xffffff, 0.22); fill.position.set(4, -1, 3); scene.add(fill);
     const rim = new T.DirectionalLight(0xffffff, 0.4); rim.position.set(2, 2, -5); scene.add(rim);
 
@@ -126,6 +173,7 @@
     const wood = new T.MeshStandardMaterial({ color: 0xc9a273, roughness: 0.55 });
     const rail = new T.Mesh(new T.CylinderGeometry(0.028, 0.028, 60, 20), metal);
     rail.rotation.z = Math.PI / 2;
+    rail.castShadow = true;
     scene.add(rail);
 
     const shape = teeShape();
@@ -142,21 +190,35 @@
     const tees = list.map((p, i) => {
       const group = new T.Group();
       const body = new T.Group(); body.position.y = -HOOK_TOP; group.add(body);
-      body.add(new T.Mesh(core, coreMat));
-      const front = new T.Mesh(plane, new T.MeshStandardMaterial({ color: 0xf7f7f5, roughness: 0.88, alphaTest: 0.5, transparent: false }));
-      const back = new T.Mesh(plane, new T.MeshStandardMaterial({ color: 0xf7f7f5, roughness: 0.88, alphaTest: 0.5, transparent: false }));
+      const coreMesh = new T.Mesh(core, coreMat); body.add(coreMesh);
+      const cotton = () => new T.MeshPhysicalMaterial({ color: 0xf6f6f4, roughness: 0.9, sheen: 0.45, sheenRoughness: 0.8, sheenColor: new T.Color(0xffffff), alphaTest: 0.5, side: T.FrontSide });
+      const front = new T.Mesh(plane, cotton());
+      const back = new T.Mesh(plane, cotton());
       back.rotation.y = Math.PI;
       front.visible = back.visible = false;   // shown once their print texture is ready
       body.add(front, back);
       const hanger = new T.Mesh(hangerGeo, wood); hanger.position.z = 0; body.add(hanger);
       const stem = new T.Mesh(stemGeo, metal); stem.position.y = 0.71; body.add(stem);
       const hook = new T.Mesh(hookGeo, metal); hook.position.set(0.02, 0.78, 0); hook.rotation.z = -0.4; body.add(hook);
+      [coreMesh, front, back, hanger, stem, hook].forEach(m => { m.castShadow = true; m.receiveShadow = true; });
       scene.add(group);
       const pr = PRINTS[p.id] || { front: [], back: [] };
       faceTexture(pr.front, renderer).then(t => { front.material.map = t; front.material.needsUpdate = true; front.visible = true; wake(); });
       faceTexture(pr.back, renderer).then(t => { back.material.map = t; back.material.needsUpdate = true; back.visible = true; wake(); });
-      return { group, cur: { x: 0, ry: 1.3, s: 0.94 }, tgt: { x: 0, ry: 1.3, s: 0.94 }, seed: i * 1.7 };
+      return { group, coreMesh, front, back, cur: { x: 0, ry: 1.3, s: 0.94 }, tgt: { x: 0, ry: 1.3, s: 0.94 }, seed: i * 1.7 };
     });
+
+    loadTeeGLB().then(([gf, gb]) => {
+      if (!S || S.tees !== tees) return;
+      tees.forEach(t => {
+        t.coreMesh.visible = false;               // the Blender panels have their own thickness and seams
+        t.front.geometry = gf; t.back.geometry = gb;
+        t.back.rotation.y = 0;                    // the Blender back panel is already in place
+        [t.front, t.back].forEach(m => { m.material.alphaTest = 0; m.material.side = T.DoubleSide; m.material.needsUpdate = true; });
+      });
+      S.blender = true;
+      wake();
+    }).catch(() => { /* keep the built-in shirt shape */ });
 
     S = { stage, canvas, renderer, scene, camera, rail, tees, w: 280, sel: null, turned: false, spin: 0, raf: 0, visible: true, last: 0, still: 0 };
     stage.classList.add("is-3d");
@@ -179,6 +241,11 @@
     S.upp = 2 * S.camera.position.z * Math.tan(T.MathUtils.degToRad(S.camera.fov / 2)) / H;
     S.H = H;
     S.rail.position.y = H / 2 * S.upp - 9 * S.upp;
+    const key = S.scene.children.find(o => o.isDirectionalLight && o.castShadow);
+    if (key) {
+      const hw = W / 2 * S.upp + 1, hh = H / 2 * S.upp + 1, c = key.shadow.camera;
+      c.left = -hw; c.right = hw; c.top = hh; c.bottom = -hh; c.near = 0.5; c.far = 20; c.updateProjectionMatrix();
+    }
   }
 
   function onLayout({ items, sel, w }) {
@@ -190,7 +257,9 @@
       t.tgt.x = it.x;
       t.tgt.ry = -it.ang * Math.PI / 180;
       t.tgt.s = it.s;
+      if (!S.placed) { t.cur.x = t.tgt.x; t.cur.ry = t.tgt.ry; t.cur.s = t.tgt.s; }   // first layout: start in place, no fly-in
     });
+    S.placed = true;
     wake();
   }
 

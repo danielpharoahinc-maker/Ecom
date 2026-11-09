@@ -31,12 +31,6 @@ AW.collections = [
       summary: "The one that started it. Big red lips with AWEZA on the teeth across the back, a small wordmark on the chest and a flag on the sleeve.",
     },
     {
-      id: "mini-lips", name: "Mini Lips Tee", collection: "signature", price: 549,
-      colourName: "White", badge: "New", sizes: ["XS", ...STD], fit: "Soft lightweight jersey, retail fit",
-      images: img("mini-lips", ["male-front-1", "male-front-3", "front", "male-duo", "male-front-5", "back", "collar"]),
-      summary: "One small pair of red lips on the front, nothing on the back. For the days you would rather whisper.",
-    },
-    {
       id: "sweet-cupcake", name: "Sweet Cupcake Tee", collection: "signature", price: 649,
       colourName: "White", sizes: STD, fit: "Heavyweight cotton, classic fit",
       images: img("sweet-cupcake", BACK_FIRST),
