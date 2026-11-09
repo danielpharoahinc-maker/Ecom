@@ -150,6 +150,7 @@
         <p class="pick-sum">${esc(p.summary)}</p>
         <fieldset class="pick-sizes">
           <legend>Size</legend>
+          <button type="button" class="pick-guide" aria-haspopup="dialog">Size guide</button>
           <div class="pick-size-row">
             ${p.sizes.map(s => {
               const up = AW.config.sizeUpcharge[s];
@@ -171,12 +172,16 @@
       </div>`;
     let size = null;
     const note = box.querySelector(".pick-note"), price = box.querySelector("[data-price]");
-    box.querySelectorAll(".pick-size").forEach(b => b.addEventListener("click", () => {
-      size = b.dataset.size;
+    const choose = s => {
+      const b = box.querySelector(`.pick-size[data-size="${s}"]`); if (!b) return;
+      size = s;
       box.querySelectorAll(".pick-size").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
       price.textContent = AW.rand(AW.priceFor(p, size));
       note.textContent = "";
-    }));
+    };
+    box.querySelectorAll(".pick-size").forEach(b => b.addEventListener("click", () => choose(b.dataset.size)));
+    const guideBtn = box.querySelector(".pick-guide");
+    guideBtn.addEventListener("click", () => openSizeGuide(p, size, s => { choose(s); box.querySelector(`.pick-size[data-size="${s}"]`).focus(); }, guideBtn));
     box.querySelector(".pick-add").addEventListener("click", () => {
       if (!size) { note.textContent = "Pick a size first."; box.querySelector(".pick-size").focus(); return; }
       AW.cart.add(p.id, size);
@@ -192,6 +197,83 @@
     });
     box.querySelectorAll(".pick-nav").forEach(b => b.addEventListener("click", () => select(st.sel + Number(b.dataset.step))));
     if (opts.focusName) box.querySelector(".pick-name").focus?.();
+  }
+
+  /* ---------- size guide sheet (opened from beside the sizes) ----------
+     Same measurements as the Size guide page: garment laid flat, inches are the source. */
+  const SIZE_CHART = {
+    sizes: ["S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"],
+    width: [18, 20, 22, 24, 26, 28, 30, 32],
+    length: [28, 29, 30, 31, 32, 33, 34, 35],
+  };
+  let guideUnit = "cm";
+  try { guideUnit = localStorage.getItem("aw-size-unit") === "in" ? "in" : "cm"; } catch {}
+
+  function openSizeGuide(p, current, onPick, opener) {
+    const root = document.getElementById("overlay-root") || document.body;
+    const fmt = inch => guideUnit === "in" ? String(inch) : String(Math.round(inch * 2.54));
+    const sizes = p.sizes.filter(s => SIZE_CHART.sizes.includes(s));
+    const wrap = document.createElement("div");
+    wrap.className = "sg";
+    wrap.innerHTML = `
+      <div class="sg-scrim" data-close></div>
+      <div class="sg-sheet" role="dialog" aria-modal="true" aria-labelledby="sg-title">
+        <div class="sg-head">
+          <h2 id="sg-title">Size guide</h2>
+          <button type="button" class="sg-x" data-close aria-label="Close size guide">Close</button>
+        </div>
+        <p class="sg-sub">${esc(p.name)}. Classic unisex fit, measured with the tee laid flat.</p>
+        <div class="sg-units" role="group" aria-label="Units">
+          <button type="button" data-unit="cm" aria-pressed="${guideUnit === "cm"}">cm</button>
+          <button type="button" data-unit="in" aria-pressed="${guideUnit === "in"}">inches</button>
+        </div>
+        <table class="sg-table">
+          <caption class="sg-cap">Tap a size to choose it.</caption>
+          <thead><tr><th scope="col">Size</th><th scope="col">Chest width (A)</th><th scope="col">Length (B)</th></tr></thead>
+          <tbody>${sizes.map(s => {
+            const i = SIZE_CHART.sizes.indexOf(s);
+            return `<tr class="${s === current ? "is-on" : ""}"><th scope="row"><button type="button" class="sg-pick" data-size="${s}" aria-label="Choose ${s}">${s}</button></th>
+              <td data-in="${SIZE_CHART.width[i]}">${fmt(SIZE_CHART.width[i])}</td><td data-in="${SIZE_CHART.length[i]}">${fmt(SIZE_CHART.length[i])}</td></tr>`;
+          }).join("")}</tbody>
+        </table>
+        <ul class="sg-how">
+          <li><strong>A, chest width:</strong> straight across, just under the armpits.</li>
+          <li><strong>B, length:</strong> from the top of the shoulder to the hem.</li>
+          <li>Compare with a tee you already like. Between sizes? Go one up for a looser fit.</li>
+        </ul>
+        <a class="sg-more" href="#/size-guide">Full size guide</a>
+      </div>`;
+    root.appendChild(wrap);
+    const sheet = wrap.querySelector(".sg-sheet");
+    const prevFocus = opener || document.activeElement;
+    const release = AW.ui && AW.ui.trapFocus ? AW.ui.trapFocus(sheet) : null;
+    if (AW.ui && AW.ui.lockScroll) AW.ui.lockScroll(true);
+    void wrap.offsetWidth;            // commit the closed state, then slide in
+    wrap.classList.add("is-open");
+    const close = () => {
+      document.removeEventListener("keydown", onKey);
+      wrap.classList.remove("is-open");
+      if (typeof release === "function") release();
+      if (AW.ui && AW.ui.lockScroll) AW.ui.lockScroll(false);
+      setTimeout(() => wrap.remove(), reduced() ? 0 : 260);
+    };
+    const onKey = e => { if (e.key === "Escape") { close(); prevFocus && prevFocus.focus && prevFocus.focus(); } };
+    document.addEventListener("keydown", onKey);
+    wrap.addEventListener("click", e => {
+      if (e.target.closest("[data-close]")) { close(); prevFocus && prevFocus.focus && prevFocus.focus(); return; }
+      const u = e.target.closest("[data-unit]");
+      if (u) {
+        guideUnit = u.dataset.unit;
+        try { localStorage.setItem("aw-size-unit", guideUnit); } catch {}
+        wrap.querySelectorAll("[data-unit]").forEach(b => b.setAttribute("aria-pressed", String(b === u)));
+        wrap.querySelectorAll("td[data-in]").forEach(td => { td.textContent = fmt(Number(td.dataset.in)); });
+        return;
+      }
+      const pk = e.target.closest(".sg-pick");
+      if (pk) { close(); onPick(pk.dataset.size); return; }
+      if (e.target.closest(".sg-more")) close();
+    });
+    setTimeout(() => { const f = wrap.querySelector(".sg-x"); f && f.focus(); }, 30);
   }
 
   function bindStage() {
