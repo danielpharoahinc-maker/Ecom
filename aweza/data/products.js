@@ -19,15 +19,16 @@ AW.collections = [
 (() => {
   const img = (slug, names) => names.map(n => `images/${slug}/${n}.jpg`);
   const STD = ["S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
-  // Every tee opens on the hand-on-hip model (male-front-5), then the strongest other poses. Flat shots after.
-  const BACK_FIRST = ["male-front-5", "male-back-3", "male-duo", "back", "male-duo-2", "front", "collar"];
-  const FRONT_FIRST = ["male-front-5", "male-duo-2", "male-front-3", "front", "male-back-3", "back", "collar"];
+  // One model across the whole store: the hand-on-hip model (male-front-5). Then the flat shots,
+  // which carry the back prints (Printify has no back view of this model).
+  const BACK_FIRST = ["male-front-5", "back", "front", "collar", "folded"];
+  const FRONT_FIRST = ["male-front-5", "front", "back", "collar", "folded"];
 
   AW.products = [
     {
       id: "signature-lips", name: "Signature Lips Tee", collection: "signature", price: 749,
       colourName: "White", badge: "Signature", sizes: STD, fit: "Heavyweight cotton, classic fit",
-      images: img("signature-lips", [...BACK_FIRST, "male-sleeve"]),
+      images: img("signature-lips", BACK_FIRST),
       summary: "The one that started it. Big red lips with AWEZA on the teeth across the back, a small wordmark on the chest and a flag on the sleeve.",
     },
     {
