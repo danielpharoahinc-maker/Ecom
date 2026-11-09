@@ -46,7 +46,7 @@
   };
 
   /* Real-faces rule (DIRECTION section 6): these cards lead with the side that does not carry the face. */
-  const FACE_SAFE = { "need-a-hug": "back", "sweet-cupcake": "front" };
+  const FACE_SAFE = {}; // owner asked for the hand-on-hip model (first photo) on every tee
   ui.cardImages = p => {
     const imgs = imagesOf(p);
     const safe = p && FACE_SAFE[p.id];
