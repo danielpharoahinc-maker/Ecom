@@ -162,19 +162,19 @@
     const scene = new T.Scene();
     const camera = new T.PerspectiveCamera(26, 1, 0.1, 100);
     camera.position.set(0, 0, 10);
-    scene.add(new T.HemisphereLight(0xffffff, 0x8c8c8c, 0.62));
+    scene.add(new T.HemisphereLight(0xe6f0fb, 0x5b6f8a, 0.66));
     const key = new T.DirectionalLight(0xffffff, 0.95); key.position.set(-3, 4, 4); scene.add(key);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
     key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02; key.shadow.radius = 4;
     scene.add(key.target);
     // a white wall just behind the rail that only shows the shirts' soft shadows
-    const wall = new T.Mesh(new T.PlaneGeometry(80, 40), new T.ShadowMaterial({ opacity: 0.13 }));
+    const wall = new T.Mesh(new T.PlaneGeometry(80, 40), new T.ShadowMaterial({ color: 0x0f1b2d, opacity: 0.16 }));
     wall.position.z = -0.75; wall.receiveShadow = true; scene.add(wall);
     const fill = new T.DirectionalLight(0xffffff, 0.22); fill.position.set(4, -1, 3); scene.add(fill);
     const rim = new T.DirectionalLight(0xffffff, 0.4); rim.position.set(2, 2, -5); scene.add(rim);
 
-    const metal = new T.MeshStandardMaterial({ color: 0xa7a7a7, metalness: 0.55, roughness: 0.32 });
+    const metal = new T.MeshStandardMaterial({ color: 0xaab6c4, metalness: 0.6, roughness: 0.3 });
     const wood = new T.MeshStandardMaterial({ color: 0xc9a273, roughness: 0.55 });
     const rail = new T.Mesh(new T.CylinderGeometry(0.028, 0.028, 60, 20), metal);
     rail.rotation.z = Math.PI / 2;

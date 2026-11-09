@@ -71,6 +71,7 @@
   function railMarkup(list) {
     return `
       <section class="rail" aria-label="The rail. ${list.length} tees">
+        <p class="rail-tag">Time of your life.</p>
         <p class="rail-hint" id="rail-hint">Run your finger along the rail. Tap a shirt to see it.</p>
         <div class="rail-stage" role="listbox" aria-label="Tees" aria-describedby="rail-hint" tabindex="0">
           <div class="rail-bar" aria-hidden="true"></div>
