@@ -73,6 +73,14 @@
       <section class="rail" aria-label="The rail. ${list.length} tees">
         <p class="rail-tag">Time of your life.</p>
         <p class="rail-hint" id="rail-hint">Run your finger along the rail. Tap a shirt to see it.</p>
+        <div class="rail-focusbar" hidden>
+          <button type="button" class="rf-back">All tees</button>
+          <span class="rf-name" aria-live="polite"></span>
+          <span class="rf-steps">
+            <button type="button" class="rf-step" data-step="-1" aria-label="Previous tee">&#8249;</button>
+            <button type="button" class="rf-step" data-step="1" aria-label="Next tee">&#8250;</button>
+          </span>
+        </div>
         <div class="rail-stage" role="listbox" aria-label="Tees" aria-describedby="rail-hint" tabindex="0">
           <div class="rail-bar" aria-hidden="true"></div>
           ${list.map((p, i) => `
@@ -82,14 +90,17 @@
                 ${i < 4 ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">
             </button>`).join("")}
         </div>
+        <p class="rail-spinhint" aria-hidden="true">Drag sideways to turn it</p>
         <div class="rail-dots" aria-hidden="true">${list.map(() => "<span></span>").join("")}</div>
       </section>
       <section class="pick" aria-live="polite"></section>`;
   }
 
   function dims() {
-    const vw = innerWidth;
-    const w = vw < 600 ? Math.min(vw * 0.64, 280) : Math.min(vw * 0.26, 360); // open shirt width
+    const vw = innerWidth, focused = st && st.sel != null;
+    const w = focused
+      ? (vw < 600 ? Math.min(vw * 0.98, 440) : Math.min(vw * 0.42, 600))          // the tapped shirt takes the stage
+      : (vw < 600 ? Math.min(vw * 0.64, 280) : Math.min(vw * 0.26, 360));          // open shirt width on the rail
     const gap = vw < 600 ? 30 : Math.min(58, vw / 22);                        // spacing of sideways shirts
     return { w, gap };
   }
@@ -112,7 +123,7 @@
         ang = d < 0 ? A : -A;
         z = 100 - Math.abs(d) * 4;
         if (d === 0) { ang = A * (1 - o) * (st.side || 1); s = 0.94 + o * 0.06; z = 200; }
-        else x += Math.sign(d) * (o * w * 0.5 + (o ? 10 : 0));
+        else x += Math.sign(d) * (o * w * 0.5 + (o ? 10 : 0) + (st.sel != null ? 70 + Math.abs(d) * 18 : 0));
       }
       items.push({ x, ang, s });
       el.style.setProperty("--x", x.toFixed(1) + "px");
@@ -124,7 +135,29 @@
       el.setAttribute("aria-selected", st.sel === i ? "true" : "false");
     });
     st.dots.forEach((d, i) => d.classList.toggle("is-on", i === c));
+    st.root.querySelector(".rail").style.setProperty("--rl-fw", w.toFixed(0) + "px");   // focus mode sizes the stage to the shirt
     AW.emit("rail:layout", { items, sel: st.sel, focus: st.focus, w });
+  }
+
+  function setFocusUI() {
+    const rail = st.root.querySelector(".rail");
+    rail.classList.toggle("rail--focus", st.sel != null);
+    const bar = st.root.querySelector(".rail-focusbar");
+    if (bar) {
+      bar.hidden = st.sel == null;
+      if (st.sel != null) {
+        bar.querySelector(".rf-name").textContent = st.list[st.sel].name;
+        bar.querySelector('[data-step="-1"]').disabled = st.sel === 0;
+        bar.querySelector('[data-step="1"]').disabled = st.sel === st.n - 1;
+      }
+    }
+  }
+
+  function unselect() {
+    if (!st || st.sel == null) return;
+    st.sel = null; st.focus = null;
+    layout(); setFocusUI();
+    st.root.querySelector(".pick").innerHTML = "";
   }
 
   function select(i, opts = {}) {
@@ -132,7 +165,7 @@
     i = Math.max(0, Math.min(st.n - 1, i));
     st.side = st.sel != null && i < st.sel ? -1 : 1;
     st.sel = i; st.focus = null;
-    layout();
+    layout(); setFocusUI();
     renderPick(st.list[i], opts);
     st.stage.setAttribute("aria-activedescendant", "");
     if (opts.scroll) AW.motion.scrollTo(st.root.querySelector(".pick"));
@@ -286,13 +319,26 @@
       return clientX < r.left || clientX > r.right ? null : best;
     };
     let down = null;
+    const turnRange = () => Math.max(420, stage.clientWidth * 1.5);   // about one and a half stage widths of dragging = one full turn
     stage.addEventListener("pointerdown", e => {
-      down = { x: e.clientX, y: e.clientY, t: Date.now(), moved: false, id: e.pointerId };
+      down = { x: e.clientX, y: e.clientY, t: Date.now(), moved: false, id: e.pointerId, lastX: e.clientX, lastT: performance.now(), v: 0, spinning: false };
+      if (st.sel != null) AW.emit("rail:spin", { phase: "start" });
       if (st.sel == null && e.pointerType !== "mouse") { st.focus = idxAt(e.clientX); layout(); }
     });
     stage.addEventListener("pointermove", e => {
       if (down && Math.abs(e.clientX - down.x) > 8) down.moved = true;
-      if (st.sel != null) return;                       // when a shirt is open, horizontal moves are swipes
+      if (st.sel != null) {
+        if (!down) return;
+        const dx = e.clientX - down.x, dy = e.clientY - down.y;
+        if (!down.spinning && Math.abs(dx) > 6 && Math.abs(dx) > Math.abs(dy)) down.spinning = true;
+        if (down.spinning) {
+          const now = performance.now(), dtm = Math.max(1, now - down.lastT);
+          down.v = 0.7 * down.v + 0.3 * ((e.clientX - down.lastX) / dtm);   // px per ms, smoothed
+          down.lastX = e.clientX; down.lastT = now;
+          AW.emit("rail:spin", { phase: "move", angle: dx / turnRange() * Math.PI * 2 });
+        }
+        return;
+      }
       if (e.pointerType === "mouse" || down) {
         const i = idxAt(e.clientX);
         if (i !== st.focus) { st.focus = i; layout(); }
@@ -301,8 +347,12 @@
     const end = e => {
       if (!down) return;
       const dx = e.clientX - down.x, dy = e.clientY - down.y, quick = Date.now() - down.t < 600;
-      const wasMoved = down.moved; down = null;
-      if (st.sel != null && Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2) { select(st.sel + (dx < 0 ? 1 : -1)); return; }
+      const wasMoved = down.moved, spun = down.spinning, flick = down.v; down = null;
+      if (st.sel != null) {   // let go of a turn: it carries on a little with the speed of the swipe
+        // px/ms -> radians per second, so a quick flick keeps turning and a slow drag just stops
+        AW.emit("rail:spin", { phase: "end", velocity: spun ? flick / turnRange() * Math.PI * 2 * 1000 : 0 });
+        return;
+      }
       if (st.sel == null && wasMoved) { const i = st.focus != null ? st.focus : idxAt(e.clientX); if (i != null) select(i); return; }
       if (!wasMoved && quick) {
         const t = e.target.closest(".rail-tee");
@@ -311,10 +361,15 @@
       }
     };
     stage.addEventListener("pointerup", end);
-    stage.addEventListener("pointercancel", () => { down = null; if (st.sel == null) { st.focus = null; layout(); } });
+    stage.addEventListener("pointercancel", () => { down = null; if (st.sel != null) AW.emit("rail:spin", { phase: "end", velocity: 0 }); else { st.focus = null; layout(); } });
     stage.addEventListener("pointerleave", e => { if (e.pointerType === "mouse" && st.sel == null) { st.focus = null; layout(); } });
     stage.addEventListener("click", e => e.preventDefault()); // selection happens on pointerup
+    const bar = st.root.querySelector(".rail-focusbar");
+    bar.querySelector(".rf-back").addEventListener("click", unselect);
+    bar.querySelectorAll(".rf-step").forEach(b => b.addEventListener("click", () => select(st.sel + Number(b.dataset.step))));
     stage.addEventListener("keydown", e => {
+      if (e.key === "Escape" && st.sel != null) { e.preventDefault(); unselect(); return; }
+      if (st.sel != null && (e.key === "a" || e.key === "d")) { AW.emit("rail:spin", { phase: "nudge", angle: (e.key === "d" ? 1 : -1) * Math.PI / 8 }); return; }
       const cur = st.sel != null ? st.sel : st.focus != null ? st.focus : -1;
       if (e.key === "ArrowRight") { e.preventDefault(); select(cur + 1); }
       else if (e.key === "ArrowLeft") { e.preventDefault(); select(cur < 0 ? 0 : cur - 1); }
