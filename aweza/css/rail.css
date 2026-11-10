@@ -280,3 +280,19 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 }
 .rail--focus .rail-spinhint { opacity: 1; max-height: 24px; }
 @media (prefers-reduced-motion: reduce) { .rail-stage.is-3d, .rail .rail-tag, .rail .rail-hint, .rail-spinhint { transition: none; } }
+
+/* ---------- bag and checkout: black text, red for what matters ----------
+   The site frame is pale blue, but money and forms should read clearly: plain black ink,
+   neutral greys, and strong red for the total, the pay button and errors. */
+.co, .co-result, .bag-panel {
+  --c-ink: #0a0a0a; --c-fg: #0a0a0a; --c-muted: #3d3d3d; --c-line: #d4d4d4;
+  --c-g200: #dcdcdc; --c-g300: #bdbdbd; --c-red: #d7191f; --c-focus: #0a0a0a;
+  color: #0a0a0a;
+}
+.co .btn--primary, .co-result .btn--primary, .bag-panel .btn--primary { --btn-bg: #d7191f; --btn-fg: #ffffff; --btn-bd: #d7191f; }
+.co .btn--primary:hover, .co-result .btn--primary:hover, .bag-panel .btn--primary:hover { --btn-bg: #a90f14; --btn-bd: #a90f14; }
+.co-title em, .co-result-title em, .co-signoff { color: #d7191f; }
+.co-trow--total dd { color: #d7191f; }
+.co-err, .co .is-invalid .co-err { color: #d7191f; font-weight: 600; }
+.co .is-invalid input, .co .is-invalid select, .co .is-invalid textarea { box-shadow: inset 0 -2px 0 #d7191f; }
+.co input::placeholder, .co textarea::placeholder { color: #8a8a8a; }
