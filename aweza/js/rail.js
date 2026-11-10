@@ -50,7 +50,7 @@
       <footer class="mf">
         ${c.deals ? `<p class="mf-deal"><b>${AW.dealLabel()}</b> <span>Mix any tees and sizes.</span></p>` : ""}
         <div class="mf-facts">
-          <p><strong>Delivery</strong> ${AW.rand(c.delivery)} anywhere in South Africa. Free over ${AW.rand(c.freeDeliveryOver)}.</p>
+          <p><strong>Delivery</strong> ${AW.rand(c.delivery)} anywhere in South Africa. Free over ${AW.rand(c.freeDeliveryOver)}. Estimated delivery ${AW.eta().text}.</p>
           <p><strong>Printed to order</strong> Every tee is printed when you buy it, so nothing sits in a warehouse.</p>
           <p><strong>Payment</strong> Card, Apple Pay or Google Pay through a secure checkout. Prices in Rand.</p>
           ${c.referral ? `<div class="mf-ref"><p><strong>Give ${AW.rand(c.referral.amount)}, get ${AW.rand(c.referral.amount)}</strong> Send a friend your link. They get ${AW.rand(c.referral.amount)} off their order. When they buy, message us your code <b>${AW.esc(AW.referral.mine())}</b> and ${AW.rand(c.referral.amount)} comes off your next tee.</p><button type="button" class="mf-ref-btn" data-ref-share>Copy my link</button></div>` : ""}
@@ -205,6 +205,7 @@
         </fieldset>
         <button type="button" class="pick-add">Add to bag</button>
         ${AW.rail3d && AW.rail3d.active ? `<button type="button" class="pick-turn" aria-pressed="false">Turn it around</button>` : ""}
+        <p class="pick-eta"><b>Estimated delivery: ${AW.eta().text}</b><span>Printed to order, then shipped to your door.${AW.eta().peak ? " Includes extra days for the festive rush." : ""}</span></p>
         <p class="pick-perk">${p.noDeal ? "Premium print, not in the multi-buy." : AW.config.deals ? `<b>${AW.dealLabel()}</b> on any tees. Mix designs and sizes.` : ""}${AW.drop() ? ` <span>${AW.esc(AW.drop().name)} closes ${AW.esc(AW.drop().label)}.</span>` : ""}</p>
         <div class="pick-photos" aria-label="Photos of the ${esc(p.name)}">
           ${photos.map((src, k) => `<img src="${esc(src)}" alt="${esc((AW.ui && AW.ui.altFor) ? AW.ui.altFor(p, src) : p.name)}" width="1000" height="1000" loading="${k < 2 ? "eager" : "lazy"}" decoding="async">`).join("")}

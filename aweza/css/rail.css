@@ -352,3 +352,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .co-wallets[data-wallet="google"] .co-wallet-marks li:nth-child(2) { background: #0a0a0a; color: #fff; }
 .co-wallet-line { margin: 0; font-size: 13px; line-height: 1.5; color: #0a0a0a; }
 .pick-count { margin: 10px 0 14px; text-align: center; font-size: 14px; font-weight: 600; color: var(--rl-on); font-variant-numeric: tabular-nums; }
+
+/* delivery estimate */
+.pick-eta { margin: 14px 0 0; font-size: 14px; line-height: 1.45; color: #0a0a0a; }
+.pick-eta b { display: block; font-weight: 700; }
+.pick-eta span { display: block; font-size: 13px; color: var(--rl-ice); }
+.co-trow.co-eta, .co-trow.co-eta dd, .bag-sum-row.bag-eta, .bag-sum-row.bag-eta dd { font-size: 13px; color: #3d3d3d; }

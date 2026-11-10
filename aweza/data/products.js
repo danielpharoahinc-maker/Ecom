@@ -13,6 +13,15 @@ AW.config = {
   // Refer a friend: a link with ?ref=CODE gives the friend this much off an order of at least minSubtotal.
   // The referrer's own reward is given by hand for now: orders carry the code, so you can see who sent whom.
   referral: { amount: 50, minSubtotal: 450 },
+  // Delivery estimate shown to customers: working days from order to the door (printing plus shipping from the US).
+  // Printify's own published range is wider (production 2 to 7 days, international standard shipping 10 to 30), so
+  // this is where most orders should land. Tighten or widen it once real orders show how long they take.
+  // Peak season (Printify warns of slower production around holidays) adds extra working days between from and to (MM-DD).
+  shipping: {
+    days: [12, 20],
+    peak: { from: "11-15", to: "01-10", extra: 5 },
+    holidays: ["2026-12-16", "2026-12-25", "2026-12-26", "2027-01-01"],   // South African public holidays that stop couriers
+  },
   // Limited drop: the server stops taking orders after this date (end of day, South African time).
   drop: { name: "Drop 01", ends: "2026-12-31", label: "31 Dec" },
 };

@@ -342,7 +342,7 @@
           <div class="pg-fig"><span class="pg-big">${freeOver}</span><span class="pg-fig-l">Spend this and delivery is free</span></div>
           <div class="pg-fig"><span class="pg-big pg-big--ph">[X–Y]</span><span class="pg-fig-l">Working days, door to door</span></div>
         </div>
-        <p>Every tee is printed after you order, then shipped to you anywhere in South Africa. Allow ${ph("X–Y")} working days from order to delivery. You'll get a tracking link by email when it ships.</p>` },
+        <p>Every tee is printed after you order, then shipped to you anywhere in South Africa. Allow about ${AW.eta().days[0]} to ${AW.eta().days[1]} working days from order to delivery (today that means ${AW.eta().text}). Around the festive season it can run a little longer. You'll get a tracking link by email when it ships.</p>` },
       { id: "payments", title: "Payments", html: `
         <p>Card payments are processed securely by our payment provider, Yoco. We never see or store your card number. Prices are in Rand ${ph("and include VAT, if registered")}.</p>
         <p class="pg-note">Payments are launching soon. Your bag is saved on this device until then.</p>` },
@@ -354,7 +354,7 @@
         ["I'm between sizes. Now what?", `<p>Size up for a relaxed fit. Size down if you like it close.</p>`],
         ["Why do bigger sizes cost more?", up ? `<p>Sizes ${esc(up.from)} and up use more fabric, so they cost ${R(up.min)}${up.max !== up.min ? " to " + R(up.max) : ""} more. The price updates when you pick a size.</p>` : `<p>They don't. One price for every size.</p>`],
         ["How do I wash it?", `<p>Cold wash, inside out. No bleach, no hot tumble dry. Iron inside out and never on the print. That's how the print stays sharp.</p>`],
-        ["Where's my order?", `<p>Your tracking link arrives by email when your tee ships. No link after ${ph("X")} working days? Email ${ph("Email")} with your order number.</p>`],
+        ["Where's my order?", `<p>Your tracking link arrives by email when your tee ships. No link after 10 working days? Email ${ph("Email")} with your order number.</p>`],
         ["Can I change or cancel my order?", `<p>Yes, if it hasn't gone to print. Email us within ${ph("X hours")} of ordering. Once it's printed, it's yours.</p>`],
         ["Do you deliver outside South Africa?", `<p>Not yet. South Africa only for now. ${ph("Owner to update when international shipping opens")}.</p>`],
         ["Can I send a tee as a gift?", `<p>Yes. Put their name and address at checkout and add a note for the courier. Gift wrapping isn't available yet.</p>`],
@@ -460,7 +460,7 @@
         "If a price is clearly wrong, we'll tell you and you can cancel for a full refund.",
       ]) },
       { id: "payment", title: "Payment", html: `<p>Card payments are processed by our payment provider, Yoco, over a secure connection. We don't receive or store your full card details. Payment is taken when you place your order.</p>` },
-      { id: "delivery", title: "Delivery", html: `<p>We deliver within South Africa only. Delivery costs ${delivery} and is free on orders of ${freeOver} or more. Tees are printed to order, so allow ${ph("X–Y")} working days. Delivery dates are estimates. Ownership and risk pass to you on delivery.</p>` },
+      { id: "delivery", title: "Delivery", html: `<p>We deliver within South Africa only. Delivery costs ${delivery} and is free on orders of ${freeOver} or more. Tees are printed to order, so allow about ${AW.eta().days[0]} to ${AW.eta().days[1]} working days. Delivery dates are estimates, not promises. Ownership and risk pass to you on delivery.</p>` },
       { id: "returns", title: "Returns and refunds", html: `<p>See our <a href="#/returns">returns policy</a>. Your rights under the Consumer Protection Act and the ECT Act are not affected.</p>` },
       { id: "ip", title: "Our designs", html: `<p>The AWEZA name, the lips and every print on this site belong to ${ph("Registered business name")}. Buying a tee doesn't give you the right to copy or sell the designs.</p>` },
       { id: "liability", title: "Liability", html: `<p>As far as the law allows, we aren't liable for indirect or consequential loss. Nothing here limits liability that the Consumer Protection Act says we can't limit. ${ph("Attorney to review this clause")}.</p>` },

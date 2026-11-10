@@ -67,6 +67,24 @@
     mine: () => mine,
     link: () => location.origin + location.pathname + "?ref=" + mine,
   };
+  /* Delivery estimate: a window of working days from today (weekends and listed public holidays skipped).
+     AW.eta(date?) -> { from: Date, to: Date, text: "Wed 26 Nov to Fri 12 Dec", days: [lo, hi], peak: bool } */
+  const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const ymd = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const addWorkingDays = (start, n, holidays) => {
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    while (n > 0) { d.setDate(d.getDate() + 1); if (d.getDay() !== 0 && d.getDay() !== 6 && !holidays.includes(ymd(d))) n--; }
+    return d;
+  };
+  AW.eta = (date = new Date()) => {
+    const c = AW.config.shipping || { days: [12, 20] };
+    const md = String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+    const pk = c.peak, peak = !!pk && (pk.from <= pk.to ? md >= pk.from && md <= pk.to : md >= pk.from || md <= pk.to);
+    const extra = peak ? pk.extra : 0, lo = c.days[0] + extra, hi = c.days[1] + extra, hol = c.holidays || [];
+    const from = addWorkingDays(date, lo, hol), to = addWorkingDays(date, hi, hol);
+    const fmt = d => DAYS[d.getDay()] + " " + d.getDate() + " " + MONTHS[d.getMonth()];
+    return { from, to, days: [lo, hi], peak, text: fmt(from) + " to " + fmt(to) };
+  };
   AW.drop = () => {
     const d = AW.config.drop; if (!d) return null;
     return { name: d.name, label: d.label, closed: Date.parse(d.ends + "T23:59:59+02:00") < Date.now() };

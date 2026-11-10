@@ -227,7 +227,7 @@
               </details>
               <details class="accordion pdp-acc">
                 <summary>Delivery</summary>
-                <div class="accordion-body pdp-acc-body"><p>Flat ${rand(conf.delivery || 179)} anywhere in South Africa. Free over ${rand(conf.freeDeliveryOver || 2000)}. Each tee is printed when you order it, so give it a few extra days.</p><p><a class="pdp-link" href="#/help">Delivery and FAQ</a></p></div>
+                <div class="accordion-body pdp-acc-body"><p>Flat ${rand(conf.delivery || 179)} anywhere in South Africa. Free over ${rand(conf.freeDeliveryOver || 2000)}. Each tee is printed when you order it. Estimated delivery: ${AW.eta().text}.</p><p><a class="pdp-link" href="#/help">Delivery and FAQ</a></p></div>
               </details>
               <details class="accordion pdp-acc">
                 <summary>Returns</summary>

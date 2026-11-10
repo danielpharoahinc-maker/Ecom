@@ -224,6 +224,7 @@
         ${AW.cart.discount() ? `<div class="bag-sum-row is-deal"><dt>Multi-buy deal</dt><dd>-${esc(rand(AW.cart.discount()))}</dd></div>` : ""}
         ${AW.cart.referral() ? `<div class="bag-sum-row is-deal"><dt>Friend's gift</dt><dd>-${esc(rand(AW.cart.referral()))}</dd></div>` : ""}
         <div class="bag-sum-row"><dt>Delivery</dt><dd>${d ? esc(rand(d)) : "Free"}</dd></div>
+        <div class="bag-sum-row bag-eta"><dt>Estimated arrival</dt><dd>${esc(AW.eta().text)}</dd></div>
         <div class="bag-sum-row bag-sum-total"><dt>Total</dt><dd>${esc(rand(AW.cart.total()))}</dd></div>
       </dl>
       ${btn("Checkout", { href: "#/checkout", block: true, size: "lg", iconAfter: "arrow-right", cls: "bag-checkout", attrs: 'data-fk="checkout"' })}
@@ -473,6 +474,7 @@
         ${AW.cart.referral() ? `<div class="co-trow is-deal"><dt>Friend's gift</dt><dd>-${esc(rand(AW.cart.referral()))}</dd></div>` : ""}
         ${AW.cart.nudge() ? `<p class="co-nudge">${esc(AW.cart.nudge())} (${esc(AW.dealLabel())})</p>` : ""}
         <div class="co-trow"><dt>Delivery</dt><dd>${d ? esc(rand(d)) : "Free"}</dd></div>
+        <div class="co-trow co-eta"><dt>Estimated arrival</dt><dd>${esc(AW.eta().text)}</dd></div>
         ${s.done ? "" : `<p class="co-nudge">Add ${esc(rand(s.over - s.sub))} more for free delivery.</p>`}
         <div class="co-trow co-trow--total"><dt>Total</dt><dd>${esc(rand(AW.cart.total()))}</dd></div>
       </dl>
@@ -712,10 +714,10 @@
     success: {
       fig: "Order confirmed",
       title: "Paid. Good <em>decision.</em>",
-      lede: "Your order is in. We print it fresh, so give it a few working days. A confirmation is on its way to your inbox.",
+      lede: `Your order is in. We print it fresh and ship it to your door. Estimated arrival: ${AW.eta().text}. A confirmation is on its way to your inbox.`,
       steps: [
         ["Printed to order", "Your tee gets printed now, just for you. No warehouse of leftovers."],
-        ["On its way", "Delivered across South Africa in [X–Y working days]."],
+        ["On its way", `Delivered across South Africa in ${AW.eta().days[0]} to ${AW.eta().days[1]} working days. Estimated arrival: ${AW.eta().text}.`],
         ["Check your inbox", "Your confirmation is there now. Tracking follows when it ships."],
       ],
       actions: btn("Back to the shop", { href: "#/shop", size: "lg", iconAfter: "arrow-right" }),
