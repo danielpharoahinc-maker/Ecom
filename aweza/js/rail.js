@@ -209,10 +209,11 @@
         <div class="pick-photos" aria-label="Photos of the ${esc(p.name)}">
           ${photos.map((src, k) => `<img src="${esc(src)}" alt="${esc((AW.ui && AW.ui.altFor) ? AW.ui.altFor(p, src) : p.name)}" width="1000" height="1000" loading="${k < 2 ? "eager" : "lazy"}" decoding="async">`).join("")}
         </div>
+        ${photos.length > 1 ? `<p class="pick-count" role="status" aria-live="polite"><span data-photo-n>1</span> of ${photos.length}</p>` : ""}
         <p class="pick-step">
-          <button type="button" class="pick-nav" data-step="-1" ${st.sel === 0 ? "disabled" : ""}>Previous</button>
-          <span>${st.sel + 1} of ${st.n}</span>
-          <button type="button" class="pick-nav" data-step="1" ${st.sel === st.n - 1 ? "disabled" : ""}>Next</button>
+          <button type="button" class="pick-nav" data-step="-1" ${st.sel === 0 ? "disabled" : ""}>Previous tee</button>
+          <span>Tee ${st.sel + 1} of ${st.n}</span>
+          <button type="button" class="pick-nav" data-step="1" ${st.sel === st.n - 1 ? "disabled" : ""}>Next tee</button>
         </p>
       </div>`;
     let size = null;
@@ -227,6 +228,19 @@
     box.querySelectorAll(".pick-size").forEach(b => b.addEventListener("click", () => choose(b.dataset.size)));
     const guideBtn = box.querySelector(".pick-guide");
     guideBtn.addEventListener("click", () => openSizeGuide(p, size, s => { choose(s); box.querySelector(`.pick-size[data-size="${s}"]`).focus(); }, guideBtn));
+    // Photo counter: 1 of 3, 2 of 3, 3 of 3 as the pictures are swiped.
+    const strip = box.querySelector(".pick-photos"), countN = box.querySelector("[data-photo-n]");
+    if (strip && countN) {
+      const imgs = [...strip.querySelectorAll("img")];
+      const update = () => {
+        const atEnd = strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 4;
+        const step = imgs.length > 1 ? imgs[1].offsetLeft - imgs[0].offsetLeft : 1;
+        const i = atEnd ? imgs.length - 1 : Math.max(0, Math.min(imgs.length - 1, Math.round(strip.scrollLeft / (step || 1))));
+        countN.textContent = String(i + 1);
+      };
+      strip.addEventListener("scroll", update, { passive: true });
+      update();
+    }
     box.querySelector(".pick-add").addEventListener("click", () => {
       if (!size) { note.textContent = "Pick a size first."; box.querySelector(".pick-size").focus(); return; }
       AW.cart.add(p.id, size);

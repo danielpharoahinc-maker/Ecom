@@ -351,3 +351,4 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .co-wallets[data-wallet="apple"] .co-wallet-marks li:nth-child(1),
 .co-wallets[data-wallet="google"] .co-wallet-marks li:nth-child(2) { background: #0a0a0a; color: #fff; }
 .co-wallet-line { margin: 0; font-size: 13px; line-height: 1.5; color: #0a0a0a; }
+.pick-count { margin: 10px 0 14px; text-align: center; font-size: 14px; font-weight: 600; color: var(--rl-on); font-variant-numeric: tabular-nums; }
