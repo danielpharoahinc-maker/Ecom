@@ -205,7 +205,6 @@
         </fieldset>
         <button type="button" class="pick-add">Add to bag</button>
         ${AW.rail3d && AW.rail3d.active ? `<button type="button" class="pick-turn" aria-pressed="false">Turn it around</button>` : ""}
-        <p class="pick-eta"><b>Estimated delivery: ${AW.eta().text}</b><span>Printed to order, then shipped to your door.${AW.eta().peak ? " Includes extra days for the festive rush." : ""}</span></p>
         <p class="pick-perk">${p.noDeal ? "Premium print, not in the multi-buy." : AW.config.deals ? `<b>${AW.dealLabel()}</b> on any tees. Mix designs and sizes.` : ""}${AW.drop() ? ` <span>${AW.esc(AW.drop().name)} closes ${AW.esc(AW.drop().label)}.</span>` : ""}</p>
         <div class="pick-photos" aria-label="Photos of the ${esc(p.name)}">
           ${photos.map((src, k) => `<img src="${esc(src)}" alt="${esc((AW.ui && AW.ui.altFor) ? AW.ui.altFor(p, src) : p.name)}" width="1000" height="1000" loading="${k < 2 ? "eager" : "lazy"}" decoding="async">`).join("")}
