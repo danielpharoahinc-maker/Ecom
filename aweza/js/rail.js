@@ -86,10 +86,6 @@
         <div class="rail-focusbar" hidden>
           <button type="button" class="rf-back">All tees</button>
           <span class="rf-name" aria-live="polite"></span>
-          <span class="rf-steps">
-            <button type="button" class="rf-step" data-step="-1" aria-label="Previous tee">&#8249;</button>
-            <button type="button" class="rf-step" data-step="1" aria-label="Next tee">&#8250;</button>
-          </span>
         </div>
         <div class="rail-stage" role="listbox" aria-label="Tees" aria-describedby="rail-hint" tabindex="0">
           <div class="rail-bar" aria-hidden="true"></div>
@@ -100,7 +96,11 @@
                 ${i < 4 ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">
             </button>`).join("")}
         </div>
-        <p class="rail-spinhint" aria-hidden="true">Drag sideways to turn it</p>
+        <div class="rail-steps">
+          <button type="button" class="rf-step" data-step="-1" aria-label="Previous tee">&#8249;</button>
+          <p class="rail-spinhint" aria-hidden="true">Drag sideways to turn it</p>
+          <button type="button" class="rf-step" data-step="1" aria-label="Next tee">&#8250;</button>
+        </div>
         <div class="rail-dots" aria-hidden="true">${list.map(() => "<span></span>").join("")}</div>
       </section>
       <section class="pick" aria-live="polite"></section>`;
@@ -109,7 +109,7 @@
   function dims() {
     const vw = innerWidth, focused = st && st.sel != null;
     const w = focused
-      ? (vw < 600 ? Math.min(vw * 0.98, 440) : Math.min(vw * 0.42, 600))          // the tapped shirt takes the stage
+      ? Math.max(240, Math.min(vw < 600 ? Math.min(vw * 0.98, 440) : Math.min(vw * 0.42, 600), (innerHeight - 310) / 1.12))   // the tapped shirt takes the stage, but leaves room for the arrows under it
       : (vw < 600 ? Math.min(vw * 0.64, 280) : Math.min(vw * 0.26, 360));          // open shirt width on the rail
     const gap = vw < 600 ? 30 : Math.min(58, vw / 22);                        // spacing of sideways shirts
     return { w, gap };
@@ -152,13 +152,13 @@
   function setFocusUI() {
     const rail = st.root.querySelector(".rail");
     rail.classList.toggle("rail--focus", st.sel != null);
-    const bar = st.root.querySelector(".rail-focusbar");
+    const bar = st.root.querySelector(".rail-focusbar"), steps = st.root.querySelector(".rail-steps");
     if (bar) {
       bar.hidden = st.sel == null;
       if (st.sel != null) {
         bar.querySelector(".rf-name").textContent = st.list[st.sel].name;
-        bar.querySelector('[data-step="-1"]').disabled = st.sel === 0;
-        bar.querySelector('[data-step="1"]').disabled = st.sel === st.n - 1;
+        steps.querySelector('[data-step="-1"]').disabled = st.sel === 0;
+        steps.querySelector('[data-step="1"]').disabled = st.sel === st.n - 1;
       }
     }
   }
@@ -380,7 +380,7 @@
     stage.addEventListener("click", e => e.preventDefault()); // selection happens on pointerup
     const bar = st.root.querySelector(".rail-focusbar");
     bar.querySelector(".rf-back").addEventListener("click", unselect);
-    bar.querySelectorAll(".rf-step").forEach(b => b.addEventListener("click", () => select(st.sel + Number(b.dataset.step))));
+    st.root.querySelectorAll(".rf-step").forEach(b => b.addEventListener("click", () => select(st.sel + Number(b.dataset.step))));
     stage.addEventListener("keydown", e => {
       if (e.key === "Escape" && st.sel != null) { e.preventDefault(); unselect(); return; }
       if (st.sel != null && (e.key === "a" || e.key === "d")) { AW.emit("rail:spin", { phase: "nudge", angle: (e.key === "d" ? 1 : -1) * Math.PI / 8 }); return; }
