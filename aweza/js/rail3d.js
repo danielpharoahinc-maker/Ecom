@@ -151,6 +151,8 @@
                vel: { x: 0, ry: 0, s: 0 }, swing: 0, swingV: 0, lift: 0, liftV: 0, seed: i * 1.7 };
     });
 
+    let pending = tees.length;
+    const oneDone = () => { if (--pending === 0) { wake(); requestAnimationFrame(() => requestAnimationFrame(() => AW.emit("rail:ready"))); } };
     loadModel().then(([gf, gb]) => {
       if (!S || S.tees !== tees) return;
       tees.forEach(t => {
@@ -161,9 +163,10 @@
           t.front.material.needsUpdate = t.back.material.needsUpdate = true;
           t.front.visible = t.back.visible = true;
           wake();
+          oneDone();
         });
       });
-    }).catch(() => { teardown(); });   // no model: fall back to the photo rail
+    }).catch(() => { teardown(); AW.emit("rail:ready"); });   // no model: fall back to the photo rail
 
     const photo = document.createElement("img");
     photo.className = "rail-photo"; photo.alt = ""; photo.setAttribute("aria-hidden", "true"); photo.decoding = "async";

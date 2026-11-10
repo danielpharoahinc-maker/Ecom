@@ -48,12 +48,12 @@
     const c = AW.config;
     f.innerHTML = `
       <footer class="mf">
+        ${c.deals ? `<p class="mf-deal"><b>${AW.dealLabel()}</b> <span>Mix any tees and sizes.</span></p>` : ""}
         <div class="mf-facts">
-          ${c.deals ? `<p><strong>${AW.dealLabel()}</strong> Mix any designs and sizes. Size extras still apply. Squad order: the more you add, the more you save.</p>` : ""}
-          ${c.referral ? `<div class="mf-ref"><p><strong>Give ${AW.rand(c.referral.amount)}, get ${AW.rand(c.referral.amount)}</strong> Send a friend your link. They get ${AW.rand(c.referral.amount)} off their order. When they buy, message us your code <b>${AW.esc(AW.referral.mine())}</b> and ${AW.rand(c.referral.amount)} comes off your next tee.</p><button type="button" class="mf-ref-btn" data-ref-share>Copy my link</button></div>` : ""}
           <p><strong>Delivery</strong> ${AW.rand(c.delivery)} anywhere in South Africa. Free over ${AW.rand(c.freeDeliveryOver)}.</p>
           <p><strong>Printed to order</strong> Every tee is printed when you buy it, so nothing sits in a warehouse.</p>
           <p><strong>Payment</strong> Card, Apple Pay or Google Pay through a secure checkout. Prices in Rand.</p>
+          ${c.referral ? `<div class="mf-ref"><p><strong>Give ${AW.rand(c.referral.amount)}, get ${AW.rand(c.referral.amount)}</strong> Send a friend your link. They get ${AW.rand(c.referral.amount)} off their order. When they buy, message us your code <b>${AW.esc(AW.referral.mine())}</b> and ${AW.rand(c.referral.amount)} comes off your next tee.</p><button type="button" class="mf-ref-btn" data-ref-share>Copy my link</button></div>` : ""}
         </div>
         <nav class="mf-links" aria-label="Help">
           <a href="#/size-guide">Size guide</a>
@@ -89,6 +89,7 @@
         </div>
         <div class="rail-stage" role="listbox" aria-label="Tees" aria-describedby="rail-hint" tabindex="0">
           <div class="rail-bar" aria-hidden="true"></div>
+          <div class="rail-skel" aria-hidden="true"><span class="sk"><i class="sk-hook"></i><i class="sk-tee"></i></span><span class="sk"><i class="sk-hook"></i><i class="sk-tee"></i></span><span class="sk"><i class="sk-hook"></i><i class="sk-tee"></i></span><span class="sk"><i class="sk-hook"></i><i class="sk-tee"></i></span><span class="sk"><i class="sk-hook"></i><i class="sk-tee"></i></span><span class="sk"><i class="sk-hook"></i><i class="sk-tee"></i></span><span class="sk"><i class="sk-hook"></i><i class="sk-tee"></i></span><span class="sk"><i class="sk-hook"></i><i class="sk-tee"></i></span></div>
           ${list.map((p, i) => `
             <button type="button" class="rail-tee" role="option" aria-selected="false" data-i="${i}" tabindex="-1"
               aria-label="${esc(p.name)}, ${AW.rand(p.price)}">
@@ -110,7 +111,7 @@
     const vw = innerWidth, focused = st && st.sel != null;
     const w = focused
       ? Math.max(240, Math.min(vw < 600 ? Math.min(vw * 0.98, 440) : Math.min(vw * 0.42, 600), (innerHeight - 310) / 1.12))   // the tapped shirt takes the stage, but leaves room for the arrows under it
-      : (vw < 600 ? Math.min(vw * 0.64, 280) : Math.min(vw * 0.26, 360));          // open shirt width on the rail
+      : (vw < 600 ? Math.min(vw * 0.74, 320) : Math.min(vw * 0.26, 360));          // open shirt width on the rail
     const gap = vw < 600 ? 30 : Math.min(58, vw / 22);                        // spacing of sideways shirts
     return { w, gap };
   }
@@ -190,10 +191,6 @@
           <h1 class="pick-name">${esc(p.name)}</h1>
           <p class="pick-price" data-price>${AW.rand(p.price)}</p>
         </div>
-        <div class="pick-offer">
-          ${p.noDeal ? `<p class="pick-deal pick-deal--off">Premium print. Not in the multi-buy.</p>` : AW.config.deals ? `<p class="pick-deal">${AW.dealLabel()}</p>` : ""}
-          ${AW.drop() ? `<p class="pick-drop">${AW.esc(AW.drop().name)} · printed to order, closes ${AW.esc(AW.drop().label)}</p>` : ""}
-        </div>
         <p class="pick-sum">${esc(p.summary)}</p>
         <fieldset class="pick-sizes">
           <legend>Size</legend>
@@ -208,6 +205,7 @@
         </fieldset>
         <button type="button" class="pick-add">Add to bag</button>
         ${AW.rail3d && AW.rail3d.active ? `<button type="button" class="pick-turn" aria-pressed="false">Turn it around</button>` : ""}
+        <p class="pick-perk">${p.noDeal ? "Premium print, not in the multi-buy." : AW.config.deals ? `<b>${AW.dealLabel()}</b> on any tees. Mix designs and sizes.` : ""}${AW.drop() ? ` <span>${AW.esc(AW.drop().name)} closes ${AW.esc(AW.drop().label)}.</span>` : ""}</p>
         <div class="pick-photos" aria-label="Photos of the ${esc(p.name)}">
           ${photos.map((src, k) => `<img src="${esc(src)}" alt="${esc((AW.ui && AW.ui.altFor) ? AW.ui.altFor(p, src) : p.name)}" width="1000" height="1000" loading="${k < 2 ? "eager" : "lazy"}" decoding="async">`).join("")}
         </div>
@@ -407,6 +405,23 @@
     setTimeout(tick, 350);
   }
 
+  /* Skeleton: the grey shimmering shirts stay until the real ones are drawn. With 3D that is when js/rail3d.js says
+     "rail:ready"; without it, when the photos have loaded. A timeout makes sure it can never get stuck. */
+  function markReady(s) {
+    if (!s || s.ready) return;
+    s.ready = true;
+    const rail = s.root.querySelector(".rail");
+    if (rail) rail.classList.add("is-ready");
+    setTimeout(() => { const k = s.root.querySelector(".rail-skel"); if (k) k.remove(); }, 700);
+  }
+  function watchReady(s) {
+    setTimeout(() => markReady(s), 12000);
+    if (AW.rail3d && AW.rail3d.active) return;          // rail3d.js will announce when its shirts are drawn
+    const imgs = [...s.root.querySelectorAll(".rail-tee img")];
+    Promise.all(imgs.map(i => (i.decode ? i.decode().catch(() => {}) : Promise.resolve()))).then(() => markReady(s));
+  }
+  AW.on("rail:ready", () => markReady(st));
+
   function renderHome(app, preselect) {
     document.title = "AWEZA | Graphic tees from South Africa";
     const list = ORDER.map(id => AW.byId(id)).filter(Boolean).concat(AW.products.filter(p => !ORDER.includes(p.id)));
@@ -421,6 +436,7 @@
     st.stage.addEventListener("pointerdown", () => { st.touched = true; }, { once: true });
     bindStage();
     AW.emit("rail:mount", { stage: st.stage, list });
+    watchReady(st);
     const pre = preselect ? list.findIndex(p => p.id === preselect) : -1;
     if (pre >= 0) select(pre);
     else {
