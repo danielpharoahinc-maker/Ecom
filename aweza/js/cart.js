@@ -11,7 +11,7 @@
   const ui = () => AW.ui || {};
   const mq = q => window.matchMedia && window.matchMedia(q).matches;
   const reduced = () => (AW.motion && typeof AW.motion.reduced === "boolean") ? AW.motion.reduced : mq("(prefers-reduced-motion: reduce)");
-  const cfg = () => AW.config || { freeDeliveryOver: 1300, delivery: 149 };
+  const cfg = () => AW.config || { freeDeliveryOver: 2000, delivery: 179 };
 
   const SVG = (p, s = 20) => `<svg class="bag-ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${p}</svg>`;
   const LOCAL_ICONS = {
@@ -139,7 +139,7 @@
   const panel = () => $b(".bag-panel");
 
   function shipState() {
-    const over = cfg().freeDeliveryOver, sub = AW.cart.subtotal() - AW.cart.discount();
+    const over = cfg().freeDeliveryOver, sub = AW.cart.net();
     const pct = over ? Math.max(0, Math.min(100, (sub / over) * 100)) : 100;
     const done = sub >= over;
     return { over, sub, pct, done, text: done ? "Free delivery unlocked. Sharp." : `You're <strong>${esc(rand(over - sub))}</strong> away from free delivery.` };
@@ -221,7 +221,8 @@
     return `
       <dl class="bag-sum">
         <div class="bag-sum-row"><dt>Subtotal</dt><dd>${esc(rand(AW.cart.subtotal()))}</dd></div>
-        ${AW.cart.discount() ? `<div class="bag-sum-row is-deal"><dt>${esc(AW.dealLabel())}</dt><dd>-${esc(rand(AW.cart.discount()))}</dd></div>` : ""}
+        ${AW.cart.discount() ? `<div class="bag-sum-row is-deal"><dt>Multi-buy deal</dt><dd>-${esc(rand(AW.cart.discount()))}</dd></div>` : ""}
+        ${AW.cart.referral() ? `<div class="bag-sum-row is-deal"><dt>Friend's gift</dt><dd>-${esc(rand(AW.cart.referral()))}</dd></div>` : ""}
         <div class="bag-sum-row"><dt>Delivery</dt><dd>${d ? esc(rand(d)) : "Free"}</dd></div>
         <div class="bag-sum-row bag-sum-total"><dt>Total</dt><dd>${esc(rand(AW.cart.total()))}</dd></div>
       </dl>
@@ -469,8 +470,9 @@
     return `
       <dl class="co-totals">
         <div class="co-trow"><dt>Subtotal</dt><dd>${esc(rand(AW.cart.subtotal()))}</dd></div>
-        ${AW.cart.discount() ? `<div class="co-trow is-deal"><dt>${esc(AW.dealLabel())} deal</dt><dd>-${esc(rand(AW.cart.discount()))}</dd></div>` : ""}
-        ${!AW.cart.discount() && AW.config.deal && AW.cart.count() % AW.config.deal.qty ? `<p class="co-nudge">Add another tee: ${esc(AW.dealLabel())}.</p>` : ""}
+        ${AW.cart.discount() ? `<div class="co-trow is-deal"><dt>Multi-buy deal</dt><dd>-${esc(rand(AW.cart.discount()))}</dd></div>` : ""}
+        ${AW.cart.referral() ? `<div class="co-trow is-deal"><dt>Friend's gift</dt><dd>-${esc(rand(AW.cart.referral()))}</dd></div>` : ""}
+        ${AW.cart.nudge() ? `<p class="co-nudge">${esc(AW.cart.nudge())} (${esc(AW.dealLabel())})</p>` : ""}
         <div class="co-trow"><dt>Delivery</dt><dd>${d ? esc(rand(d)) : "Free"}</dd></div>
         ${s.done ? "" : `<p class="co-nudge">Add ${esc(rand(s.over - s.sub))} more for free delivery.</p>`}
         <div class="co-trow co-trow--total"><dt>Total</dt><dd>${esc(rand(AW.cart.total()))}</dd></div>
@@ -662,7 +664,8 @@
       customer: { email: v("email"), phone: normPhone(v("phone")) || v("phone"), firstName: v("firstName"), lastName: v("lastName") },
       address: { line1: v("line1"), line2: v("line2"), suburb: v("suburb"), city: v("city"), province: v("province"), postalCode: v("postalCode"), country: "ZA" },
       notes: v("notes"),
-      totals: { subtotal: Math.round(AW.cart.subtotal()), discount: Math.round(AW.cart.discount()), delivery: Math.round(AW.cart.delivery()), total: Math.round(AW.cart.total()), currency: "ZAR" },
+      ref: AW.referral.code(),
+      totals: { subtotal: Math.round(AW.cart.subtotal()), discount: Math.round(AW.cart.discount()), referral: Math.round(AW.cart.referral()), delivery: Math.round(AW.cart.delivery()), total: Math.round(AW.cart.total()), currency: "ZAR" },
     };
   }
 

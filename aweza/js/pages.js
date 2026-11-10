@@ -63,8 +63,8 @@
   const fitOf = p => (/retail/i.test(p.fit || "") ? "retail" : "classic");
   const productLinks = fit => products().filter(p => fitOf(p) === fit)
     .map(p => `<a class="pg-chiplink" href="#/product/${encodeURIComponent(p.id)}">${esc(p.name)}</a>`).join("");
-  const delivery = R(cfg.delivery || 149);
-  const freeOver = R(cfg.freeDeliveryOver || 1500);
+  const delivery = R(cfg.delivery || 179);
+  const freeOver = R(cfg.freeDeliveryOver || 2000);
 
   /* ---------- editorial page template ---------- */
   // sections: [{ id, title, html }]

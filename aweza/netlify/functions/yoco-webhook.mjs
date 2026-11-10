@@ -60,8 +60,8 @@ export default async function handler(req) {
   let order, pricing;
   try {
     const packed = unpackOrder(meta.order);
-    order = validateOrder({ ...packed, lines: packed.lines.map(({ id, size, qty }) => ({ id, size, qty })) });
-    pricing = priceOrder(order.lines);
+    order = validateOrder({ ...packed, lines: packed.lines.map(({ id, size, qty }) => ({ id, size, qty })) }, undefined, { skipDrop: true });
+    pricing = priceOrder(order.lines, undefined, packed.ref);
     if (payment.currency !== "ZAR" || payment.amount !== pricing.totalCents || packed.totalCents !== pricing.totalCents) {
       log("manual_review", { ref, checkoutId, reason: "amount_mismatch", paid: payment.amount, expected: pricing.totalCents, quoted: packed.totalCents });
       return json(200, { received: true, status: "manual_review" });

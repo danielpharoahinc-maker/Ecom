@@ -300,3 +300,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 /* 2-for deal */
 .pick-deal { display: inline-block; margin: 4px 0 0; padding: 3px 10px; border-radius: 999px; background: #d7191f; color: #fff; font: 600 12px/1.4 var(--font-body); letter-spacing: .02em; }
 .co-trow.is-deal, .co-trow.is-deal dd, .bag-sum-row.is-deal, .bag-sum-row.is-deal dd { color: #d7191f; font-weight: 600; }
+
+/* multi-buy, drop and refer-a-friend */
+.pick-deal--off { background: #f1f1ee; color: #3d3d3d; }
+.pick-drop { margin: 6px 0 0; font: 600 12px/1.4 var(--font-body); letter-spacing: .04em; text-transform: uppercase; color: #0a0a0a; }
+.mf-ref { grid-column: 1 / -1; padding-top: 6px; }
+.mf-ref b { font-family: ui-monospace, monospace; letter-spacing: .05em; color: #d7191f; }
+.mf-ref-btn { margin-top: 10px; min-height: 44px; padding: 0 20px; border: 0; border-radius: 999px; background: #d7191f; color: #fff; font: 600 14px/1 var(--font-body); cursor: pointer; }
+.mf-ref-btn:hover { background: #a90f14; }
+.pick-offer { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 2px 0 14px; }
+.pick-offer p { margin: 0; }

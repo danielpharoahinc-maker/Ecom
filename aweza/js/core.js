@@ -36,16 +36,41 @@
   /* Multi-buy ("2 for R700"): tees are grouped in sets of deal.qty, dearest base prices together, and each full
      set costs deal.price instead of its base prices. Size extras are paid on top. Mirrored on the server in
      netlify/functions/_lib/catalogue.mjs; keep the two the same. */
-  AW.dealDiscount = ls => {
-    const d = AW.config.deal; if (!d || !(d.qty > 1)) return 0;
-    const units = [];
-    ls.forEach(l => { const p = AW.byId(l.id); if (p) for (let k = 0; k < l.qty; k++) units.push(p.price); });
-    units.sort((a, b) => b - a);
-    let off = 0;
-    for (let i = 0; i + d.qty <= units.length; i += d.qty) off += Math.max(0, units.slice(i, i + d.qty).reduce((a, b) => a + b, 0) - d.price);
-    return off;
+  AW.bestDeal = (bases, deals) => {            // biggest saving from splitting these base prices into deal sets
+    const u = bases.slice().sort((a, b) => b - a), best = new Array(u.length + 1).fill(0);
+    for (let i = 1; i <= u.length; i++) {
+      best[i] = best[i - 1];
+      for (const d of deals) if (i >= d.qty) best[i] = Math.max(best[i], best[i - d.qty] + Math.max(0, u.slice(i - d.qty, i).reduce((a, b) => a + b, 0) - d.price));
+    }
+    return best[u.length];
   };
-  AW.dealLabel = () => { const d = AW.config.deal; return d ? `${d.qty} for ${AW.rand(d.price)}` : ""; };
+  const dealUnits = ls => { const u = []; ls.forEach(l => { const p = AW.byId(l.id); if (p && !p.noDeal) for (let k = 0; k < l.qty; k++) u.push(p.price); }); return u; };
+  AW.dealDiscount = ls => AW.bestDeal(dealUnits(ls), AW.config.deals || []);
+  AW.dealLabel = () => (AW.config.deals || []).map(d => `${d.qty} for ${AW.rand(d.price)}`).join(" · ");
+  AW.dealNudge = ls => {                      // "add one more and save R..." (squad order)
+    const u = dealUnits(ls), deals = AW.config.deals || []; if (!u.length || !deals.length) return "";
+    const now = AW.bestDeal(u, deals), next = AW.bestDeal(u.concat([Math.min(...u)]), deals);
+    return next > now ? `Add one more tee and your deal saves ${AW.rand(next)} in total.` : "";
+  };
+  /* Refer a friend: ?ref=CODE on the link is remembered; your own code is made once and kept. */
+  const REF_RE = /^[A-Za-z0-9]{4,16}$/;
+  let friend = "", mine = "";
+  try {
+    const q = new URLSearchParams(location.search).get("ref");
+    if (q && REF_RE.test(q)) localStorage.setItem("aweza-ref", q);
+    friend = localStorage.getItem("aweza-ref") || "";
+    mine = localStorage.getItem("aweza-mycode") || "";
+    if (!mine) { mine = "AW" + Math.random().toString(36).slice(2, 8).toUpperCase(); localStorage.setItem("aweza-mycode", mine); }
+  } catch { if (!mine) mine = "AW" + Math.random().toString(36).slice(2, 8).toUpperCase(); }
+  AW.referral = {
+    code: () => (friend && friend !== mine && REF_RE.test(friend) ? friend : ""),
+    mine: () => mine,
+    link: () => location.origin + location.pathname + "?ref=" + mine,
+  };
+  AW.drop = () => {
+    const d = AW.config.drop; if (!d) return null;
+    return { name: d.name, label: d.label, closed: Date.parse(d.ends + "T23:59:59+02:00") < Date.now() };
+  };
   AW.cart = {
     lines: () => lines.map(l => ({ ...l })),
     add(id, size) {
@@ -58,8 +83,11 @@
     count: () => lines.reduce((n, l) => n + l.qty, 0),
     subtotal: () => lines.reduce((n, l) => n + l.qty * AW.priceFor(AW.byId(l.id), l.size), 0),
     discount: () => AW.dealDiscount(lines),
-    delivery() { const s = this.subtotal() - this.discount(); return !s || s >= AW.config.freeDeliveryOver ? 0 : AW.config.delivery; },
-    total() { return this.subtotal() - this.discount() + this.delivery(); },
+    referral() { const r = AW.config.referral; return r && AW.referral.code() && this.subtotal() - this.discount() >= r.minSubtotal ? r.amount : 0; },
+    nudge: () => AW.dealNudge(lines),
+    net() { return this.subtotal() - this.discount() - this.referral(); },
+    delivery() { const s = this.net(); return !s || s >= AW.config.freeDeliveryOver ? 0 : AW.config.delivery; },
+    total() { return this.net() + this.delivery(); },
   };
 
   // Router

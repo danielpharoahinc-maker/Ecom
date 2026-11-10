@@ -107,6 +107,7 @@
   const promoMessages = () => {
     const free = AW.config && AW.config.freeDeliveryOver;
     return [
+      AW.config && AW.config.deals ? AW.dealLabel() + " on any tees" : "Printed to order",
       free ? `Free delivery over ${AW.rand(free)}` : "Delivery across South Africa",
       "Printed to order. Shipped nationwide.",
       "Sizes XS to 5XL",

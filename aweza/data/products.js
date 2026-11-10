@@ -5,10 +5,16 @@ window.AW = window.AW || {};
 
 AW.config = {
   currency: "ZAR",
-  delivery: 149,          // flat delivery fee (Printify charges ~R172 to ship one tee to SA)
-  freeDeliveryOver: 1300, // order subtotal for free delivery (three tees)
+  delivery: 179,          // flat delivery fee (Printify charges ~R177 to ship the first tee to SA)
+  freeDeliveryOver: 2000, // free delivery on orders of R2 000 and over, counted after deals
   sizeUpcharge: { "2XL": 40, "3XL": 70, "4XL": 70, "5XL": 70 },
-  deal: { qty: 2, price: 700 },  // multi-buy: any 2 tees for R700 (size extras still added). Remove to end the sale.
+  // Multi-buy: the best mix of these sets is applied to tees that are not marked noDeal. Size extras are paid on top.
+  deals: [{ qty: 2, price: 800 }, { qty: 3, price: 1200 }],
+  // Refer a friend: a link with ?ref=CODE gives the friend this much off an order of at least minSubtotal.
+  // The referrer's own reward is given by hand for now: orders carry the code, so you can see who sent whom.
+  referral: { amount: 50, minSubtotal: 450 },
+  // Limited drop: the server stops taking orders after this date (end of day, South African time).
+  drop: { name: "Drop 01", ends: "2026-12-31", label: "31 Dec" },
 };
 
 AW.collections = [
@@ -27,7 +33,7 @@ AW.collections = [
 
   AW.products = [
     {
-      id: "signature-lips", name: "Signature Lips Tee", collection: "signature", price: 450,
+      id: "signature-lips", name: "Signature Lips Tee", collection: "signature", price: 550, noDeal: true,
       colourName: "White", badge: "Signature", sizes: STD, fit: "Heavyweight cotton, classic fit",
       images: img("signature-lips", BACK_FIRST),
       summary: "The one that started it. Big red lips with AWEZA on the teeth across the back, a small wordmark on the chest and a flag on the sleeve.",

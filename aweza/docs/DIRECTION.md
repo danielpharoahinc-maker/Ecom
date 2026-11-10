@@ -28,7 +28,7 @@ Short. Confident. A wink, never a shout. Write like a funny friend texting, then
 - **No profanity in site copy.** The prints carry the edge; the site stays PG-13 because teens shop here. Never spell out the full wording on adult prints: refer to them by product name.
 - Never reference, name or describe any real person, including anyone who may appear in a print. Describe the design ("a very sweet surprise on the back"), never the face.
 - No exclamation marks except at most one per page. No em dashes in UI copy; use full stops or colons.
-- Functional copy is boring on purpose: "Add to Bag", "Select a size", "Checkout", "Free delivery over R1 300". Clarity beats cleverness on every button.
+- Functional copy is boring on purpose: "Add to Bag", "Select a size", "Checkout", "Free delivery over R2 000". Clarity beats cleverness on every button.
 - Prices always via `AW.rand(n)`: "R649", "R1 500". Never "ZAR 649", never decimals.
 
 **Point of view:** we talk like the sharpest guy at the braai. Dry, self-aware, a bit arrogant about the quality, never about the customer. Banned stock phrases: "elevate your style", "unleash", "level up", "curated", "must-have", "game-changer", "vibes", "wardrobe staple", "look no further". No emoji anywhere on the site.
@@ -326,7 +326,7 @@ AW.motion.reduced -> boolean
 ## 10. Page-by-page layout
 
 ### Global chrome
-- **Promo bar** (nav): ink, `--promo-h` tall, white `--fs-xs` caps. Three messages cross-fade every 4s (pause on hover/focus): "Free delivery over R1 300" (value from `AW.config.freeDeliveryOver`), "Printed to order. Shipped across South Africa.", "Sizes XS to 5XL". Scrolls away with the page.
+- **Promo bar** (nav): ink, `--promo-h` tall, white `--fs-xs` caps. Three messages cross-fade every 4s (pause on hover/focus): "Free delivery over R2 000" (value from `AW.config.freeDeliveryOver`), "Printed to order. Shipped across South Africa.", "Sizes XS to 5XL". Scrolls away with the page.
 - **Header** (nav): sticky, white, `--header-h`. Mobile: menu button left · AWEZA wordmark centred · search + bag right. Desktop ≥1024: wordmark left · links centre ("Shop All", then each collection name from `AW.collections`) · search + bag right. Hairline bottom border appears after 8px scroll. Hides on scroll down past 240px, reappears on scroll up (translateY, `--dur-3`); updates `--nav-offset` on `<html>`. Never hides while a drawer is open or on the checkout route.
 - **Bag button:** icon + count badge (red circle, white Archivo 600 micro, hidden at 0). `aria-label="Bag, 2 items"`. Click → `AW.emit("cart:open")`.
 - **Footer** (pages): ink (`data-theme="dark"`), see §10 Footer.

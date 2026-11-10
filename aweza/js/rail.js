@@ -49,7 +49,8 @@
     f.innerHTML = `
       <footer class="mf">
         <div class="mf-facts">
-          ${c.deal ? `<p><strong>${AW.dealLabel()}</strong> Mix any two tees. Size extras still apply.</p>` : ""}
+          ${c.deals ? `<p><strong>${AW.dealLabel()}</strong> Mix any designs and sizes. Size extras still apply. Squad order: the more you add, the more you save.</p>` : ""}
+          ${c.referral ? `<div class="mf-ref"><p><strong>Give ${AW.rand(c.referral.amount)}, get ${AW.rand(c.referral.amount)}</strong> Send a friend your link. They get ${AW.rand(c.referral.amount)} off their order. When they buy, message us your code <b>${AW.esc(AW.referral.mine())}</b> and ${AW.rand(c.referral.amount)} comes off your next tee.</p><button type="button" class="mf-ref-btn" data-ref-share>Copy my link</button></div>` : ""}
           <p><strong>Delivery</strong> ${AW.rand(c.delivery)} anywhere in South Africa. Free over ${AW.rand(c.freeDeliveryOver)}.</p>
           <p><strong>Printed to order</strong> Every tee is printed when you buy it, so nothing sits in a warehouse.</p>
           <p><strong>Payment</strong> Card, Apple Pay or Google Pay through a secure checkout. Prices in Rand.</p>
@@ -64,6 +65,14 @@
         </nav>
         <p class="mf-sign"><span class="mf-mark">AWEZA<sup>™</sup></span> Time of your life.</p>
       </footer>`;
+    const share = f.querySelector("[data-ref-share]");
+    if (share) share.addEventListener("click", async () => {
+      const link = AW.referral.link(), text = `Get ${AW.rand(AW.config.referral.amount)} off AWEZA tees:`;
+      try {
+        if (navigator.share) await navigator.share({ title: "AWEZA", text, url: link });
+        else { await navigator.clipboard.writeText(link); share.textContent = "Link copied"; setTimeout(() => { share.textContent = "Copy my link"; }, 2200); }
+      } catch { /* cancelled */ }
+    });
   }
 
   /* ---------- the rail ---------- */
@@ -180,7 +189,10 @@
         <div class="pick-head">
           <h1 class="pick-name">${esc(p.name)}</h1>
           <p class="pick-price" data-price>${AW.rand(p.price)}</p>
-          ${AW.config.deal ? `<p class="pick-deal">${AW.dealLabel()} on any tees</p>` : ""}
+        </div>
+        <div class="pick-offer">
+          ${p.noDeal ? `<p class="pick-deal pick-deal--off">Premium print. Not in the multi-buy.</p>` : AW.config.deals ? `<p class="pick-deal">${AW.dealLabel()}</p>` : ""}
+          ${AW.drop() ? `<p class="pick-drop">${AW.esc(AW.drop().name)} · printed to order, closes ${AW.esc(AW.drop().label)}</p>` : ""}
         </div>
         <p class="pick-sum">${esc(p.summary)}</p>
         <fieldset class="pick-sizes">

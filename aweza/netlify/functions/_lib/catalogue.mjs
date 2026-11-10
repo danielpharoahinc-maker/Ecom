@@ -98,7 +98,7 @@ const str = (v, field, { min = 1, max = 120, optional = false } = {}) => {
  * Validate the order object from the browser (DIRECTION §11) and return a
  * clean, server-trusted order. Browser totals are ignored entirely.
  */
-export function validateOrder(input, cat = loadCatalogue()) {
+export function validateOrder(input, cat = loadCatalogue(), { skipDrop = false } = {}) {
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new ValidationError("Something is off with your order. Refresh and try again.");
   const { byId, variants } = cat;
 
@@ -149,17 +149,25 @@ export function validateOrder(input, cat = loadCatalogue()) {
   if (a.country != null && a.country !== "ZA") throw new ValidationError("We only deliver within South Africa for now.");
 
   const notes = str(input.notes, "delivery notes", { max: 300, optional: true });
+  const ref = typeof input.ref === "string" && REF_RE.test(input.ref) ? input.ref : "";
+
+  // Limited drop: after its end date the shop stops taking orders (end of day, South African time).
+  const drop = cat.config.drop;
+  if (!skipDrop && drop && drop.ends && Date.parse(drop.ends + "T23:59:59+02:00") < Date.now()) {
+    throw new ValidationError(`${drop.name || "This drop"} has closed. Thanks for the love.`);
+  }
 
   return {
     lines,
     customer: { email, phone, firstName, lastName },
     address: { line1, line2, suburb, city, province, postalCode, country: "ZA" },
     notes,
+    ref,
   };
 }
 
 /** Server-side money. Rand integers in, cents out. Never trusts the browser. */
-export function priceOrder(lines, cat = loadCatalogue()) {
+export function priceOrder(lines, cat = loadCatalogue(), ref = "") {
   const { byId, config, priceFor } = cat;
   let subtotal = 0;
   const priced = lines.map(l => {
@@ -171,20 +179,26 @@ export function priceOrder(lines, cat = loadCatalogue()) {
   });
   // Multi-buy, mirroring AW.dealDiscount in js/core.js: sets of deal.qty tees (dearest base prices together)
   // cost deal.price; size extras are paid on top.
-  let discount = 0;
-  const deal = config.deal;
-  if (deal && Number.isInteger(deal.qty) && deal.qty > 1 && Number.isInteger(deal.price) && deal.price > 0) {
-    const units = [];
-    priced.forEach(l => { const base = byId.get(l.id).price; for (let k = 0; k < l.qty; k++) units.push(base); });
-    units.sort((a, b) => b - a);
-    for (let i = 0; i + deal.qty <= units.length; i += deal.qty) discount += Math.max(0, units.slice(i, i + deal.qty).reduce((a, b) => a + b, 0) - deal.price);
+  const deals = (Array.isArray(config.deals) ? config.deals : []).filter(d => Number.isInteger(d.qty) && d.qty > 1 && Number.isInteger(d.price) && d.price > 0);
+  const units = [];
+  priced.forEach(l => { const p = byId.get(l.id); if (!p.noDeal) for (let k = 0; k < l.qty; k++) units.push(p.price); });
+  units.sort((a, b) => b - a);
+  const best = new Array(units.length + 1).fill(0);
+  for (let i = 1; i <= units.length; i++) {
+    best[i] = best[i - 1];
+    for (const d of deals) if (i >= d.qty) best[i] = Math.max(best[i], best[i - d.qty] + Math.max(0, units.slice(i - d.qty, i).reduce((a, b) => a + b, 0) - d.price));
   }
+  let discount = best[units.length];
+  // Refer a friend: a well-formed code takes a flat amount off an order that is big enough.
+  const rf = config.referral;
+  const referral = rf && ref && REF_RE.test(ref) && subtotal - discount >= rf.minSubtotal ? rf.amount : 0;
+  discount += referral;
   const net = subtotal - discount;
   const delivery = !net || net >= config.freeDeliveryOver ? 0 : config.delivery;
   const total = net + delivery;
   return {
     lines: priced,
-    subtotal, discount, delivery, total,
+    subtotal, discount, referral, delivery, total,
     subtotalCents: subtotal * 100,
     discountCents: discount * 100,
     deliveryCents: delivery * 100,
@@ -199,6 +213,7 @@ export function priceOrder(lines, cat = loadCatalogue()) {
 // string. MAX_METADATA_CHARS is a self-imposed guard.
 
 export const MAX_METADATA_CHARS = 3000;
+export const REF_RE = /^[A-Za-z0-9]{4,16}$/;
 
 export function packOrder(order, pricing, cat = loadCatalogue()) {
   const { variants } = cat;
@@ -210,6 +225,7 @@ export function packOrder(order, pricing, cat = loadCatalogue()) {
     t: pricing.totalCents,
   };
   if (order.notes) o.n = order.notes;
+  if (order.ref) o.r = order.ref;
   return JSON.stringify(o);
 }
 
@@ -221,6 +237,7 @@ export function unpackOrder(json) {
     customer: { firstName: o.c[0], lastName: o.c[1], email: o.c[2], phone: o.c[3] },
     address: { line1: o.a[0], line2: o.a[1], suburb: o.a[2], city: o.a[3], province: o.a[4], postalCode: o.a[5], country: "ZA" },
     notes: o.n || "",
+    ref: o.r || "",
     totalCents: o.t,
   };
 }

@@ -28,7 +28,7 @@ function idempotencyKey(req, order, pricing) {
   // checkout, while a fresh attempt (after cancelling) gets a new one.
   const attempt = (req.headers.get("x-aweza-attempt") || "").replace(/[^\w-]/g, "").slice(0, 64);
   const bucket = attempt || String(Math.floor(Date.now() / (5 * 60 * 1000)));
-  const canon = JSON.stringify([order.lines, order.customer, order.address, pricing.totalCents]);
+  const canon = JSON.stringify([order.lines, order.customer, order.address, order.ref, pricing.totalCents]);
   return "aweza-" + crypto.createHash("sha256").update(bucket + "|" + canon).digest("hex").slice(0, 40);
 }
 
@@ -59,7 +59,7 @@ export default async function handler(req) {
   }
   try {
     order = validateOrder(input, cat);
-    pricing = priceOrder(order.lines, cat);
+    pricing = priceOrder(order.lines, cat, order.ref);
   } catch (e) {
     if (e instanceof ValidationError) return json(400, { error: e.message });
     log("validate_error", { message: String(e && e.message) });

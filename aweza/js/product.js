@@ -210,7 +210,7 @@
                 </span>
               </button>
               <p class="pdp-fit">Classic fit. If you like it roomy, size up.${sizes.some(z => ups[z]) ? `<span class="pdp-up-note">2XL and up cost a little more. More shirt, more ink.</span>` : ""}</p>
-              <p class="pdp-note">${icon("truck", 16)}<span>Free delivery over ${rand(conf.freeDeliveryOver || 1500)}. Printed to order.</span></p>
+              <p class="pdp-note">${icon("truck", 16)}<span>Free delivery over ${rand(conf.freeDeliveryOver || 2000)}. Printed to order.</span></p>
             </div>
 
             <p class="pdp-summary">${esc(p.summary || "")}</p>
@@ -227,7 +227,7 @@
               </details>
               <details class="accordion pdp-acc">
                 <summary>Delivery</summary>
-                <div class="accordion-body pdp-acc-body"><p>Flat ${rand(conf.delivery || 149)} anywhere in South Africa. Free over ${rand(conf.freeDeliveryOver || 1500)}. Each tee is printed when you order it, so give it a few extra days.</p><p><a class="pdp-link" href="#/help">Delivery and FAQ</a></p></div>
+                <div class="accordion-body pdp-acc-body"><p>Flat ${rand(conf.delivery || 179)} anywhere in South Africa. Free over ${rand(conf.freeDeliveryOver || 2000)}. Each tee is printed when you order it, so give it a few extra days.</p><p><a class="pdp-link" href="#/help">Delivery and FAQ</a></p></div>
               </details>
               <details class="accordion pdp-acc">
                 <summary>Returns</summary>
