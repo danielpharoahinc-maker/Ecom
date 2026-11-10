@@ -52,7 +52,7 @@ We talk like the sharpest guy at the braai: a bit arrogant about the quality, ne
 | Elevate your style with our curated collection. | Heavy cotton. Loud prints. Zero apologies. |
 | Our must-have tees are perfect for any occasion! | Good for braais, bad for first dates. |
 | Unleash your inner boss with this bold design. | A quiet wordmark up front. The job title on the back. |
-| Shop now and get FREE shipping on orders over R1500!!! | Free delivery over R1 500. |
+| Shop now and get FREE shipping on orders over R1500!!! | Free delivery over R1 300. |
 | Oops! Something went wrong. Please try again later. | That did not work. Try again in a moment. |
 | This tee features a hilarious print of a famous... | A very sweet surprise on the back. |
 | Hey there, fashionista! | (Nothing. Just get to the point.) |

@@ -79,7 +79,7 @@ The checkout (`js/cart.js`) calls `window.AW_PAY(order)` when it exists and othe
 
 1. Set `YOCO_SECRET_KEY=sk_test_...`, register the webhook with the test key, set `YOCO_WEBHOOK_SECRET`, set `PRINTIFY_API_TOKEN`, leave `PRINTIFY_AUTO_SEND` unset. Redeploy.
 2. Add two tees to the bag, one of them a 2XL (to check the size upcharge), go to checkout, fill the form, press Pay.
-3. You land on Yoco's page with the right total (subtotal + R149 delivery, or free delivery at R1 500 and over). Pay with Yoco's test card (Yoco App, Checkout API integration, How to connect, Test card details).
+3. You land on Yoco's page with the right total (subtotal + R149 delivery, or free delivery at R1 300 and over). Pay with Yoco's test card (Yoco App, Checkout API integration, How to connect, Test card details).
 4. You return to `/#/checkout/success` and the bag empties.
 5. Netlify, Functions, `yoco-webhook` logs show `printify_order_created` with `"test":true`.
 6. In Printify, Orders: a new order labelled `TEST-AW...`, on hold, with the right variants and address. **Delete or cancel it by hand**; do not send it to production.
@@ -101,11 +101,13 @@ Printify bills you in **US dollars**; customers pay in **Rand**. Current numbers
 - Product cost per tee: about **US$15.93 to $22.35** for S to XL on the Gildan 5000 designs, up to about $26.16 for 5XL; the Mini Lips Bella+Canvas 3001 is $11.29 to $20.24. Exact per-size costs are in `data/printify-variants.json` (`cost_usd_cents`).
 - Shipping to South Africa (provider 99, "rest of the world" rate): **US$10.39 for the first item, US$4.00 for each extra item**, about 10 days handling plus transit.
 - Prices checked against the live Printify costs on 9 November 2026 at **R16.50 per US$** (market rate), with a safety margin at **R17.00** for bank currency-conversion fees:
-  - Standard tees (CEO, Zero Ex's, Sweet Cupcake, Need A Hug): $16.72 + $10.39 shipping = $27.11, about **R461** landed. Sold at R649 + R149 delivery = R798; after Yoco's fee about **R310 profit (39%)** per single-tee order.
-  - Captain Save: $15.93 + $10.39 = $26.32, about **R447** landed; about **R323 profit (41%)**.
-  - Signature Lips (back print + sleeve): $22.35 + $10.39 = $32.74, about **R557** landed. Sold at R749 + R149 = R898; about **R311 profit (35%)**.
-  - Bigger sizes cost Printify more ($2.10 more for 2XL, $3.23 to $3.73 more for 3XL to 5XL, about R36 and R55 to R63). The site's +R50 and +R80 upcharges cover that, so every size keeps a 33% to 41% margin.
-  - Extra tees in the same order ship for $4.00 (about R68) each, and free delivery from R1 500 (three tees) still leaves about R715 profit on the order.
+  - Prices were lowered on 10 November 2026 to sit near Printify's own suggested retail ($27.87, about R460, for a standard tee).
+  - Standard tees (CEO, Zero Ex's, Sweet Cupcake, Need A Hug): $16.72 + $10.39 shipping = $27.11, about **R461** landed. Sold at R449 + R149 delivery = R598; after Yoco's fee about **R116 profit (19%)** per single-tee order.
+  - Captain Save: $15.93 + $10.39 = $26.32, about **R447** landed; also R449, about **R130 profit (22%)**.
+  - Signature Lips (back print + sleeve): $22.35 + $10.39 = $32.74, about **R557** landed. Sold at R549 + R149 = R698; about **R117 profit (17%)**.
+  - Bigger sizes cost Printify more ($2.10 more for 2XL, $3.23 to $3.73 more for 3XL to 5XL, about R36 and R55 to R63). The site's +R40 and +R70 upcharges cover that.
+  - Extra tees in the same order ship for $4.00 (about R68) each. Free delivery from R1 300 (three tees): three standard tees leave about R170 profit on the order.
+  - Margins are thin now. If the rand weakens past about R19 per US$, a single standard tee stops making money: re-check before running ads.
 - Yoco takes its card fee from each payment; Printify may add VAT/duties depending on the destination; the rand moves. Re-check margins whenever you change prices or the exchange rate shifts, and re-run the sync to refresh costs.
 - The server only charges what `data/products.js` says; change prices there, never in the browser.
 

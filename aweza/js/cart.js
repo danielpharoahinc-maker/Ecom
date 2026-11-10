@@ -11,7 +11,7 @@
   const ui = () => AW.ui || {};
   const mq = q => window.matchMedia && window.matchMedia(q).matches;
   const reduced = () => (AW.motion && typeof AW.motion.reduced === "boolean") ? AW.motion.reduced : mq("(prefers-reduced-motion: reduce)");
-  const cfg = () => AW.config || { freeDeliveryOver: 1500, delivery: 149 };
+  const cfg = () => AW.config || { freeDeliveryOver: 1300, delivery: 149 };
 
   const SVG = (p, s = 20) => `<svg class="bag-ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${p}</svg>`;
   const LOCAL_ICONS = {

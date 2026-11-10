@@ -17,9 +17,9 @@ Owner: brand agent (09). Audience: young South African men, 18 to 34, mostly on 
 - Heavyweight cotton, printed to order, so nothing sits in a warehouse going stale.
 - Designed in South Africa, by people who have stood at the same braais.
 - Sizes XS to 5XL. Every body gets the joke.
-- Free delivery over R1 500, delivered across the country.
+- Free delivery over R1 300, delivered across the country.
 
-**Price stance:** R549 to R749. Not cheap, not precious. We never discount in the first 30 days; scarcity and first dibs do the work instead of sales.
+**Price stance:** R449 to R549. Fair for heavy cotton printed to order. We never discount in the first 30 days; scarcity and first dibs do the work instead of sales.
 
 ## 2. Launch campaign: "Time of your life"
 
@@ -71,7 +71,7 @@ Rules: hook in the first five words, max three hashtags, max one emoji or none, 
 19. Heavyweight cotton that survives the wash and the weekend. #AWEZA #MadeInSA
 20. Main character energy, minus the speech. Let the shirt talk. #AWEZA
 21. POV: someone behind you in the queue just laughed. #AWEZA #MzansiStreetwear
-22. Free delivery over R1 500. Squad order, anyone? #AWEZA
+22. Free delivery over R1 300. Squad order, anyone? #AWEZA
 23. Designed in Mzansi. Worn wherever you end up. #MadeInSA #TimeOfYourLife
 24. The captain is in. For the guy who always swoops. #AWEZA #NoFilter
 25. Thought it. Printed it. Wore it. The No Filter collection. #AWEZA #NoFilter
@@ -125,7 +125,7 @@ All shot vertical, 7 to 20 seconds, natural light or one hard flash, real places
    - Hook: "Fit check, but make it braai."
    - Shots: tongs, smoke, meat flip, slow pan up to the back print, mates in AWEZA in the background.
    - Sound: gqom or amapiano, sizzling foley.
-   - CTA: "Free delivery over R1 500. Squad order."
+   - CTA: "Free delivery over R1 300. Squad order."
 
 8. **Printed To Order**
    - Hook: "Your shirt didn't exist yesterday."
@@ -153,9 +153,9 @@ Paid ads only use Signature Lips, Mini Lips, CEO of Bad Decisions and Zero Ex's.
 |---|---|---|---|---|
 | 1 | The front is polite. The back says what you meant. Heavy cotton, printed to order. | Say it with your back | 9:16 Turnaround video, CEO of Bad Decisions | Men 18 to 30, SA, interests: streetwear, amapiano, comedy, nightlife. Broad, let the algorithm find the funny ones. |
 | 2 | Bad decisions. Good cotton. Join the club. | Bad Decisions Club | Carousel: evidence-bag flat lays of CEO and Zero Ex's | Men 21 to 34, Gauteng, Western Cape and KZN metros. Retarget video viewers 50%+. |
-| 3 | Zero ex's. The maths checks out. R649, sizes XS to 5XL. | Zero Ex's Tee | Static: back print close-up on a model, white wall, hard flash | Men 20 to 32, single relationship status where available, interests: memes, sport, braai. |
+| 3 | Zero ex's. The maths checks out. R449, sizes XS to 5XL. | Zero Ex's Tee | Static: back print close-up on a model, white wall, hard flash | Men 20 to 32, single relationship status where available, interests: memes, sport, braai. |
 | 4 | The lips that started it all. Our signature tee, back print, sleeve flag. | Signature Lips Tee | 1:1 slow push-in on the lips back print, then the giant lips wall | Men and women 18 to 34, lookalike of site visitors and first purchasers. |
-| 5 | Squad order? Free delivery over R1 500. Three tees and you're there. | Free delivery over R1 500 | Line-up of three guys, backs to camera, three different prints | Retarget add-to-bag without purchase, 14 days. Men 18 to 34. |
+| 5 | Squad order? Free delivery over R1 300. Three tees and you're there. | Free delivery over R1 300 | Line-up of three guys, backs to camera, three different prints | Retarget add-to-bag without purchase, 14 days. Men 18 to 34. |
 | 6 | Something hot is coming. Get first dibs before Drop 02 lands. | Get first dibs | 6s grill smoke teaser, hotdog artwork blurred, "DROP 02" | Engaged video viewers and newsletter lookalikes. Lead objective (email sign-up), not purchase. |
 
 **Testing:** run 1, 3 and 4 against each other for 5 days at equal budget, keep the winner, kill the bottom one, then layer 5 as retargeting. Judge on cost per add-to-bag and cost per purchase, not likes.
@@ -173,7 +173,7 @@ Paid ads only use Signature Lips, Mini Lips, CEO of Bad Decisions and Zero Ex's.
 - Tue: Paid ads 1, 3, 4 go live (test). TikTok: Read It Out Loud.
 - Wed: Story Q&A "Which shirt are you?" poll. Caption set 1 to 6.
 - Thu: TikTok: Queue Reactions. Repost every creator back shot.
-- Fri: Payday push: "Squad order? Free delivery over R1 500."
+- Fri: Payday push: "Squad order? Free delivery over R1 300."
 - Sat: Braai Fit Check (shoot live at a real braai, post same day).
 - Sun: Carousel "How it's made: printed to order."
 
@@ -220,5 +220,5 @@ The hotdog artwork is the first "next drop" and the test of the first-dibs machi
 - **Music:** use the platform's licensed library for paid and branded content. No unlicensed tracks.
 - **Emoji:** max one per caption, usually none. Never on the site.
 - **Hashtags:** max three. House set: #AWEZA #TimeOfYourLife #BadDecisionsClub #NoFilter #MzansiStreetwear #MadeInSA.
-- **Claims:** only say what is true. "Heavyweight cotton", "printed to order", "sizes XS to 5XL", "free delivery over R1 500" are all checkable. No fake reviews, fake stock counts or fake countdowns.
+- **Claims:** only say what is true. "Heavyweight cotton", "printed to order", "sizes XS to 5XL", "free delivery over R1 300" are all checkable. No fake reviews, fake stock counts or fake countdowns.
 - **Local and legal:** pricing in Rand, VAT note where applicable, POPIA-compliant opt-ins for email and WhatsApp (clear consent, easy unsubscribe).
