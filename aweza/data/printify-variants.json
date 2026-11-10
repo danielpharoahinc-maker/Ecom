@@ -8,16 +8,16 @@
     "variant_id": 12102,
     "cost_usd_cents": 1672
    },
-   "XL": {
-    "variant_id": 12103,
+   "M": {
+    "variant_id": 12101,
     "cost_usd_cents": 1672
    },
    "L": {
     "variant_id": 12100,
     "cost_usd_cents": 1672
    },
-   "M": {
-    "variant_id": 12101,
+   "XL": {
+    "variant_id": 12103,
     "cost_usd_cents": 1672
    },
    "2XL": {
@@ -45,35 +45,35 @@
   "sizes": {
    "S": {
     "variant_id": 12102,
-    "cost_usd_cents": 2235
-   },
-   "XL": {
-    "variant_id": 12103,
-    "cost_usd_cents": 2235
-   },
-   "L": {
-    "variant_id": 12100,
-    "cost_usd_cents": 2235
+    "cost_usd_cents": 1593
    },
    "M": {
     "variant_id": 12101,
-    "cost_usd_cents": 2235
+    "cost_usd_cents": 1593
+   },
+   "L": {
+    "variant_id": 12100,
+    "cost_usd_cents": 1593
+   },
+   "XL": {
+    "variant_id": 12103,
+    "cost_usd_cents": 1593
    },
    "2XL": {
     "variant_id": 12104,
-    "cost_usd_cents": 2442
+    "cost_usd_cents": 1802
    },
    "3XL": {
     "variant_id": 12105,
-    "cost_usd_cents": 2545
+    "cost_usd_cents": 1915
    },
    "4XL": {
     "variant_id": 24031,
-    "cost_usd_cents": 2598
+    "cost_usd_cents": 1965
    },
    "5XL": {
     "variant_id": 24164,
-    "cost_usd_cents": 2616
+    "cost_usd_cents": 1968
    }
   }
  },
@@ -86,16 +86,16 @@
     "variant_id": 12102,
     "cost_usd_cents": 1672
    },
-   "XL": {
-    "variant_id": 12103,
+   "M": {
+    "variant_id": 12101,
     "cost_usd_cents": 1672
    },
    "L": {
     "variant_id": 12100,
     "cost_usd_cents": 1672
    },
-   "M": {
-    "variant_id": 12101,
+   "XL": {
+    "variant_id": 12103,
     "cost_usd_cents": 1672
    },
    "2XL": {
@@ -125,16 +125,16 @@
     "variant_id": 12102,
     "cost_usd_cents": 1593
    },
-   "XL": {
-    "variant_id": 12103,
+   "M": {
+    "variant_id": 12101,
     "cost_usd_cents": 1593
    },
    "L": {
     "variant_id": 12100,
     "cost_usd_cents": 1593
    },
-   "M": {
-    "variant_id": 12101,
+   "XL": {
+    "variant_id": 12103,
     "cost_usd_cents": 1593
    },
    "2XL": {
@@ -164,16 +164,16 @@
     "variant_id": 12102,
     "cost_usd_cents": 1672
    },
-   "XL": {
-    "variant_id": 12103,
+   "M": {
+    "variant_id": 12101,
     "cost_usd_cents": 1672
    },
    "L": {
     "variant_id": 12100,
     "cost_usd_cents": 1672
    },
-   "M": {
-    "variant_id": 12101,
+   "XL": {
+    "variant_id": 12103,
     "cost_usd_cents": 1672
    },
    "2XL": {
@@ -203,16 +203,94 @@
     "variant_id": 12102,
     "cost_usd_cents": 1672
    },
-   "XL": {
-    "variant_id": 12103,
+   "M": {
+    "variant_id": 12101,
     "cost_usd_cents": 1672
    },
    "L": {
     "variant_id": 12100,
     "cost_usd_cents": 1672
    },
+   "XL": {
+    "variant_id": 12103,
+    "cost_usd_cents": 1672
+   },
+   "2XL": {
+    "variant_id": 12104,
+    "cost_usd_cents": 1882
+   },
+   "3XL": {
+    "variant_id": 12105,
+    "cost_usd_cents": 1995
+   },
+   "4XL": {
+    "variant_id": 24031,
+    "cost_usd_cents": 2042
+   },
+   "5XL": {
+    "variant_id": 24164,
+    "cost_usd_cents": 2045
+   }
+  }
+ },
+ "black-out": {
+  "printify_product_id": "6af3632fc4b4ed42fb0da50d",
+  "blueprint_id": 6,
+  "print_provider_id": 99,
+  "sizes": {
+   "S": {
+    "variant_id": 12102,
+    "cost_usd_cents": 1672
+   },
    "M": {
     "variant_id": 12101,
+    "cost_usd_cents": 1672
+   },
+   "L": {
+    "variant_id": 12100,
+    "cost_usd_cents": 1672
+   },
+   "XL": {
+    "variant_id": 12103,
+    "cost_usd_cents": 1672
+   },
+   "2XL": {
+    "variant_id": 12104,
+    "cost_usd_cents": 1882
+   },
+   "3XL": {
+    "variant_id": 12105,
+    "cost_usd_cents": 1995
+   },
+   "4XL": {
+    "variant_id": 24031,
+    "cost_usd_cents": 2042
+   },
+   "5XL": {
+    "variant_id": 24164,
+    "cost_usd_cents": 2045
+   }
+  }
+ },
+ "time-of-your-life": {
+  "printify_product_id": "6af35db484c3e9e3630d75bd",
+  "blueprint_id": 6,
+  "print_provider_id": 99,
+  "sizes": {
+   "S": {
+    "variant_id": 12102,
+    "cost_usd_cents": 1672
+   },
+   "M": {
+    "variant_id": 12101,
+    "cost_usd_cents": 1672
+   },
+   "L": {
+    "variant_id": 12100,
+    "cost_usd_cents": 1672
+   },
+   "XL": {
+    "variant_id": 12103,
     "cost_usd_cents": 1672
    },
    "2XL": {

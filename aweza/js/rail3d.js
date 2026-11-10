@@ -19,7 +19,7 @@
      Two fronts use the real Printify hanger photo instead, with its white background cut away.
      top/bottom/cx: where the hook top, the hem and the centre sit in the image, as fractions. */
   const PH = "images/hang-real/", PR = "images/hang/";
-  const M = {"captain-save-back": {"top": 0.0125, "bottom": 0.975, "cx": 0.4994}, "ceo-of-bad-decisions-back": {"top": 0.0098, "bottom": 0.9696, "cx": 0.4989}, "ceo-of-bad-decisions-front": {"top": 0.0116, "bottom": 0.9696, "cx": 0.4994}, "need-a-hug-back": {"top": 0.0116, "bottom": 0.9812, "cx": 0.4994}, "signature-lips-back": {"top": 0.0107, "bottom": 0.9812, "cx": 0.4961}, "signature-lips-front": {"top": 0.0107, "bottom": 0.9696, "cx": 0.4994}, "sweet-cupcake-front": {"top": 0.0071, "bottom": 0.9723, "cx": 0.4994}, "zero-exes-back": {"top": 0.0143, "bottom": 0.983, "cx": 0.4961}, "zero-exes-front": {"top": 0.0125, "bottom": 0.9696, "cx": 0.4989}, "captain-save-front-real": {"top": 0.0, "bottom": 0.97, "cx": 0.5258}, "need-a-hug-front-real": {"top": 0.0, "bottom": 0.97, "cx": 0.5258}};
+  const M = {"captain-save-back": {"top": 0.0125, "bottom": 0.975, "cx": 0.4994}, "ceo-of-bad-decisions-back": {"top": 0.0098, "bottom": 0.9696, "cx": 0.4989}, "ceo-of-bad-decisions-front": {"top": 0.0116, "bottom": 0.9696, "cx": 0.4994}, "need-a-hug-back": {"top": 0.0116, "bottom": 0.9812, "cx": 0.4994}, "signature-lips-back": {"top": 0.0133, "bottom": 0.9767, "cx": 0.4833}, "signature-lips-front": {"top": 0.01, "bottom": 0.9578, "cx": 0.4896}, "sweet-cupcake-front": {"top": 0.0071, "bottom": 0.9723, "cx": 0.4994}, "zero-exes-back": {"top": 0.0143, "bottom": 0.983, "cx": 0.4961}, "zero-exes-front": {"top": 0.0125, "bottom": 0.9696, "cx": 0.4989}, "captain-save-front-real": {"top": 0.0, "bottom": 0.97, "cx": 0.5258}, "need-a-hug-front-real": {"top": 0.0, "bottom": 0.97, "cx": 0.5258}, "black-out-front": {"top": 0.0122, "bottom": 0.9656, "cx": 0.4882}, "black-out-back": {"top": 0.0078, "bottom": 0.9733, "cx": 0.4868}, "time-of-your-life-front": {"top": 0.02, "bottom": 0.9656, "cx": 0.4938}, "time-of-your-life-back": {"top": 0.0089, "bottom": 0.9744, "cx": 0.484}};
   const shot = id => ({ src: PH + id + ".webp", m: M[id], aspect: 0.8, real: false });
   // real Printify hanger photo, white background cut away so it sits cleanly on the wall
   const real = id => ({ src: PH + id + "-front-real.webp", m: M[id + "-front-real"], aspect: 640 / 801, real: false });
@@ -30,6 +30,8 @@
     "sweet-cupcake":        { front: shot("sweet-cupcake-front") },
     "need-a-hug":           { front: real("need-a-hug"),                 back: shot("need-a-hug-back") },
     "captain-save":         { front: real("captain-save"),               back: shot("captain-save-back") },
+    "black-out":           { front: shot("black-out-front"),            back: shot("black-out-back") },
+    "time-of-your-life":   { front: shot("time-of-your-life-front"),    back: shot("time-of-your-life-back") },
   };
   Object.values(PHOTOS).forEach(p => Object.values(p).forEach(v => { const i = new Image(); i.decoding = "async"; i.src = v.src; })); // warm the cache
 

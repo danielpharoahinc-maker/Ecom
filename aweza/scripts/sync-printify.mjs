@@ -25,6 +25,8 @@ const OVERRIDES = {
   "6adf9615c392daed6500e7f0": "captain-save",
   "6adf952c250930614e0f5c15": "sweet-cupcake",
   "6adf93fe250930614e0f5b4f": "need-a-hug",
+  "6af3632fc4b4ed42fb0da50d": "black-out",
+  "6af35db484c3e9e3630d75bd": "time-of-your-life",
   "6adf3e096048caed7507d374": "mini-lips",
 };
 const COLOUR = "White";

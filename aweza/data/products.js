@@ -33,10 +33,10 @@ AW.collections = [
 
   AW.products = [
     {
-      id: "signature-lips", name: "Signature Lips Tee", collection: "signature", price: 550, noDeal: true,
+      id: "signature-lips", name: "Signature Lips Tee", collection: "signature", price: 450,
       colourName: "White", badge: "Signature", sizes: STD, fit: "Heavyweight cotton, classic fit",
       images: img("signature-lips", BACK_FIRST),
-      summary: "The one that started it. Big red lips with AWEZA on the teeth across the back, a small wordmark on the chest and a flag on the sleeve.",
+      summary: "The one that started it. Big red lips with AWEZA on the teeth across the back, and a small wordmark on the chest.",
     },
     {
       id: "sweet-cupcake", name: "Sweet Cupcake Tee", collection: "signature", price: 450,
@@ -67,6 +67,18 @@ AW.collections = [
       colourName: "White", sizes: STD, fit: "Heavyweight cotton, classic fit",
       images: img("need-a-hug", FRONT_FIRST),
       summary: "Bold black type across the chest that says exactly what it means. Small AWEZA mark on the back, hugs not guaranteed.",
+    },
+    {
+      id: "black-out", name: "Black Out Or Back Out Tee", collection: "bad-decisions", price: 450,
+      colourName: "White", sizes: STD, fit: "Heavyweight cotton, classic fit",
+      images: img("black-out", BACK_FIRST),
+      summary: "A small black wordmark up front. On the back, two bottles and a choice: black out, or back out. Decide wisely.",
+    },
+    {
+      id: "time-of-your-life", name: "Time of Your Life Tee", collection: "signature", price: 450,
+      colourName: "White", sizes: STD, fit: "Heavyweight cotton, classic fit",
+      images: img("time-of-your-life", BACK_FIRST),
+      summary: "A small blue AWEZA on the chest. On the back, the brand line wrapped up in loud blue: time of your life, sealed and ready.",
     },
   ];
 })();
