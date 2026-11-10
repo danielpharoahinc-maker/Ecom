@@ -343,3 +343,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .pick-perk { margin: 14px 0 0; font-size: 13px; line-height: 1.5; color: var(--rl-ice); }
 .pick-perk b { color: #d7191f; font-weight: 700; }
 .pick-perk span { display: block; color: var(--rl-ice-muted); }
+
+/* Apple Pay / Google Pay note above the pay button */
+.co-wallets { margin: 0 0 14px; padding: 12px 14px; border: 1px solid #d4d4d4; border-radius: 12px; background: #fafafa; }
+.co-wallet-marks { display: flex; gap: 8px; flex-wrap: wrap; list-style: none; margin: 0 0 8px; padding: 0; }
+.co-wallet-marks li { padding: 4px 12px; border-radius: 999px; border: 1px solid #0a0a0a; font: 600 12px/1.4 var(--font-body); letter-spacing: .02em; color: #0a0a0a; background: #fff; }
+.co-wallets[data-wallet="apple"] .co-wallet-marks li:nth-child(1),
+.co-wallets[data-wallet="google"] .co-wallet-marks li:nth-child(2) { background: #0a0a0a; color: #fff; }
+.co-wallet-line { margin: 0; font-size: 13px; line-height: 1.5; color: #0a0a0a; }

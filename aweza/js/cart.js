@@ -378,7 +378,7 @@
     { name: "lastName", label: "Last name", ac: "family-name", req: true, sec: "address", half: true },
     { name: "line1", label: "Street address", ac: "address-line1", req: true, sec: "address" },
     { name: "line2", label: "Apartment, complex or unit", ac: "address-line2", sec: "address", optional: true },
-    { name: "suburb", label: "Suburb", ac: "address-level3", req: true, sec: "address", half: true },
+    { name: "suburb", label: "Suburb", ac: "address-level3", sec: "address", half: true, optional: true },
     { name: "city", label: "City or town", ac: "address-level2", req: true, sec: "address", half: true },
     { name: "province", label: "Province", ac: "address-level1", req: true, sec: "address", half: true, select: PROVINCES },
     { name: "postalCode", label: "Postal code", ac: "postal-code", im: "numeric", req: true, sec: "address", half: true, max: 4, ph: "0000" },
@@ -390,7 +390,6 @@
     firstName: ["What should we call you?"],
     lastName: ["Your surname, for the courier."],
     line1: ["We need this to deliver your tee."],
-    suburb: ["Which suburb are we heading to?"],
     city: ["Which city or town?"],
     province: ["Pick your province."],
     postalCode: ["We need your postal code.", "Four digits, please."],
@@ -502,6 +501,18 @@
       </div>
     </aside>`;
 
+  /* Apple Pay / Google Pay: the secure payment page (Yoco) offers both and asks for Face ID, Touch ID or a fingerprint.
+     We cannot show the wallet sheet on this page, so we tell people what to expect on their device. */
+  const walletKind = () => {
+    let apple = false;
+    try { apple = !!(window.ApplePaySession && window.ApplePaySession.canMakePayments()); } catch (e) {}
+    return apple ? "apple" : /Android/i.test(navigator.userAgent || "") ? "google" : "other";
+  };
+  const walletLine = () => ({
+    apple: "Apple Pay works on this device. Tap Pay, then confirm with Face ID or Touch ID. No card number to type.",
+    google: "Google Pay works on the next screen. Tap Pay, then confirm with your fingerprint or face. No card number to type.",
+    other: "On the next screen, choose Apple Pay, Google Pay or card.",
+  })[walletKind()];
   const payLabel = () => `Pay ${rand(AW.cart.total())}`;
 
   function checkoutForm(app) {
@@ -534,8 +545,14 @@
                 </fieldset>`).join("")}
               <div class="co-pay-wrap">
                 <div class="co-alert" role="alert" hidden></div>
+                <div class="co-wallets" data-wallet="${walletKind()}">
+                  <ul class="co-wallet-marks" aria-label="Ways to pay">
+                    <li>Apple Pay</li><li>Google Pay</li><li>Card</li>
+                  </ul>
+                  <p class="co-wallet-line">${walletLine()}</p>
+                </div>
                 ${btn(payLabel(), { type: "submit", block: true, size: "lg", icon: "lock", cls: "co-pay", labelAttr: "data-co-paylabel" })}
-                <p class="co-fine">You'll pay by card on a secure payment page. We never see or store your card details.</p>
+                <p class="co-fine">You'll pay on Yoco's secure payment page. We never see or store your card details.</p>
                 <div class="co-soon" hidden tabindex="-1">
                   <span class="co-soon-mark" aria-hidden="true">${lipsArt("co-soon-lips")}</span>
                   <div class="co-soon-text">
