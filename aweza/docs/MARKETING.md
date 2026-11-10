@@ -154,7 +154,7 @@ Paid ads only use Signature Lips, Mini Lips, CEO of Bad Decisions and Zero Ex's.
 | 1 | The front is polite. The back says what you meant. Heavy cotton, printed to order. | Say it with your back | 9:16 Turnaround video, CEO of Bad Decisions | Men 18 to 30, SA, interests: streetwear, amapiano, comedy, nightlife. Broad, let the algorithm find the funny ones. |
 | 2 | Bad decisions. Good cotton. Join the club. | Bad Decisions Club | Carousel: evidence-bag flat lays of CEO and Zero Ex's | Men 21 to 34, Gauteng, Western Cape and KZN metros. Retarget video viewers 50%+. |
 | 3 | Zero ex's. The maths checks out. R449, sizes XS to 5XL. | Zero Ex's Tee | Static: back print close-up on a model, white wall, hard flash | Men 20 to 32, single relationship status where available, interests: memes, sport, braai. |
-| 4 | The lips that started it all. Our signature tee, back print, sleeve flag. | Signature Lips Tee | 1:1 slow push-in on the lips back print, then the giant lips wall | Men and women 18 to 34, lookalike of site visitors and first purchasers. |
+| 4 | The lips that started it all. Our signature tee, back print close-up. | Signature Lips Tee | 1:1 slow push-in on the lips back print, then the giant lips wall | Men and women 18 to 34, lookalike of site visitors and first purchasers. |
 | 5 | Squad order? 3 for R1 200, free delivery from R2 000. | Free delivery over R2 000 | Line-up of three guys, backs to camera, three different prints | Retarget add-to-bag without purchase, 14 days. Men 18 to 34. |
 | 6 | Something hot is coming. Get first dibs before Drop 02 lands. | Get first dibs | 6s grill smoke teaser, hotdog artwork blurred, "DROP 02" | Engaged video viewers and newsletter lookalikes. Lead objective (email sign-up), not purchase. |
 
@@ -187,7 +187,7 @@ Paid ads only use Signature Lips, Mini Lips, CEO of Bad Decisions and Zero Ex's.
 
 **Week 3: signature ("The lips that started it all")**
 - Mon: The Lips Wall video.
-- Tue: Signature Lips spotlight carousel (sleeve flag, back print close-ups).
+- Tue: Signature Lips spotlight carousel (back print close-ups).
 - Wed: Mini Lips story: "Small lips. Big energy."
 - Thu: Printed To Order video.
 - Fri: Kill the weakest ad, double the winner.
