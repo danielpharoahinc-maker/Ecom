@@ -86,6 +86,7 @@ export default async function handler(req) {
     failureUrl: `${origin}/#/checkout/failed`,
     clientReferenceId: ref,
     subtotalAmount: pricing.subtotalCents,
+    ...(pricing.discountCents ? { totalDiscount: pricing.discountCents } : {}),
     lineItems: [
       ...pricing.lines.map(l => ({
         displayName: `${l.name} (${l.size})`.slice(0, 100),

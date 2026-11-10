@@ -8,6 +8,7 @@ AW.config = {
   delivery: 149,          // flat delivery fee (Printify charges ~R172 to ship one tee to SA)
   freeDeliveryOver: 1300, // order subtotal for free delivery (three tees)
   sizeUpcharge: { "2XL": 40, "3XL": 70, "4XL": 70, "5XL": 70 },
+  deal: { qty: 2, price: 700 },  // multi-buy: any 2 tees for R700 (size extras still added). Remove to end the sale.
 };
 
 AW.collections = [
@@ -26,37 +27,37 @@ AW.collections = [
 
   AW.products = [
     {
-      id: "signature-lips", name: "Signature Lips Tee", collection: "signature", price: 549,
+      id: "signature-lips", name: "Signature Lips Tee", collection: "signature", price: 450,
       colourName: "White", badge: "Signature", sizes: STD, fit: "Heavyweight cotton, classic fit",
       images: img("signature-lips", BACK_FIRST),
       summary: "The one that started it. Big red lips with AWEZA on the teeth across the back, a small wordmark on the chest and a flag on the sleeve.",
     },
     {
-      id: "sweet-cupcake", name: "Sweet Cupcake Tee", collection: "signature", price: 449,
+      id: "sweet-cupcake", name: "Sweet Cupcake Tee", collection: "signature", price: 450,
       colourName: "White", sizes: STD, fit: "Heavyweight cotton, classic fit",
       images: img("sweet-cupcake", BACK_FIRST),
       summary: "Red AWEZA across the chest. On the back, a very sweet surprise in pink icing.",
     },
     {
-      id: "ceo-of-bad-decisions", name: "CEO of Bad Decisions Tee", collection: "bad-decisions", price: 449,
+      id: "ceo-of-bad-decisions", name: "CEO of Bad Decisions Tee", collection: "bad-decisions", price: 450,
       colourName: "White", badge: "Bestseller", sizes: STD, fit: "Heavyweight cotton, classic fit",
       images: img("ceo-of-bad-decisions", BACK_FIRST),
       summary: "A quiet wordmark up front, and the job title stacked big in red serif down the back. Self-aware, never sorry.",
     },
     {
-      id: "zero-exes", name: "Zero Ex's Tee", collection: "bad-decisions", price: 449,
+      id: "zero-exes", name: "Zero Ex's Tee", collection: "bad-decisions", price: 450,
       colourName: "White", sizes: STD, fit: "Heavyweight cotton, classic fit",
       images: img("zero-exes", BACK_FIRST),
       summary: "Small red wordmark on the chest. The back does the maths in big red caps: zero ex's, because mistakes don't count.",
     },
     {
-      id: "captain-save", name: "Captain Save Tee", collection: "no-filter", price: 449,
+      id: "captain-save", name: "Captain Save Tee", collection: "no-filter", price: 450,
       colourName: "White", sizes: STD, fit: "Heavyweight cotton, classic fit",
       images: img("captain-save", FRONT_FIRST),
       summary: "A loud red and yellow shield across the chest, for the guy who always swoops in. AWEZA on the back, so they know who to thank.",
     },
     {
-      id: "need-a-hug", name: "Need A Hug Tee", collection: "no-filter", price: 449,
+      id: "need-a-hug", name: "Need A Hug Tee", collection: "no-filter", price: 450,
       colourName: "White", sizes: STD, fit: "Heavyweight cotton, classic fit",
       images: img("need-a-hug", FRONT_FIRST),
       summary: "Bold black type across the chest that says exactly what it means. Small AWEZA mark on the back, hugs not guaranteed.",

@@ -296,3 +296,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .co-err, .co .is-invalid .co-err { color: #d7191f; font-weight: 600; }
 .co .is-invalid input, .co .is-invalid select, .co .is-invalid textarea { box-shadow: inset 0 -2px 0 #d7191f; }
 .co input::placeholder, .co textarea::placeholder { color: #8a8a8a; }
+
+/* 2-for deal */
+.pick-deal { display: inline-block; margin: 4px 0 0; padding: 3px 10px; border-radius: 999px; background: #d7191f; color: #fff; font: 600 12px/1.4 var(--font-body); letter-spacing: .02em; }
+.co-trow.is-deal, .co-trow.is-deal dd, .bag-sum-row.is-deal, .bag-sum-row.is-deal dd { color: #d7191f; font-weight: 600; }

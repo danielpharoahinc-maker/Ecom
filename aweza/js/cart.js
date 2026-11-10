@@ -139,7 +139,7 @@
   const panel = () => $b(".bag-panel");
 
   function shipState() {
-    const over = cfg().freeDeliveryOver, sub = AW.cart.subtotal();
+    const over = cfg().freeDeliveryOver, sub = AW.cart.subtotal() - AW.cart.discount();
     const pct = over ? Math.max(0, Math.min(100, (sub / over) * 100)) : 100;
     const done = sub >= over;
     return { over, sub, pct, done, text: done ? "Free delivery unlocked. Sharp." : `You're <strong>${esc(rand(over - sub))}</strong> away from free delivery.` };
@@ -221,6 +221,7 @@
     return `
       <dl class="bag-sum">
         <div class="bag-sum-row"><dt>Subtotal</dt><dd>${esc(rand(AW.cart.subtotal()))}</dd></div>
+        ${AW.cart.discount() ? `<div class="bag-sum-row is-deal"><dt>${esc(AW.dealLabel())}</dt><dd>-${esc(rand(AW.cart.discount()))}</dd></div>` : ""}
         <div class="bag-sum-row"><dt>Delivery</dt><dd>${d ? esc(rand(d)) : "Free"}</dd></div>
         <div class="bag-sum-row bag-sum-total"><dt>Total</dt><dd>${esc(rand(AW.cart.total()))}</dd></div>
       </dl>
@@ -468,6 +469,8 @@
     return `
       <dl class="co-totals">
         <div class="co-trow"><dt>Subtotal</dt><dd>${esc(rand(AW.cart.subtotal()))}</dd></div>
+        ${AW.cart.discount() ? `<div class="co-trow is-deal"><dt>${esc(AW.dealLabel())} deal</dt><dd>-${esc(rand(AW.cart.discount()))}</dd></div>` : ""}
+        ${!AW.cart.discount() && AW.config.deal && AW.cart.count() % AW.config.deal.qty ? `<p class="co-nudge">Add another tee: ${esc(AW.dealLabel())}.</p>` : ""}
         <div class="co-trow"><dt>Delivery</dt><dd>${d ? esc(rand(d)) : "Free"}</dd></div>
         ${s.done ? "" : `<p class="co-nudge">Add ${esc(rand(s.over - s.sub))} more for free delivery.</p>`}
         <div class="co-trow co-trow--total"><dt>Total</dt><dd>${esc(rand(AW.cart.total()))}</dd></div>
@@ -659,7 +662,7 @@
       customer: { email: v("email"), phone: normPhone(v("phone")) || v("phone"), firstName: v("firstName"), lastName: v("lastName") },
       address: { line1: v("line1"), line2: v("line2"), suburb: v("suburb"), city: v("city"), province: v("province"), postalCode: v("postalCode"), country: "ZA" },
       notes: v("notes"),
-      totals: { subtotal: Math.round(AW.cart.subtotal()), delivery: Math.round(AW.cart.delivery()), total: Math.round(AW.cart.total()), currency: "ZAR" },
+      totals: { subtotal: Math.round(AW.cart.subtotal()), discount: Math.round(AW.cart.discount()), delivery: Math.round(AW.cart.delivery()), total: Math.round(AW.cart.total()), currency: "ZAR" },
     };
   }
 

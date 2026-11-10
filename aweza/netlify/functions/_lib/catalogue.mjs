@@ -169,12 +169,24 @@ export function priceOrder(lines, cat = loadCatalogue()) {
     subtotal += unit * l.qty;
     return { ...l, name: p.name, unit };
   });
-  const delivery = !subtotal || subtotal >= config.freeDeliveryOver ? 0 : config.delivery;
-  const total = subtotal + delivery;
+  // Multi-buy, mirroring AW.dealDiscount in js/core.js: sets of deal.qty tees (dearest base prices together)
+  // cost deal.price; size extras are paid on top.
+  let discount = 0;
+  const deal = config.deal;
+  if (deal && Number.isInteger(deal.qty) && deal.qty > 1 && Number.isInteger(deal.price) && deal.price > 0) {
+    const units = [];
+    priced.forEach(l => { const base = byId.get(l.id).price; for (let k = 0; k < l.qty; k++) units.push(base); });
+    units.sort((a, b) => b - a);
+    for (let i = 0; i + deal.qty <= units.length; i += deal.qty) discount += Math.max(0, units.slice(i, i + deal.qty).reduce((a, b) => a + b, 0) - deal.price);
+  }
+  const net = subtotal - discount;
+  const delivery = !net || net >= config.freeDeliveryOver ? 0 : config.delivery;
+  const total = net + delivery;
   return {
     lines: priced,
-    subtotal, delivery, total,
+    subtotal, discount, delivery, total,
     subtotalCents: subtotal * 100,
+    discountCents: discount * 100,
     deliveryCents: delivery * 100,
     totalCents: total * 100,
     currency: "ZAR",

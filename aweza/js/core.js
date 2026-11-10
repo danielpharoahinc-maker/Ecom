@@ -33,6 +33,19 @@
   if (!Array.isArray(lines)) lines = [];
   lines = lines.filter(l => l && AW.byId(l.id));
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(lines)); } catch {} AW.emit("cart"); };
+  /* Multi-buy ("2 for R700"): tees are grouped in sets of deal.qty, dearest base prices together, and each full
+     set costs deal.price instead of its base prices. Size extras are paid on top. Mirrored on the server in
+     netlify/functions/_lib/catalogue.mjs; keep the two the same. */
+  AW.dealDiscount = ls => {
+    const d = AW.config.deal; if (!d || !(d.qty > 1)) return 0;
+    const units = [];
+    ls.forEach(l => { const p = AW.byId(l.id); if (p) for (let k = 0; k < l.qty; k++) units.push(p.price); });
+    units.sort((a, b) => b - a);
+    let off = 0;
+    for (let i = 0; i + d.qty <= units.length; i += d.qty) off += Math.max(0, units.slice(i, i + d.qty).reduce((a, b) => a + b, 0) - d.price);
+    return off;
+  };
+  AW.dealLabel = () => { const d = AW.config.deal; return d ? `${d.qty} for ${AW.rand(d.price)}` : ""; };
   AW.cart = {
     lines: () => lines.map(l => ({ ...l })),
     add(id, size) {
@@ -44,8 +57,9 @@
     remove(i) { lines.splice(i, 1); save(); },
     count: () => lines.reduce((n, l) => n + l.qty, 0),
     subtotal: () => lines.reduce((n, l) => n + l.qty * AW.priceFor(AW.byId(l.id), l.size), 0),
-    delivery() { const s = this.subtotal(); return !s || s >= AW.config.freeDeliveryOver ? 0 : AW.config.delivery; },
-    total() { return this.subtotal() + this.delivery(); },
+    discount: () => AW.dealDiscount(lines),
+    delivery() { const s = this.subtotal() - this.discount(); return !s || s >= AW.config.freeDeliveryOver ? 0 : AW.config.delivery; },
+    total() { return this.subtotal() - this.discount() + this.delivery(); },
   };
 
   // Router

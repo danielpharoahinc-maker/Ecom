@@ -49,6 +49,7 @@
     f.innerHTML = `
       <footer class="mf">
         <div class="mf-facts">
+          ${c.deal ? `<p><strong>${AW.dealLabel()}</strong> Mix any two tees. Size extras still apply.</p>` : ""}
           <p><strong>Delivery</strong> ${AW.rand(c.delivery)} anywhere in South Africa. Free over ${AW.rand(c.freeDeliveryOver)}.</p>
           <p><strong>Printed to order</strong> Every tee is printed when you buy it, so nothing sits in a warehouse.</p>
           <p><strong>Payment</strong> Card, Apple Pay or Google Pay through a secure checkout. Prices in Rand.</p>
@@ -179,6 +180,7 @@
         <div class="pick-head">
           <h1 class="pick-name">${esc(p.name)}</h1>
           <p class="pick-price" data-price>${AW.rand(p.price)}</p>
+          ${AW.config.deal ? `<p class="pick-deal">${AW.dealLabel()} on any tees</p>` : ""}
         </div>
         <p class="pick-sum">${esc(p.summary)}</p>
         <fieldset class="pick-sizes">
