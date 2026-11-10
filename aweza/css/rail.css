@@ -236,3 +236,14 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   .sg.is-open .sg-sheet { transform: translate(-50%, -50%); opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) { .sg-sheet, .sg-scrim { transition: none; } }
+
+/* photo-real shot that the settled 3D shirt crossfades into (js/rail3d.js placePhoto) */
+.rail-photo {
+  position: absolute; top: 0; left: 0; z-index: 3; pointer-events: none; user-select: none;
+  max-width: none; opacity: 0; transform-origin: 0 0;
+  transition: opacity .45s var(--rl-ease);
+  filter: drop-shadow(0 14px 18px rgba(21, 37, 58, .14));
+}
+.rail-photo.is-on { opacity: 1; }
+.rail-photo.is-real { mix-blend-mode: multiply; filter: none; }   /* real Printify photo on a white ground */
+@media (prefers-reduced-motion: reduce) { .rail-photo { transition: none; } }

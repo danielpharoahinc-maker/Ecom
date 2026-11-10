@@ -27,6 +27,26 @@
     "need-a-hug":           { front: [{ src: "need-a-hug-print", x: 0, y: 0.19, w: 0.72 }],            back: [{ src: "logo-serif-black", x: 0, y: 0.48, w: 0.15 }] },
   };
 
+  /* ---------- photo-real hanging shots ----------
+     When a shirt has swung round to face you and settled, the 3D shirt crossfades into a photo-real shot of
+     the same tee on a hanger (Higgsfield renders made from the Printify mockups, transparent background).
+     Two fronts use the real Printify hanger photo instead, with its white background cut away.
+     top/bottom/cx: where the hook top, the hem and the centre sit in the image, as fractions. */
+  const PH = "images/hang-real/", PR = "images/hang/";
+  const M = {"captain-save-back": {"top": 0.0125, "bottom": 0.975, "cx": 0.4994}, "ceo-of-bad-decisions-back": {"top": 0.0098, "bottom": 0.9696, "cx": 0.4989}, "ceo-of-bad-decisions-front": {"top": 0.0116, "bottom": 0.9696, "cx": 0.4994}, "need-a-hug-back": {"top": 0.0116, "bottom": 0.9812, "cx": 0.4994}, "signature-lips-back": {"top": 0.0107, "bottom": 0.9812, "cx": 0.4961}, "signature-lips-front": {"top": 0.0107, "bottom": 0.9696, "cx": 0.4994}, "sweet-cupcake-front": {"top": 0.0071, "bottom": 0.9723, "cx": 0.4994}, "zero-exes-back": {"top": 0.0143, "bottom": 0.983, "cx": 0.4961}, "zero-exes-front": {"top": 0.0125, "bottom": 0.9696, "cx": 0.4989}, "captain-save-front-real": {"top": 0.0, "bottom": 0.97, "cx": 0.5258}, "need-a-hug-front-real": {"top": 0.0, "bottom": 0.97, "cx": 0.5258}};
+  const shot = id => ({ src: PH + id + ".webp", m: M[id], aspect: 0.8, real: false });
+  // real Printify hanger photo, white background cut away so it sits cleanly on the wall
+  const real = id => ({ src: PH + id + "-front-real.webp", m: M[id + "-front-real"], aspect: 640 / 801, real: false });
+  const PHOTOS = {
+    "signature-lips":       { front: shot("signature-lips-front"),       back: shot("signature-lips-back") },
+    "ceo-of-bad-decisions": { front: shot("ceo-of-bad-decisions-front"), back: shot("ceo-of-bad-decisions-back") },
+    "zero-exes":            { front: shot("zero-exes-front"),            back: shot("zero-exes-back") },
+    "sweet-cupcake":        { front: shot("sweet-cupcake-front") },
+    "need-a-hug":           { front: real("need-a-hug"),                 back: shot("need-a-hug-back") },
+    "captain-save":         { front: real("captain-save"),               back: shot("captain-save-back") },
+  };
+  Object.values(PHOTOS).forEach(p => Object.values(p).forEach(v => { const i = new Image(); i.decoding = "async"; i.src = v.src; })); // warm the cache
+
   /* ---------- the tee silhouette ---------- */
   const X0 = -0.95, X1 = 0.95, Y0 = -0.70, Y1 = 0.66; // texture area in shirt units
   function teePath(ctx, toX, toY) {
@@ -210,7 +230,8 @@
       const pr = PRINTS[p.id] || { front: [], back: [] };
       faceTexture(pr.front, renderer).then(t => { front.material.map = t; front.material.needsUpdate = true; front.visible = true; wake(); });
       faceTexture(pr.back, renderer).then(t => { back.material.map = t; back.material.needsUpdate = true; back.visible = true; wake(); });
-      return { group, coreMesh, front, back, cur: { x: 0, ry: 1.3, s: 0.94 }, tgt: { x: 0, ry: 1.3, s: 0.94 }, seed: i * 1.7 };
+      return { group, coreMesh, front, back, id: p.id, cur: { x: 0, ry: 1.3, s: 0.94 }, tgt: { x: 0, ry: 1.3, s: 0.94 },
+               vel: { x: 0, ry: 0, s: 0 }, swing: 0, swingV: 0, lift: 0, liftV: 0, seed: i * 1.7 };
     });
 
     loadTeeGLB().then(([gf, gb]) => {
@@ -225,7 +246,10 @@
       wake();
     }).catch(() => { /* keep the built-in shirt shape */ });
 
-    S = { stage, canvas, renderer, scene, camera, rail, tees, w: 280, sel: null, turned: false, spin: 0, raf: 0, visible: true, last: 0, still: 0 };
+    const photo = document.createElement("img");
+    photo.className = "rail-photo"; photo.alt = ""; photo.setAttribute("aria-hidden", "true"); photo.decoding = "async";
+    stage.appendChild(photo);
+    S = { stage, canvas, renderer, scene, camera, rail, tees, photo, w: 280, sel: null, turned: false, spin: 0, spinV: 0, raf: 0, visible: true, last: 0, still: 0 };
     stage.classList.add("is-3d");
     AW.rail3d.active = true;
 
@@ -256,7 +280,18 @@
   function onLayout({ items, sel, w }) {
     if (!S) return;
     S.w = w;
-    if (sel !== S.sel) { S.sel = sel; S.turned = false; }
+    if (sel !== S.sel) {
+      const prev = S.sel;
+      S.sel = sel; S.turned = false;
+      if (sel != null && !reduced()) {
+        const dir = prev == null ? 1 : Math.sign(sel - prev) || 1;
+        S.tees.forEach((t, i) => {
+          const d = i - sel;
+          if (d === 0) { t.swingV += 1.6 * dir; t.liftV += 0.9; }          // pulled off the rail: a lift and a swing
+          else if (Math.abs(d) <= 3) t.swingV += (0.9 / Math.abs(d)) * Math.sign(d);  // neighbours get nudged aside
+        });
+      }
+    }
     items.forEach((it, i) => {
       const t = S.tees[i]; if (!t) return;
       t.tgt.x = it.x;
@@ -270,30 +305,68 @@
 
   function wake() { if (S && !S.raf && S.visible) { S.still = 0; S.last = performance.now(); S.raf = requestAnimationFrame(frame); } }
 
+  function spring(c, v, g, k, d, dt) { const a = k * (g - c) - d * v; v += a * dt; return [c + v * dt, v]; }
+
   function frame(now) {
     if (!S) return;
     S.raf = 0;
-    const dt = Math.min(0.05, (now - S.last) / 1000); S.last = now;
-    const k = reduced() ? 1 : 1 - Math.exp(-dt * 7.5);
+    const elapsed = Math.min(0.1, (now - S.last) / 1000); S.last = now;
+    const steps = Math.max(1, Math.ceil(elapsed / 0.016)), dt = elapsed / steps;   // fixed small steps keep the springs stable
+    const still = reduced();
     const scaleBase = S.w * S.upp * 1.3 / 1.9;
     let moving = false;
-    S.spin += ((S.turned ? Math.PI : 0) - S.spin) * k;
+    // turning round: a spring with a little overshoot, like a shirt spun on its hook
+    const spinG = S.turned ? Math.PI : 0;
+    for (let n = 0; n < steps; n++) {
+      if (still) { S.spin = spinG; S.spinV = 0; } else [S.spin, S.spinV] = spring(S.spin, S.spinV, spinG, 46, 9.5, dt);
+      S.tees.forEach((t, i) => {
+        const c = t.cur, g = t.tgt, v = t.vel;
+        if (still) { c.x = g.x; c.ry = g.ry; c.s = g.s; v.x = v.ry = v.s = 0; t.swing = t.swingV = t.lift = t.liftV = 0; return; }
+        [c.x, v.x] = spring(c.x, v.x, g.x, 70, 13, dt);
+        [c.ry, v.ry] = spring(c.ry, v.ry, g.ry, 70, 11.5, dt);   // slightly under-damped: a small overshoot as it swings round
+        [c.s, v.s] = spring(c.s, v.s, g.s, 70, 14, dt);
+        [t.lift, t.liftV] = spring(t.lift, t.liftV, i === S.sel ? 0.035 : 0, 55, 9, dt);
+        [t.swing, t.swingV] = spring(t.swing, t.swingV, 0, 38, 2.6, dt);   // pendulum on the hook
+      });
+    }
+    if (Math.abs(S.spin - spinG) > 0.002 || Math.abs(S.spinV) > 0.01) moving = true;
     S.tees.forEach((t, i) => {
-      const c = t.cur, g = t.tgt;
-      const ex = g.x - c.x, er = g.ry - c.ry, es = g.s - c.s;
-      c.x += ex * k; c.ry += er * k; c.s += es * k;
-      if (Math.abs(ex) > 0.3 || Math.abs(er) > 0.002 || Math.abs(es) > 0.0005) moving = true;
+      const c = t.cur, g = t.tgt, v = t.vel;
+      if (Math.abs(g.x - c.x) > 0.3 || Math.abs(v.x) > 2 || Math.abs(g.ry - c.ry) > 0.002 || Math.abs(v.ry) > 0.01 ||
+          Math.abs(g.s - c.s) > 0.0005 || Math.abs(t.swing) > 0.002 || Math.abs(t.swingV) > 0.01 || Math.abs(t.liftV) > 0.005) moving = true;
       const grp = t.group;
-      grp.position.set(c.x * S.upp, S.rail.position.y, Math.abs(c.ry) < 0.6 ? 0.12 : 0);
+      grp.position.set(c.x * S.upp, S.rail.position.y + t.lift * scaleBase, Math.abs(c.ry) < 0.6 ? 0.12 : 0);
       grp.rotation.y = c.ry + (i === S.sel ? S.spin : 0);
-      grp.rotation.z = reduced() ? 0 : Math.sin(now / 1300 + t.seed) * 0.012;  // the faintest sway
+      grp.rotation.z = (still ? 0 : Math.sin(now / 1300 + t.seed) * 0.012) + t.swing * 0.09;
       grp.scale.setScalar(scaleBase * c.s);
     });
-    if (Math.abs(S.spin - (S.turned ? Math.PI : 0)) > 0.002) moving = true;
     S.renderer.render(S.scene, S.camera);
-    // keep the gentle sway alive while on screen, but rest the GPU when the page is idle a while
-    S.still = moving ? 0 : S.still + dt;
-    if (S.visible && !document.hidden && (moving || (!reduced() && S.still < 8))) S.raf = requestAnimationFrame(frame);
+    placePhoto(scaleBase);
+    S.still = moving ? 0 : S.still + elapsed;
+    if (S.visible && !document.hidden && (moving || (!still && S.still < 8))) S.raf = requestAnimationFrame(frame);
+  }
+
+  /* Crossfade the settled shirt into its photo-real shot, lined up hook-to-hem with the 3D shirt. */
+  function placePhoto(scaleBase) {
+    const img = S.photo; if (!img) return;
+    const t = S.sel != null ? S.tees[S.sel] : null;
+    const set = t && PHOTOS[t.id];
+    const ph = set && (S.turned ? set.back : set.front);
+    const spinG = S.turned ? Math.PI : 0;
+    const settled = t && Math.abs(t.tgt.ry - t.cur.ry) < 0.03 && Math.abs(t.vel.ry) < 0.12 &&
+      Math.abs(S.spin - spinG) < 0.04 && Math.abs(S.spinV) < 0.15 && Math.abs(t.swing) < 0.06;
+    const holding = ph && img.classList.contains("is-on") && img.getAttribute("src") === ph.src &&
+      Math.abs(t.tgt.ry - t.cur.ry) < 0.2 && Math.abs(S.spin - spinG) < 0.3;
+    if (!ph || !(settled || holding)) { if (img.classList.contains("is-on")) img.classList.remove("is-on"); return; }
+    if (img.getAttribute("src") !== ph.src) { img.classList.remove("is-on"); img.setAttribute("src", ph.src); img.classList.toggle("is-real", ph.real); }
+    const W = S.stage.clientWidth;
+    const hookToHem = 1.535 * scaleBase * t.cur.s / S.upp;            // px, from the hook top to the hem of the 3D shirt
+    const h = hookToHem / (ph.m.bottom - ph.m.top), w = h * ph.aspect;
+    const railPx = 9 - t.lift * scaleBase / S.upp;
+    img.style.width = w.toFixed(1) + "px";
+    img.style.height = h.toFixed(1) + "px";
+    img.style.transform = `translate(${(W / 2 + t.cur.x - w * ph.m.cx).toFixed(1)}px, ${(railPx - 4 - ph.m.top * h).toFixed(1)}px)`;
+    if (img.complete && img.naturalWidth) img.classList.add("is-on"); else img.onload = () => { if (S && S.photo === img) wake(); };
   }
 
   function teardown() {
@@ -303,6 +376,7 @@
     S.scene.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); } });
     S.renderer.dispose();
     S.canvas.remove();
+    S.photo && S.photo.remove();
     S.stage.classList.remove("is-3d");
     S = null;
     AW.rail3d.active = false;
