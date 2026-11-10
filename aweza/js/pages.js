@@ -342,7 +342,7 @@
           <div class="pg-fig"><span class="pg-big">${freeOver}</span><span class="pg-fig-l">Spend this and delivery is free</span></div>
           <div class="pg-fig"><span class="pg-big pg-big--ph">[X–Y]</span><span class="pg-fig-l">Working days, door to door</span></div>
         </div>
-        <p>Every tee is printed after you order, then shipped to you anywhere in South Africa. Allow about ${AW.eta().days[0]} to ${AW.eta().days[1]} working days from order to delivery (today that means ${AW.eta().text}). Around the festive season it can run a little longer. You'll get a tracking link by email when it ships.</p>` },
+        <p>Every tee is printed after you order, then shipped to you anywhere in South Africa. Allow about ${AW.eta().days[0]} to ${AW.eta().days[1]} working days from order to delivery. Around the festive season it can run a little longer. You'll get a tracking link by email when it ships.</p>` },
       { id: "payments", title: "Payments", html: `
         <p>Card payments are processed securely by our payment provider, Yoco. We never see or store your card number. Prices are in Rand ${ph("and include VAT, if registered")}.</p>
         <p class="pg-note">Payments are launching soon. Your bag is saved on this device until then.</p>` },

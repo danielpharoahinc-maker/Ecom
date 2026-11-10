@@ -474,7 +474,6 @@
         ${AW.cart.referral() ? `<div class="co-trow is-deal"><dt>Friend's gift</dt><dd>-${esc(rand(AW.cart.referral()))}</dd></div>` : ""}
         ${AW.cart.nudge() ? `<p class="co-nudge">${esc(AW.cart.nudge())} (${esc(AW.dealLabel())})</p>` : ""}
         <div class="co-trow"><dt>Delivery</dt><dd>${d ? esc(rand(d)) : "Free"}</dd></div>
-        <div class="co-trow co-eta"><dt>Estimated arrival</dt><dd>${esc(AW.eta().text)}</dd></div>
         ${s.done ? "" : `<p class="co-nudge">Add ${esc(rand(s.over - s.sub))} more for free delivery.</p>`}
         <div class="co-trow co-trow--total"><dt>Total</dt><dd>${esc(rand(AW.cart.total()))}</dd></div>
       </dl>
@@ -714,10 +713,10 @@
     success: {
       fig: "Order confirmed",
       title: "Paid. Good <em>decision.</em>",
-      lede: `Your order is in. We print it fresh and ship it to your door. Estimated arrival: ${AW.eta().text}. A confirmation is on its way to your inbox.`,
+      lede: "Your order is in. We print it fresh and ship it to your door. A confirmation is on its way to your inbox.",
       steps: [
         ["Printed to order", "Your tee gets printed now, just for you. No warehouse of leftovers."],
-        ["On its way", `Delivered across South Africa in ${AW.eta().days[0]} to ${AW.eta().days[1]} working days. Estimated arrival: ${AW.eta().text}.`],
+        ["On its way", "Delivered across South Africa. Tracking follows as soon as it ships."],
         ["Check your inbox", "Your confirmation is there now. Tracking follows when it ships."],
       ],
       actions: btn("Back to the shop", { href: "#/shop", size: "lg", iconAfter: "arrow-right" }),
