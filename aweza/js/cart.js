@@ -474,6 +474,7 @@
         ${AW.cart.referral() ? `<div class="co-trow is-deal"><dt>Friend's gift</dt><dd>-${esc(rand(AW.cart.referral()))}</dd></div>` : ""}
         ${AW.cart.nudge() ? `<p class="co-nudge">${esc(AW.cart.nudge())} (${esc(AW.dealLabel())})</p>` : ""}
         <div class="co-trow"><dt>Delivery</dt><dd>${d ? esc(rand(d)) : "Free"}</dd></div>
+        <div class="co-trow co-eta"><dt>Estimated arrival</dt><dd>${esc(AW.eta().text)}</dd></div>
         ${s.done ? "" : `<p class="co-nudge">Add ${esc(rand(s.over - s.sub))} more for free delivery.</p>`}
         <div class="co-trow co-trow--total"><dt>Total</dt><dd>${esc(rand(AW.cart.total()))}</dd></div>
       </dl>
