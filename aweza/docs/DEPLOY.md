@@ -151,3 +151,9 @@ Yoco developer docs, read November 2026:
 - Testing and going live (test keys, test cards, verified domains, R2.00 minimum): https://developer.yoco.com/docs/checkout-api/testing
 
 Printify API v1 reference (orders: `external_id`, `line_items`, `shipping_method`, `address_to`; products list max `limit=50`): https://developers.printify.com/
+
+## Adding a new tee: use the same model photo
+
+Every tee shows the same model: the man with his hand on his hip, saved as `images/<id>/male-front-5.jpg`. Printify renumbers its model cameras, so do not trust the name: on 10 November 2026 that man is the camera **`person-4`** (id `92661`), and `person-5` is a different woman. Download it with
+`https://images-api.printify.com/mockup/<printify product id>/12100/92661/<product slug>.jpg?camera_label=person-4`
+and check it by eye before publishing. The other photos (`back` 92571, `front` 92570, `collar` 92586, `folded` 102001, `hanging-1` 102002) have kept their ids.
