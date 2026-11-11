@@ -764,3 +764,21 @@ input, .big-input, .note, .talkbox textarea { border: 0; color: var(--ink); back
 .rem-toggle input { width: 22px; height: 22px; accent-color: var(--red); flex: none; }
 .rem-install .inst { gap: 10px; }
 .tour-txt { padding-right: 44px; }
+
+/* ---------- Proff's idle moves (every 10 s) ---------- */
+.proff { transform-origin: 50% 92%; }
+.proff .pf-handle { transform-origin: 70px 52px; transform-box: view-box; }
+.proff .pf-look { transform-box: view-box; }
+.proff.mv-hop { animation: mvHop .9s var(--spring); }
+.proff.mv-wiggle { animation: mvWiggle .9s ease-in-out; }
+.proff.mv-stretch { animation: mvStretch .9s var(--spring); }
+.proff.mv-stamp { animation: mvStamp .7s ease-in-out; }
+.proff.mv-look .pf-look { animation: mvLook 1.4s ease-in-out; }
+.proff.mv-twirl .pf-handle { animation: mvTwirl 1s ease-in-out; }
+@keyframes mvHop { 0% { transform: none; } 20% { transform: scale(1.06, .9); } 50% { transform: translateY(-14px) scale(.96, 1.06); } 78% { transform: scale(1.08, .9); } 100% { transform: none; } }
+@keyframes mvWiggle { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-9deg); } 45% { transform: rotate(8deg); } 70% { transform: rotate(-5deg); } 88% { transform: rotate(3deg); } }
+@keyframes mvStretch { 0%, 100% { transform: none; } 35% { transform: scale(1.1, .86); } 70% { transform: scale(.94, 1.1); } }
+@keyframes mvStamp { 0%, 100% { transform: none; } 30% { transform: translateY(-8px); } 55% { transform: translateY(3px) scale(1.08, .88); } 75% { transform: none; } }
+@keyframes mvLook { 0%, 100% { transform: translateX(0); } 20%, 40% { transform: translateX(-4px); } 60%, 80% { transform: translateX(4px); } }
+@keyframes mvTwirl { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-22deg); } 45% { transform: rotate(18deg); } 70% { transform: rotate(-10deg); } 88% { transform: rotate(5deg); } }
+@media (prefers-reduced-motion: reduce) { .proff[class*="mv-"], .proff[class*="mv-"] * { animation: none !important; } }

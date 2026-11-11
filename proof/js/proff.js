@@ -15,10 +15,10 @@ const R = '#e8423f', RD = '#b8302d', W = '#eef2f9', WS = '#cdd6ea', N = '#0b1630
 // "Proff" in Fredoka (rounded), as shapes: deliberately unlike the "proof." logo.
 export const NAME = (h = 18) => `<svg class="proff-name" height="${h}" viewBox="4.6 -72.0 233.0 73.7" role="img" aria-label="Proff"><path d="M12.2 0.9L12.2 0.9Q8.5 0.9 7.0-0.2Q5.4-1.3 5-3.1Q4.6-4.9 4.6-6.8L4.6-6.8L4.6-61.4Q4.6-63.3 5-65.0Q5.4-66.8 7-67.9Q8.6-69 12.3-69L12.3-69L32.8-69Q37-69 41.3-67.5Q45.5-66 49.2-62.9Q52.8-59.7 55.1-55.1Q57.3-50.5 57.3-44.3L57.3-44.3Q57.3-38.2 55.1-33.6Q52.8-29 49.2-26.0Q45.5-22.9 41.2-21.4Q36.9-19.8 32.7-19.8L32.7-19.8L19.9-19.8L19.9-6.7Q19.9-4.8 19.5-3.1Q19.1-1.3 17.5-0.2Q15.9 0.9 12.2 0.9ZM19.9-53.8L19.9-35L32.8-35Q35-35 37.1-36.0Q39.3-36.9 40.8-39Q42.2-41.1 42.2-44.4L42.2-44.4Q42.2-47.2 41-49.3Q39.8-51.4 37.6-52.6Q35.5-53.8 32.7-53.8L32.7-53.8L19.9-53.8ZM71.3 0.9L71.3 0.9Q67.6 0.9 66.0-0.2Q64.5-1.2 64.2-3Q63.8-4.8 63.8-6.7L63.8-6.7L63.8-41.6Q63.8-43.6 64.2-45.3Q64.6-47 66.2-48.1Q67.7-49.1 71.4-49.1L71.4-49.1Q74.9-49.1 76.5-48.2Q78-47.2 78.4-46.0Q78.8-44.7 78.8-43.8L78.8-43.8L77.6-43.2Q77.8-43.6 78.7-44.7Q79.5-45.7 81-46.9Q82.5-48 84.7-48.8Q86.8-49.6 89.6-49.6L89.6-49.6Q90.7-49.6 92.1-49.5Q93.4-49.3 94.8-48.9Q96.3-48.4 97.5-47.7Q98.7-46.9 99.5-45.8Q100.2-44.7 100.2-43.1L100.2-43.1Q100.2-39 98.3-36.1Q96.4-33.3 93.5-33.3L93.5-33.3Q91.8-33.3 91.1-33.6Q90.4-33.9 90.0-34.2Q89.5-34.5 88.9-34.8Q88.3-35 86.7-35L86.7-35Q85.2-35 83.9-34.6Q82.5-34.2 81.4-33.4Q80.2-32.5 79.6-31.3Q78.9-30 78.9-28.5L78.9-28.5L78.9-6.5Q78.9-4.6 78.6-2.9Q78.2-1.1 76.6-0.1Q75 0.9 71.3 0.9ZM130.1 1.7L130.1 1.7Q125.4 1.7 120.8-0.2Q116.1-2 112.3-5.4Q108.5-8.8 106.3-13.6Q104.1-18.3 104.1-24.1L104.1-24.1Q104.1-29.5 106.1-34.1Q108.1-38.8 111.7-42.4Q115.3-46 120.0-48.1Q124.6-50.1 129.9-50.1L129.9-50.1Q137.1-50.1 142.9-46.7Q148.8-43.2 152.3-37.3Q155.8-31.4 155.8-24.2L155.8-24.2Q155.8-18.1 153.6-13.4Q151.3-8.6 147.6-5.2Q143.8-1.8 139.3-0.1Q134.7 1.7 130.1 1.7ZM129.9-13.4L129.9-13.4Q132.3-13.4 134.8-14.6Q137.3-15.8 139-18.2Q140.7-20.6 140.7-24.3L140.7-24.3Q140.7-27.5 139.3-29.9Q137.9-32.3 135.4-33.6Q133-35 129.8-35L129.8-35Q126.8-35 124.5-33.6Q122.1-32.2 120.7-29.8Q119.2-27.3 119.2-24.2L119.2-24.2Q119.2-20.6 120.8-18.2Q122.5-15.7 125-14.6Q127.5-13.4 129.9-13.4ZM175.3 1L175.3 1Q171.8 1 170.2-0.1Q168.6-1.2 168.3-3.0Q167.9-4.7 167.9-6.7L167.9-6.7L167.9-53.5Q167.9-56.9 169-60.2Q170.1-63.5 172.5-66.2Q174.9-68.8 178.6-70.4Q182.3-72 187.6-72L187.6-72Q189.5-72 191.3-71.7Q193-71.3 194.1-69.8Q195.1-68.2 195.1-64.5L195.1-64.5Q195.1-60.8 194-59.3Q192.9-57.7 191.2-57.4Q189.4-57 187.5-57L187.5-57Q186.2-57 185.4-56.9Q184.5-56.7 184-56.4Q183.5-56.1 183.3-55.4Q183-54.7 183-53.7L183-53.7L183-6.4Q183-4.5 182.6-2.8Q182.2-1.1 180.6-0.1Q179 1 175.3 1ZM164.8-48.3L164.8-48.3L175.8-48.3L189.6-48.7Q191.5-48.7 193.2-48.4Q194.9-48 196-46.4Q197.1-44.8 197.1-41.1L197.1-41.1Q197.1-37.7 196.1-36.1Q195-34.5 193.3-34.1Q191.6-33.6 189.6-33.6L189.6-33.6L176.5-33.9L164.4-33.9Q161.5-34 160.3-35.6Q159.2-37.3 159.2-41.2L159.2-41.2Q159.2-44.8 160.6-46.6Q162-48.3 164.8-48.3ZM215.8 1L215.8 1Q212.3 1 210.7-0.1Q209.1-1.2 208.8-3.0Q208.4-4.7 208.4-6.7L208.4-6.7L208.4-53.5Q208.4-56.9 209.5-60.2Q210.6-63.5 213-66.2Q215.4-68.8 219.1-70.4Q222.8-72 228.1-72L228.1-72Q230-72 231.8-71.7Q233.5-71.3 234.6-69.8Q235.6-68.2 235.6-64.5L235.6-64.5Q235.6-60.8 234.5-59.3Q233.4-57.7 231.7-57.4Q229.9-57 228-57L228-57Q226.7-57 225.9-56.9Q225-56.7 224.5-56.4Q224-56.1 223.8-55.4Q223.5-54.7 223.5-53.7L223.5-53.7L223.5-6.4Q223.5-4.5 223.1-2.8Q222.7-1.1 221.1-0.1Q219.5 1 215.8 1ZM205.3-48.3L205.3-48.3L216.3-48.3L230.1-48.7Q232-48.7 233.7-48.4Q235.4-48 236.5-46.4Q237.6-44.8 237.6-41.1L237.6-41.1Q237.6-37.7 236.6-36.1Q235.5-34.5 233.8-34.1Q232.1-33.6 230.1-33.6L230.1-33.6L217-33.9L204.9-33.9Q202-34 200.8-35.6Q199.7-37.3 199.7-41.2L199.7-41.2Q199.7-44.8 201.1-46.6Q202.5-48.3 205.3-48.3Z" fill="currentColor"/></svg>`;
 
-const handle = (lean = 0) => `<g transform="rotate(${lean} 70 70)"><rect x="63" y="30" width="14" height="22" rx="4" fill="${RD}"/><circle cx="70" cy="24" r="14" fill="${R}"/><ellipse cx="65" cy="19" rx="5" ry="3.5" fill="#fff" opacity=".35"/></g>`;
+const handle = (lean = 0) => `<g class="pf-handle"><g transform="rotate(${lean} 70 70)"><rect x="63" y="30" width="14" height="22" rx="4" fill="${RD}"/><circle cx="70" cy="24" r="14" fill="${R}"/><ellipse cx="65" cy="19" rx="5" ry="3.5" fill="#fff" opacity=".35"/></g></g>`;
 const body = (y = 52) => `<rect x="34" y="${y}" width="72" height="50" rx="12" fill="${W}"/><rect x="34" y="${y + 38}" width="72" height="12" fill="${WS}" opacity=".7"/><rect x="28" y="${y + 48}" width="84" height="13" rx="5" fill="${N2}"/><rect x="28" y="${y + 56}" width="84" height="5" rx="2.5" fill="${N}" opacity=".5"/>`;
 const eye = (x, y, lx = 0, ly = 0) => `<ellipse cx="${x}" cy="${y}" rx="5.2" ry="6.4" fill="${N}"/><circle cx="${x + lx + 1.6}" cy="${y + ly - 2}" r="1.8" fill="#fff"/>`;
-const eyes = (y, lx = 0, ly = 0) => `<g class="pf-eyes" style="transform-origin:70px ${y}px">${eye(55, y, lx, ly)}${eye(85, y, lx, ly)}</g>`;
+const eyes = (y, lx = 0, ly = 0) => `<g class="pf-look"><g class="pf-eyes" style="transform-origin:70px ${y}px">${eye(55, y, lx, ly)}${eye(85, y, lx, ly)}</g></g>`;
 const shut = (x, y) => `<path d="M${x - 5} ${y} q5 -6 10 0" stroke="${N}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
 const closed = (x, y) => `<path d="M${x - 5} ${y} q5 5 10 0" stroke="${N}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
 const blush = (y) => `<ellipse cx="46" cy="${y}" rx="5" ry="3" fill="${R}" opacity=".35"/><ellipse cx="94" cy="${y}" rx="5" ry="3" fill="${R}" opacity=".35"/>`;
@@ -68,6 +68,28 @@ export function mountProff() {
   if (!fab.isConnected) document.body.appendChild(fab);
 }
 export function unmountProff() { fab?.remove(); fab = null; }
+
+// Every 10 seconds Proff does a little something, so he feels alive.
+// Never while asleep, never when the app is in the background, and not at all
+// if the phone asks for reduced motion.
+const MOVES = ['hop', 'wiggle', 'look', 'stretch', 'twirl', 'stamp'];
+let lastMove = '';
+setInterval(() => {
+  if (!fab?.isConnected || document.hidden) return;
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  const svg = fab.querySelector('svg.proff');
+  if (!svg || svg.classList.contains('pf-sleep')) return;
+  const choices = MOVES.filter((m) => m !== lastMove);
+  const move = choices[Math.floor(Math.random() * choices.length)];
+  lastMove = move;
+  svg.classList.add(`mv-${move}`);
+  svg.addEventListener('animationend', function done(e) {
+    if (e.target !== svg && !e.target.classList?.contains('pf-handle') && !e.target.classList?.contains('pf-look')) return;
+    svg.classList.remove(`mv-${move}`);
+    svg.removeEventListener('animationend', done);
+  });
+  setTimeout(() => svg.classList.remove(`mv-${move}`), 1600); // safety
+}, 10000);
 
 /* ---------- Ask Proff ---------- */
 
