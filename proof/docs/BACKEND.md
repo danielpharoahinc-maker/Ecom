@@ -29,6 +29,31 @@ setup. Start with **Google and email** (free). Add Apple once the App Store
 version is in progress, because Apple requires an Apple sign-in option in any
 iOS app that offers Google sign-in.
 
+## 2a. Email sign-in with a 6-digit code (free, do this first)
+The app is already built for this: people type their email, get a 6-digit
+code, type it in, and they're in. New emails get an account automatically.
+
+1. In Supabase: Authentication > Providers > **Email**: make sure it's on.
+   Turn **Confirm email** on.
+2. Authentication > Email Templates > **Magic Link**. Replace the body with:
+   ```
+   <h2>Your Proof code</h2>
+   <p>Enter this code in Proof to sign in:</p>
+   <p style="font-size:28px;font-weight:700;letter-spacing:6px">{{ .Token }}</p>
+   <p>It expires in 1 hour. If you didn't ask for it, ignore this email.</p>
+   ```
+   Do the same for the **Confirm signup** template (first-time users get that one).
+   Subject for both: `Your Proof code`.
+3. **Before real users:** Supabase's built-in email sender only allows a few
+   emails per hour, which is fine for testing but not for launch. Create a free
+   Resend account (resend.com, 3,000 emails a month free), verify your domain,
+   then in Supabase: Project Settings > Authentication > SMTP Settings, paste
+   Resend's SMTP details. Sender name: Proof.
+4. Paste the Project URL and anon key into `js/config.js` and redeploy.
+
+Test: open your Netlify link, tap Continue with email, enter your address,
+type the code from the email. You land on onboarding.
+
 ## 2b. Sign in with Apple, step by step (do this with a parent)
 What the person sees: on an iPhone, iPad or Mac, tapping **Continue with
 Apple** shows Apple's sheet and confirms with **Face ID or Touch ID**. They

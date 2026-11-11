@@ -12,8 +12,17 @@ let client = null;
 async function sb() {
   if (!LIVE) return null;
   if (client) return client;
-  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm');
-  client = createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
+  // The library ships inside the app (vendor/), so sign-in never depends on a CDN.
+  if (!window.supabase) {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'vendor/supabase-2.45.4.js';
+      s.onload = resolve;
+      s.onerror = () => reject(new Error('Couldn’t load sign-in. Check your connection and try again.'));
+      document.head.appendChild(s);
+    });
+  }
+  client = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
   return client;
 }
 
@@ -25,13 +34,7 @@ export async function currentLiveUser() {
   if (!c) return null;
   const { data } = await c.auth.getSession();
   const u = data.session?.user;
-  if (!u) return null;
-  return {
-    id: u.id,
-    email: u.email || '',
-    name: u.user_metadata?.full_name || u.user_metadata?.name || '',
-    provider: u.app_metadata?.provider || 'email',
-  };
+  return u ? toUser(u) : null;
 }
 
 // provider: 'apple' | 'google' | 'microsoft' | 'email'
@@ -42,9 +45,8 @@ export async function signIn(provider, email = '') {
   if (c) {
     const redirectTo = location.origin + location.pathname;
     if (provider === 'email') {
-      const { error } = await c.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
-      if (error) throw error;
-      return { pending: true, message: `Check ${email} for your sign-in link.` };
+      await sendEmailCode(email);
+      return { pending: true, code: true };
     }
     const { error } = await c.auth.signInWithOAuth({ provider: PROVIDER[provider], options: { redirectTo } });
     if (error) throw error;
@@ -52,6 +54,39 @@ export async function signIn(provider, email = '') {
   }
   // Local mode.
   return { user: { id: uid(), email, name: '', provider, local: true } };
+}
+
+// Email sign-in with a 6-digit code (works in every browser, unlike links,
+// which on iPhone often open in a different browser than the one you're in).
+// New emails get an account automatically.
+const toUser = (u) => ({
+  id: u.id,
+  email: u.email || '',
+  name: u.user_metadata?.full_name || u.user_metadata?.name || '',
+  provider: u.app_metadata?.provider || 'email',
+});
+
+export async function sendEmailCode(email) {
+  const c = await sb();
+  if (!c) throw new Error('Sign-in server isn’t connected yet.');
+  const { error } = await c.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+  if (error) throw new Error(friendly(error));
+}
+
+export async function verifyEmailCode(email, code) {
+  const c = await sb();
+  if (!c) throw new Error('Sign-in server isn’t connected yet.');
+  const { data, error } = await c.auth.verifyOtp({ email, token: code, type: 'email' });
+  if (error || !data.user) throw new Error(error ? friendly(error) : 'That code didn’t work. Check it and try again.');
+  return toUser(data.user);
+}
+
+function friendly(error) {
+  const m = (error.message || '').toLowerCase();
+  if (error.status === 429 || m.includes('rate') || m.includes('seconds')) return 'Too many tries. Wait a minute, then send a new code.';
+  if (m.includes('expired') || m.includes('invalid') || m.includes('token')) return 'That code is wrong or has expired. Send a new one.';
+  if (m.includes('email')) return 'Check the email address and try again.';
+  return 'Couldn’t reach the sign-in server. Check your connection and try again.';
 }
 
 export async function signOutLive() {

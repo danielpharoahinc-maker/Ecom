@@ -543,3 +543,13 @@ input, .big-input, .note, .talkbox textarea { border: 0; color: var(--ink); back
 .day.is-today { background: linear-gradient(90deg, rgba(232, 66, 63, .1), transparent 60%); }
 .day.is-today .day-d b { color: var(--ink); }
 .day.is-today .day-d b::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 2px; background: var(--red); margin-right: 6px; vertical-align: middle; }
+
+/* ---------- Email code sign-in ---------- */
+.form-err { color: var(--danger); font-size: 14px; }
+.code-form { display: flex; flex-direction: column; gap: 12px; }
+.code-form .sub b { color: var(--ink); font-weight: 600; overflow-wrap: anywhere; }
+.otp { width: 100%; min-height: 64px; padding: 0 18px; border-radius: var(--r-ctl); background: var(--s2); box-shadow: var(--hi); font-size: 30px; font-weight: 700; letter-spacing: .5em; text-align: center; font-variant-numeric: tabular-nums; }
+.otp:focus { outline: none; box-shadow: inset 0 0 0 1.5px var(--accent); }
+.code-links { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.link-btn { font-size: 15px; font-weight: 600; color: var(--accent); padding: 8px 0; }
+.link-btn:disabled { color: var(--mute); opacity: 1; }

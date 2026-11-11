@@ -1,12 +1,12 @@
 // Offline support: the app shell is cached so Proof opens without signal.
 // Bump VERSION whenever you change any file below, so phones get the update.
-const VERSION = 'proof-v6';
+const VERSION = 'proof-v7';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css',
   'js/app.js', 'js/auth.js', 'js/billing.js', 'js/capture.js', 'js/club.js', 'js/config.js', 'js/data.js', 'js/db.js',
   'js/icons.js', 'js/onboarding.js', 'js/planner.js', 'js/speech.js', 'js/proofview.js', 'js/sheet.js', 'js/state.js', 'js/stats.js',
   'js/statsview.js', 'js/today.js', 'js/util.js', 'js/vault.js', 'js/welcome.js',
-  'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png',
+  'vendor/supabase-2.45.4.js', 'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png',
 ];
 
 self.addEventListener('install', (e) => {
