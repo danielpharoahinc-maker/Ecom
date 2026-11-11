@@ -664,3 +664,86 @@ input, .big-input, .note, .talkbox textarea { border: 0; color: var(--ink); back
 .wordmark { display: block; width: auto; color: var(--ink); filter: drop-shadow(0 12px 30px rgba(46, 78, 160, .45)); }
 .mk-app { display: block; width: 34px; height: 34px; border-radius: 8px; }
 .inst-icon { width: 84px; height: 84px; border-radius: 19px; box-shadow: 0 16px 34px -14px rgba(0, 0, 0, .9); }
+
+/* ---------- Proff ---------- */
+.proff { display: block; overflow: visible; }
+.proff .pf-bob { animation: pfBob 3.2s ease-in-out infinite; transform-origin: 70px 110px; }
+.proff .pf-eyes { animation: pfBlink 5s infinite; }
+.proff .pf-z { animation: pfZ 2.4s ease-in-out infinite; }
+.pf-talk .pf-mouth { animation: pfTalk .5s ease-in-out infinite; transform-origin: 70px 87px; }
+@keyframes pfBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes pfBlink { 0%, 94%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+@keyframes pfZ { 0%, 100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(3px, -4px); opacity: .6; } }
+@keyframes pfTalk { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.45); } }
+.proff-name { display: block; width: auto; }
+
+.view { padding-bottom: calc(190px + var(--safe-b)); }
+.proff-fab {
+  position: fixed; z-index: 21; right: max(10px, calc(50% - 230px)); bottom: calc(62px + var(--safe-b));
+  display: flex; flex-direction: column; align-items: center; gap: 0; padding: 0;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, .55)); transition: transform .35s var(--spring);
+  animation: pfIn .6s var(--spring) both .3s;
+}
+.proff-fab:active { transform: scale(.92); }
+.proff-tag { display: none; margin-top: -6px; padding: 3px 8px 4px; border-radius: var(--pill); background: var(--red); color: #fff; }
+@keyframes pfIn { from { transform: translateY(30px) scale(.6); opacity: 0; } }
+
+/* Ask Proff */
+.ask-head { display: flex; align-items: center; gap: 12px; }
+.ask-head .ask-name { display: inline-flex; padding: 4px 12px 6px; border-radius: var(--pill); background: var(--red); color: #fff; }
+.ask-head p { margin-top: 6px; color: var(--ink-2); font-size: 15px; }
+.ask-search input { width: 100%; min-height: 50px; padding: 0 16px; border-radius: var(--r-ctl); background: var(--s2); box-shadow: var(--hi); font-size: 16px; }
+.ask-search input:focus { outline: none; box-shadow: inset 0 0 0 1.5px var(--accent); }
+.ask-topics { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 0 -20px; padding: 2px 20px 4px; }
+.ask-topics::-webkit-scrollbar { display: none; }
+.ask-topics button { flex: none; height: 34px; padding: 0 13px; border-radius: var(--pill); background: var(--s2); color: var(--ink-2); font-size: 14px; font-weight: 600; }
+.ask-topics button.on { background: var(--ink); color: var(--on-sel); }
+.ask-browse, .ask-results { display: flex; flex-direction: column; gap: 10px; }
+.ask-list, .ask-results { display: flex; flex-direction: column; gap: 6px; }
+.qa { border-radius: var(--r-ctl); background: var(--s2); box-shadow: var(--hi); }
+.qa summary { list-style: none; cursor: pointer; padding: 14px 40px 14px 14px; font-size: 16px; font-weight: 600; position: relative; }
+.qa summary::-webkit-details-marker { display: none; }
+.qa summary::after { content: "+"; position: absolute; right: 14px; top: 11px; font-size: 22px; font-weight: 400; color: var(--mute); transition: transform .25s; }
+.qa[open] summary::after { transform: rotate(45deg); color: var(--red); }
+.qa p { padding: 0 14px 14px; color: var(--ink-2); font-size: 15px; line-height: 1.45; }
+.ask-none { color: var(--ink-2); font-size: 15px; padding: 4px 2px; }
+
+/* Tour */
+.tour { position: fixed; inset: 0; z-index: 70; animation: fadeIn .3s ease both; }
+.tour.out { opacity: 0; transition: opacity .3s; }
+@keyframes fadeIn { from { opacity: 0; } }
+.tour-hole { position: fixed; border-radius: 12px; box-shadow: 0 0 0 200vmax rgba(3, 6, 13, .8), 0 0 0 2px rgba(232, 66, 63, .9); transition: all .45s var(--spring); pointer-events: none; }
+.tour-card {
+  position: fixed; left: 50%; transform: translateX(-50%); width: min(92vw, 420px);
+  display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: center; padding: 14px 16px 14px 10px;
+  border-radius: var(--r-card); background: linear-gradient(160deg, #18264a, #0c1426); box-shadow: 0 20px 50px -10px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(170, 195, 255, .1);
+  transition: top .45s var(--spring), bottom .45s var(--spring);
+}
+.tour-card.mid { top: 50%; transform: translate(-50%, -50%); }
+.tour-card.in .tour-who, .tour-card.in .tour-txt { animation: rise .45s var(--spring) both; }
+.tour-who { display: flex; flex-direction: column; align-items: center; gap: 0; color: #fff; }
+.tour-who > span { margin-top: -6px; padding: 2px 8px 3px; border-radius: var(--pill); background: var(--red); }
+.tour-txt b { display: block; font-size: 18px; letter-spacing: -.01em; }
+.tour-txt p { color: var(--ink-2); font-size: 15px; line-height: 1.4; margin-top: 3px; }
+.tour-foot { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; padding-left: 6px; margin-top: 6px; }
+.tour-dots { display: flex; gap: 5px; margin-right: auto; }
+.tour-dots i { width: 6px; height: 6px; border-radius: 3px; background: var(--s3); transition: width .3s, background .3s; }
+.tour-dots i.on { width: 18px; background: var(--red); }
+.tour-back { height: 40px; padding: 0 14px; color: var(--ink-2); font-weight: 600; }
+.tour-next { height: 40px; padding: 0 20px; border-radius: var(--pill); background: var(--ink); color: var(--on-sel); font-weight: 700; }
+.tour-skip { position: absolute; top: 8px; right: 10px; padding: 6px 8px; font-size: 13px; font-weight: 600; color: var(--mute); }
+
+/* Post celebration: Proff jumps and slams the stamp */
+.done-stamp { position: relative; display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
+.done-stamp .proff { animation: slamBody .7s var(--spring) both; }
+.ink-mark { margin-top: -10px; padding: 6px 14px 8px; border: 3px solid var(--red); border-radius: 6px; color: var(--red); transform: rotate(-7deg); animation: slamInk .5s cubic-bezier(.2, 1.6, .4, 1) both .45s; }
+.ink-mark .wordmark { color: var(--red); filter: none; }
+.ink-mark .wordmark path { fill: var(--red); }
+@keyframes slamBody { 0% { transform: translateY(40px) scale(.7); opacity: 0; } 50% { transform: translateY(-18px); opacity: 1; } 75% { transform: translateY(4px) scaleY(.94); } 100% { transform: none; } }
+@keyframes slamInk { from { transform: rotate(-7deg) scale(1.9); opacity: 0; } to { transform: rotate(-7deg) scale(1); opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .proff .pf-bob, .proff .pf-eyes, .proff .pf-z, .pf-talk .pf-mouth, .proff-fab { animation: none; }
+}
+/* Proff perches on the tab bar, right above Club, out of the way of buttons. */
+.proff-fab .pf-shadow { display: none; }

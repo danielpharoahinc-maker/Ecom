@@ -1,7 +1,8 @@
 // Today: four things only. Header, your three commitments, today's plan,
 // and a box to talk (or type) your plan. Say "gym at 6, then school,
 // work on the business after school and read before bed" and it becomes a list.
-import { S, hydrateMedia, signOut, resetEverything, getPlan, savePlan } from './state.js';
+import { S, hydrateMedia, signOut, resetEverything, getPlan, savePlan, saveProfile } from './state.js';
+import { startTour } from './proff.js';
 import { commitment } from './data.js';
 import { doneToday, streak } from './stats.js';
 import { openCapture } from './capture.js';
@@ -205,11 +206,18 @@ function settings() {
     <button class="set-row set-plan" data-plan-row><span><b>${isPro() ? 'Proof Pro' : 'Free plan'}</b><small>${isPro() ? 'Unlimited posts' : `${postsLeft()} of ${FREE_POSTS} free posts left`}</small></span>${isPro() ? '' : '<span class="btn-pill">Get Pro</span>'}</button>
     <p class="fine">${LIVE ? 'Synced to your Proof account.' : 'Test version: your proof is saved in this browser only.'}</p>
     <div class="stack">
+      <button class="btn btn-secondary" data-tour>Show me around again</button>
+      <button class="btn btn-secondary" data-proff>${S.profile.hideProff ? 'Show Proff' : 'Hide Proff'}</button>
       <button class="btn btn-secondary" data-out>${ic('logout', 20)}<span>Sign out</span></button>
       <button class="btn btn-quiet danger" data-reset>${ic('trash', 18)}<span>Delete all my data</span></button>
     </div>`, {
     onMount(body, close) {
       body.querySelector('[data-plan-row]').addEventListener('click', () => { if (!isPro()) { close(); paywall({ reason: 'info' }); } });
+      body.querySelector('[data-tour]').addEventListener('click', () => { close(); setTimeout(() => startTour(), 320); });
+      body.querySelector('[data-proff]').addEventListener('click', async () => {
+        await saveProfile({ ...S.profile, hideProff: !S.profile.hideProff });
+        close(); emit('proof:changed');
+      });
       body.querySelector('[data-out]').addEventListener('click', async () => {
         await signOutLive(); await signOut(); close(); emit('proof:route');
       });

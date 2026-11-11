@@ -12,6 +12,7 @@ import { openCapture } from './capture.js';
 import { ic } from './icons.js';
 import { haptic } from './util.js';
 import { refreshPro, afterCheckout } from './billing.js';
+import { mountProff, unmountProff, startTour, tourNeeded } from './proff.js';
 
 const app = document.getElementById('app');
 
@@ -35,15 +36,19 @@ try {
 if (params.has('join')) history.replaceState(null, '', location.pathname);
 
 function route(opts = {}) {
-  if (!S.user) return renderWelcome(app, () => route());
+  if (!S.user) { unmountProff(); return renderWelcome(app, () => route()); }
   if (!S.profile?.onboarded) {
+    unmountProff();
     return renderOnboarding(app, (o) => {
       S.tab = 'today';
       route();
-      if (o?.firstProof) setTimeout(() => openCapture(), 350);
+      // Proff explains the app first, then (if they chose it) the first proof.
+      setTimeout(() => startTour(() => { if (o?.firstProof) setTimeout(() => openCapture(), 300); }), 450);
     });
   }
   shell();
+  mountProff();
+  if (tourNeeded() && !opts.fromOnboarding) setTimeout(() => startTour(), 600);
   if (pendingJoin) {
     const code = pendingJoin;
     pendingJoin = '';
@@ -83,7 +88,7 @@ function draw(scrollTop = false) {
   if (scrollTop) window.scrollTo(0, 0);
 }
 
-window.addEventListener('proof:changed', () => { if (S.profile?.onboarded && S.user) draw(); });
+window.addEventListener('proof:changed', () => { if (S.profile?.onboarded && S.user) { draw(); mountProff(); } });
 window.addEventListener('proof:tab', (e) => { S.tab = e.detail; draw(true); });
 window.addEventListener('proof:route', () => route());
 

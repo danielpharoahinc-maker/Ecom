@@ -10,6 +10,7 @@ import { ic } from './icons.js';
 import { esc, haptic, toast, fmtDur, emit } from './util.js';
 import { getDictation } from './speech.js';
 import { canPost, paywall } from './billing.js';
+import { proffSVG, inkMark } from './proff.js';
 
 const MAX_TALK = 60; // seconds
 
@@ -370,7 +371,7 @@ function success() {
   const st = streak(S.proofs);
   root.innerHTML = `
   <div class="done-screen">
-    <div class="done-mark">${ic('check', 56, 2.2)}</div>
+    <div class="done-stamp">${proffSVG('cheer', 132)}${inkMark()}</div>
     <h2 class="title">${cKey === 'moment' ? 'Moment saved' : 'Proof posted'}</h2>
     <p class="sub">${cKey === 'moment' ? 'Added to your day. Your club sees it too.' : n === 3 ? 'All three done. That’s a perfect day.' : `${n} of 3 locked in today.`}</p>
     <div class="done-seg">${S.profile.commitments.map((k) => `<i class="${done.has(k) ? 'on' : ''}"></i>`).join('')}</div>
