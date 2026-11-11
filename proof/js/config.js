@@ -6,7 +6,7 @@
 // designed to be public; never paste the service_role key here.
 export const CONFIG = {
   supabaseUrl: 'https://kfnetfsyvhyysjjhpwue.supabase.co',
-  supabaseAnonKey: '',
+  supabaseAnonKey: 'sb_publishable_Gjr7TQ0n71KiE3lf2RbJsQ_abvNlJ2v',
 };
 
 // Free plan: how many posts (proofs and moments) before Proof Pro is needed.
