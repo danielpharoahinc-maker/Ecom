@@ -661,3 +661,6 @@ input, .big-input, .note, .talkbox textarea { border: 0; color: var(--ink); back
 .mk-sheet > .mk-hl { display: flex; margin: 4px 0; }
 @keyframes hl { 0%, 100% { box-shadow: 0 0 0 2.5px var(--red); } 50% { box-shadow: 0 0 0 5px rgba(232, 66, 63, .35); } }
 @media (prefers-reduced-motion: reduce) { .mk-hl { animation: none; } }
+.wordmark { display: block; width: auto; color: var(--ink); filter: drop-shadow(0 12px 30px rgba(46, 78, 160, .45)); }
+.mk-app { display: block; width: 34px; height: 34px; border-radius: 8px; }
+.inst-icon { width: 84px; height: 84px; border-radius: 19px; box-shadow: 0 16px 34px -14px rgba(0, 0, 0, .9); }

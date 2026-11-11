@@ -1,6 +1,6 @@
 // "Add to Home Screen" guide, shown during onboarding. Asks Safari or Chrome,
 // then draws the exact buttons to tap. Android Chrome gets a one-tap Install.
-import { ic, MARK } from './icons.js';
+import { ic } from './icons.js';
 import { haptic } from './util.js';
 
 const ua = navigator.userAgent;
@@ -17,7 +17,7 @@ let deferred = null;
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e; });
 
 const hl = (inner, label = '') => `<span class="mk-hl" ${label ? `aria-label="${label}"` : ''}>${inner}</span>`;
-const appIcon = `<span class="mk-app">${MARK(22)}</span>`;
+const appIcon = '<img class="mk-app" src="icons/icon-180.png" alt="">';
 const url = `<span class="mk-url">${location.host || 'proof-lockin.netlify.app'}</span>`;
 
 const GUIDES = {
@@ -50,7 +50,7 @@ const GUIDES = {
 export function installBody() {
   if (isAndroid && deferred) {
     return `<div class="inst">
-      <div class="inst-one">${MARK(72)}<p>Your phone can install Proof in one tap.</p></div>
+      <div class="inst-one"><img class="inst-icon" src="icons/icon-180.png" alt="Proof icon"><p>Your phone can install Proof in one tap.</p></div>
       <div class="ob-foot"><button class="btn btn-primary" data-install>${ic('addhome', 20)}<span>Install Proof</span></button>
       <button class="btn btn-quiet" data-later>Later</button></div></div>`;
   }
