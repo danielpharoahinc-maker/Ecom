@@ -6,6 +6,8 @@ import { commitment } from './data.js';
 import { doneToday, streak } from './stats.js';
 import { openCapture } from './capture.js';
 import { openProof } from './proofview.js';
+import { isPro, postsLeft, paywall } from './billing.js';
+import { FREE_POSTS } from './config.js';
 import { openSheet, confirmSheet } from './sheet.js';
 import { signOutLive } from './auth.js';
 import { parsePlan } from './planner.js';
@@ -63,6 +65,11 @@ export async function renderToday(el) {
     ${todays.length ? '' : '<span class="ds-hint">Snap your day as it happens. Moments don’t count toward your streak, they just tell the story.</span>'}
   </section>
 
+  ${!isPro() && postsLeft() <= 7 ? `<button class="free-bar" data-pro>
+    <span class="free-meter"><i style="width:${(postsLeft() / FREE_POSTS) * 100}%"></i></span>
+    <span>${postsLeft() ? `${postsLeft()} free ${postsLeft() === 1 ? 'post' : 'posts'} left` : 'Free posts used up'}</span><b>Get Pro</b>
+  </button>` : ''}
+
   <section class="plan-sec" aria-label="Today's plan">
     ${plan.length ? `
       <div class="sec-h"><h2 class="headline">Today’s plan</h2><span class="dim">${left ? `${left} to go` : 'All done'}</span></div>
@@ -91,6 +98,7 @@ export async function renderToday(el) {
   hydrateMedia(el);
   el.querySelectorAll('[data-capture]').forEach((b) => b.addEventListener('click', () => openCapture({ cKey: b.dataset.capture })));
   el.querySelector('[data-settings]').addEventListener('click', settings);
+  el.querySelector('[data-pro]')?.addEventListener('click', () => paywall({ reason: postsLeft() ? 'info' : 'limit' }));
   el.querySelector('[data-moment]').addEventListener('click', () => openCapture({ cKey: 'moment' }));
   el.querySelectorAll('.ds-shot').forEach((b) => b.addEventListener('click', () => openProof(b.dataset.open)));
   bindPlan(el, plan, done);
@@ -189,12 +197,14 @@ function settings() {
     <h2 class="h2">Account</h2>
     <div class="set-row"><span class="avatar">${esc(S.profile.name[0].toUpperCase())}</span>
       <span><b>${esc(S.profile.name)}</b><small>${esc(u?.email || `Signed in with ${u?.provider || 'Proof'}`)}</small></span></div>
+    <button class="set-row set-plan" data-plan-row><span><b>${isPro() ? 'Proof Pro' : 'Free plan'}</b><small>${isPro() ? 'Unlimited posts' : `${postsLeft()} of ${FREE_POSTS} free posts left`}</small></span>${isPro() ? '' : '<span class="btn-pill">Get Pro</span>'}</button>
     <p class="fine">${LIVE ? 'Synced to your Proof account.' : 'Test version: your proof is saved in this browser only.'}</p>
     <div class="stack">
       <button class="btn btn-secondary" data-out>${ic('logout', 20)}<span>Sign out</span></button>
       <button class="btn btn-quiet danger" data-reset>${ic('trash', 18)}<span>Delete all my data</span></button>
     </div>`, {
     onMount(body, close) {
+      body.querySelector('[data-plan-row]').addEventListener('click', () => { if (!isPro()) { close(); paywall({ reason: 'info' }); } });
       body.querySelector('[data-out]').addEventListener('click', async () => {
         await signOutLive(); await signOut(); close(); emit('proof:route');
       });

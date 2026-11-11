@@ -61,9 +61,9 @@ export const STEPS = [
     ],
   },
   {
-    id: 'proofTime', type: 'choice',
+    id: 'proofTime', type: 'choice', multi: 2,
     title: 'When will you post your proof?',
-    sub: 'We’ll remind you at this time.',
+    sub: 'Pick one or two. We’ll remind you then.',
     options: [
       { v: 'morning', label: 'Morning',    hint: 'Before the day starts', icon: 'sunrise', phrase: 'Proof in the morning' },
       { v: 'midday',  label: 'Midday',     hint: 'Lunch break',           icon: 'sun',     phrase: 'Proof at midday' },
@@ -72,9 +72,9 @@ export const STEPS = [
     ],
   },
   {
-    id: 'crew', type: 'choice',
+    id: 'crew', type: 'choice', multi: 2,
     title: 'Lock in solo or with your crew?',
-    sub: 'People who post together keep going longer.',
+    sub: 'Pick one or two. People who post together keep going longer.',
     options: [
       { v: 'solo',   label: 'Solo',          hint: 'Just me for now',  icon: 'user' },
       { v: 'friend', label: 'With a friend', hint: 'One partner',      icon: 'users' },
@@ -83,9 +83,9 @@ export const STEPS = [
     ],
   },
   {
-    id: 'obstacle', type: 'choice',
+    id: 'obstacle', type: 'choice', multi: 2,
     title: 'What usually stops you?',
-    sub: 'Proof is built around fixing this.',
+    sub: 'Pick one or two. Proof is built around fixing them.',
     options: [
       { v: 'phone',      label: 'My phone',          hint: 'Scrolling eats the day', icon: 'phoneoff' },
       { v: 'motivation', label: 'Low motivation',    hint: 'Start strong, fade out', icon: 'battery' },

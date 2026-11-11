@@ -9,6 +9,7 @@ import { doneToday, streak } from './stats.js';
 import { ic } from './icons.js';
 import { esc, haptic, toast, fmtDur, emit } from './util.js';
 import { getDictation } from './speech.js';
+import { canPost, paywall } from './billing.js';
 
 const MAX_TALK = 60; // seconds
 
@@ -18,6 +19,7 @@ let rec, recStream, recog, meterRAF, talkTimer, audioCtx;
 
 export function openCapture(opts = {}) {
   if (document.querySelector('.cap')) return;
+  if (!canPost()) return paywall();
   const done = doneToday(S.proofs);
   // Next unproven commitment; once all three are done, default to a moment.
   cKey = opts.cKey || S.profile.commitments.find((k) => !done.has(k)) || 'moment';

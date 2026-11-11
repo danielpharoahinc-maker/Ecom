@@ -126,20 +126,37 @@ function draw(root, onDone) {
   }
 
   if (step.type === 'perm') {
-    root.querySelector('[data-allow]').addEventListener('click', async (e) => {
-      const btn = e.currentTarget;
-      btn.disabled = true;
-      try {
-        const s = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        s.getTracks().forEach((t) => t.stop());
-        ans.perm = 'granted';
-      } catch {
-        ans.perm = 'later';
-        toast('No problem. Proof will ask again when you post.');
-      }
-      next();
-    });
-    root.querySelector('[data-later]').addEventListener('click', () => { ans.perm = 'later'; next(); });
+    // Ask for each one separately, like a native app: the phone shows its own
+    // "Allow camera?" / "Allow microphone?" prompt when the button is tapped.
+    const cont = root.querySelector('[data-next]');
+    const show = (kind, state) => {
+      const row = root.querySelector(`[data-perm="${kind}"]`);
+      const btn = row.querySelector('button');
+      row.dataset.state = state;
+      btn.disabled = state === 'granted';
+      btn.textContent = state === 'granted' ? 'Allowed' : state === 'denied' ? 'Try again' : 'Allow';
+      row.querySelector('.perm-note').hidden = state !== 'denied';
+      const both = ['camera', 'microphone'].every((k) => root.querySelector(`[data-perm="${k}"]`).dataset.state === 'granted');
+      cont.textContent = both ? 'Continue' : 'Skip for now';
+      cont.classList.toggle('btn-primary', both);
+      cont.classList.toggle('btn-quiet', !both);
+    };
+    for (const kind of ['camera', 'microphone']) {
+      show(kind, 'prompt');
+      // If the browser already knows the answer, show it without asking.
+      navigator.permissions?.query({ name: kind }).then((r) => { if (r.state !== 'prompt') show(kind, r.state); }).catch(() => {});
+      root.querySelector(`[data-perm="${kind}"] button`).addEventListener('click', async () => {
+        haptic();
+        try {
+          const s = await navigator.mediaDevices.getUserMedia(kind === 'camera' ? { video: true } : { audio: true });
+          s.getTracks().forEach((t) => t.stop());
+          show(kind, 'granted');
+        } catch {
+          show(kind, 'denied');
+        }
+      });
+    }
+    cont.addEventListener('click', next);
   }
 
   if (step.type === 'plan') {
@@ -195,19 +212,23 @@ function body(step) {
   }
 
   if (step.type === 'perm') {
+    const row = (kind, icon, title, why) => `
+      <div class="perm-row" data-perm="${kind}">
+        <span class="perm-ic">${ic(icon, 24)}</span>
+        <span class="perm-txt"><b>${title}</b><small>${why}</small>
+          <small class="perm-note" hidden>Blocked. Turn it on in your phone’s Settings for this app, then tap Try again.</small></span>
+        <button class="perm-btn">Allow</button>
+      </div>`;
     return `<div class="perm">
-      <div class="perm-row">${ic('camera', 28)}<span><b>Camera</b><small>Take the photo that proves it. It never posts without you tapping Post.</small></span></div>
-      <div class="perm-row">${ic('mic', 28)}<span><b>Microphone</b><small>Say what you did instead of typing it.</small></span></div>
-      <div class="ob-foot">
-        <button class="btn btn-primary" data-allow>Allow camera and mic</button>
-        <button class="btn btn-quiet" data-later>Not now</button>
-      </div>
+      ${row('camera', 'camera', 'Camera', 'Take the photo that proves it. Nothing posts until you tap Post.')}
+      ${row('microphone', 'mic', 'Microphone', 'Say what you did, or talk through your plan.')}
+      <div class="ob-foot"><button class="btn btn-quiet" data-next>Skip for now</button></div>
     </div>`;
   }
 
   if (step.type === 'plan') {
     const goals = [].concat(ans.goal || []).map((g) => LABEL.goal[g]?.label.toLowerCase()).filter(Boolean); const wake = LABEL.wake[ans.wake];
-    const lock = LABEL.lockin[ans.lockin]; const pt = LABEL.proofTime[ans.proofTime];
+    const lock = LABEL.lockin[ans.lockin]; const pts = [].concat(ans.proofTime || []).map((v) => LABEL.proofTime[v]).filter(Boolean);
     return `<div class="plan">
       <div class="plan-card">
         <div class="plan-name"><span class="avatar lg">${esc((ans.name || '?')[0].toUpperCase())}</span>
@@ -223,7 +244,7 @@ function body(step) {
         }).join('')}</div>
         <div class="plan-meta">
           <div>${ic(wake?.icon || 'sun', 20)}<span>Up ${wake ? wake.label.toLowerCase() : ''}</span></div>
-          <div>${ic(pt?.icon || 'clock', 20)}<span>${pt ? pt.phrase : 'Proof every day'}</span></div>
+          <div>${ic(pts[0]?.icon || 'clock', 20)}<span>${pts.length ? `${pts[0].phrase}${pts[1] ? ` and ${pts[1].label.toLowerCase()}` : ''}` : 'Proof every day'}</span></div>
         </div>
         <div class="plan-week">
           <span class="lab">Week 1 target: 21 proofs</span>

@@ -41,7 +41,10 @@ export async function addProof(proof, photo, audio) {
   if (photo) { p.photoId = uid(); await db.put('media', photo, p.photoId); }
   if (audio) { p.audioId = uid(); await db.put('media', audio, p.audioId); }
   await db.put('proofs', p);
+  // Free-plan tally. Deleting a proof doesn't give the post back.
+  const usedBefore = S.profile.postsUsed ?? S.proofs.length;
   S.proofs.unshift(p);
+  await saveProfile({ ...S.profile, postsUsed: usedBefore + 1 });
   // Proof ticks off any plan item linked to the same commitment.
   const plan = await getPlan();
   if (plan.some((it) => it.cKey === p.cKey && !it.done)) {

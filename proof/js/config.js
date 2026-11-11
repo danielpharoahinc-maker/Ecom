@@ -9,4 +9,10 @@ export const CONFIG = {
   supabaseAnonKey: '',
 };
 
+// Free plan: how many posts (proofs and moments) before Proof Pro is needed.
+// 21 is about one full week of three commitments a day.
+export const FREE_POSTS = 21;
+
+export const PRICES = { monthly: 'R49', yearly: 'R399', yearlySaving: '32%' };
+
 export const LIVE = Boolean(CONFIG.supabaseUrl && CONFIG.supabaseAnonKey);
