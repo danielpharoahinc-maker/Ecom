@@ -13,7 +13,7 @@ import { signOutLive } from './auth.js';
 import { parsePlan } from './planner.js';
 import { getDictation } from './speech.js';
 import { ic } from './icons.js';
-import { esc, fmtDay, emit, haptic, toast } from './util.js';
+import { esc, fmtDay, fmtClock, emit, haptic, toast } from './util.js';
 import { LIVE } from './config.js';
 
 let dictation; // resolved once, reused
@@ -40,29 +40,24 @@ export async function renderToday(el) {
       <p class="date">${fmtDay(Date.now())}</p>
       <h1 class="title">${greeting()}, ${esc(P.name)}</h1>
     </div>
-    <div class="top-actions">
-      <span class="streak-chip ${st ? 'on' : ''}" aria-label="${st} day streak">${ic('flame', 16)}${st}</span>
-      <button class="avatar" data-settings aria-label="Account">${esc(P.name[0].toUpperCase())}</button>
-    </div>
+    <button class="avatar" data-settings aria-label="Account">${esc(P.name[0].toUpperCase())}</button>
   </header>
 
-  <section class="commits" aria-label="Your three commitments">
-    ${P.commitments.map((k) => {
-      const c = commitment(k); const p = proofFor(k);
-      return `<button class="commit ${p ? 'done' : ''}" data-capture="${k}" aria-label="${c.label}: ${p ? 'proven today' : 'post proof'}">
-        ${p?.photoId ? `<img data-media="${p.photoId}" alt="">` : ''}
-        <span class="commit-ic">${p ? ic('check', 18, 2.4) : ic(c.icon, 20)}</span>
-        <span class="commit-txt"><b>${c.label}</b><small>${p ? 'Proven' : 'Prove it'}</small></span>
-      </button>`;
-    }).join('')}
-  </section>
-
-  <section class="day-strip" aria-label="Your day in photos">
-    <button class="ds-add" data-moment aria-label="Add a photo from your day">${ic('camera', 20)}<span>Moment</span></button>
-    ${todays.map((p) => `<button class="ds-shot" data-open="${p.id}" aria-label="${commitment(p.cKey).label} photo">
-      ${p.photoId ? `<img data-media="${p.photoId}" alt="">` : `<span class="ds-voice">${ic('wave', 20, 1.5)}</span>`}
-    </button>`).join('')}
-    ${todays.length ? '' : '<span class="ds-hint">Snap your day as it happens. Moments don’t count toward your streak, they just tell the story.</span>'}
+  <section class="cm-sec" aria-label="Your three commitments">
+    <div class="sec-h">
+      <h2 class="headline">${done.size >= 3 ? 'All three proven' : `${P.commitments.filter((k) => done.has(k)).length} of 3 proven`}</h2>
+      <span class="streak-line ${st ? 'on' : ''}">${ic('flame', 15)}${st} day streak</span>
+    </div>
+    <div class="cm-list">
+      ${P.commitments.map((k) => {
+        const c = commitment(k); const p = proofFor(k);
+        return `<button class="cm ${p ? 'done' : ''}" data-capture="${k}" aria-label="${c.label}: ${p ? 'proven today, add another' : 'post proof'}">
+          <span class="cm-ic">${p ? ic('check', 18, 2.4) : ic(c.icon, 20)}</span>
+          <span class="cm-txt"><b>${c.label}</b><small>${p ? `Proven at ${fmtClock(p.ts)}` : c.hint}</small></span>
+          ${p?.photoId ? `<img class="cm-shot" data-media="${p.photoId}" alt="">` : `<span class="cm-go">${ic('camera', 18)}</span>`}
+        </button>`;
+      }).join('')}
+    </div>
   </section>
 
   ${!isPro() && postsLeft() <= 7 ? `<button class="free-bar" data-pro>
@@ -93,6 +88,16 @@ export async function renderToday(el) {
       <button type="button" class="talk-mic" data-mic aria-label="Talk your plan" hidden>${ic('mic', 22)}</button>
       <button type="submit" class="talk-send" data-send aria-label="Add to plan" hidden>${ic('check', 20, 2.4)}</button>
     </form>
+  </section>
+
+  <section class="day-sec" aria-label="Your day in photos">
+    <div class="sec-h"><h2 class="headline">Your day</h2><span class="dim">${todays.length ? `${todays.length} ${todays.length === 1 ? 'photo' : 'photos'}` : 'Moments don’t affect your streak'}</span></div>
+    <div class="day-strip">
+      <button class="ds-add" data-moment aria-label="Add a photo from your day">${ic('plus', 20, 2.2)}<span>Moment</span></button>
+      ${todays.map((p) => `<button class="ds-shot" data-open="${p.id}" aria-label="${commitment(p.cKey).label} photo">
+        ${p.photoId ? `<img data-media="${p.photoId}" alt="">` : `<span class="ds-voice">${ic('wave', 20, 1.5)}</span>`}
+      </button>`).join('')}
+    </div>
   </section>`;
 
   hydrateMedia(el);

@@ -24,19 +24,20 @@
   --danger: #ff6b62;
   --hi: inset 0 1px 0 rgba(170, 195, 255, .07);
 
-  /* Signature shape: square, with only the two top corners softened. */
-  --r-card: 12px 12px 0 0;
-  --r-tile: 10px 10px 0 0;
-  --r-ctl: 8px 8px 0 0;
-  --r-sheet: 18px 18px 0 0;
-  --pill: 8px 8px 0 0;
-  --r-sm: 5px 5px 0 0;
+  /* Small, tight corners on all four sides. No bubbles. */
+  --r-card: 10px;
+  --r-tile: 8px;
+  --r-ctl: 7px;
+  --r-sheet: 12px 12px 0 0;  /* sheets and the tab bar sit on the bottom edge */
+  --pill: 7px;
+  --r-sm: 5px;
 
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
   --spring: cubic-bezier(.32, .72, 0, 1);
-  --font: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --display: "Archivo", "Hanken Grotesk", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  /* The phone's own font: SF Pro on iPhone and Mac, Roboto on Android. */
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color-scheme: dark;
   font-family: var(--font);
   -webkit-font-smoothing: antialiased;
@@ -487,20 +488,16 @@ input, .big-input, .note, .talkbox textarea { border: 0; color: var(--ink); back
 .pw-plan.on { background: var(--sel); color: var(--on-sel); }
 .pw-plan.on small { color: rgba(5, 10, 22, .6); }
 
-/* ---------- Type: Archivo Expanded headings, Hanken Grotesk body ---------- */
-.display, .title, .h2, .stamp-word, .recap-num, .recap-brand, .pw-mark, .summary .num, .code {
-  font-family: var(--display);
-  font-stretch: 125%;
-}
-.display { font-weight: 800; letter-spacing: -.03em; line-height: .98; }
-.title { font-size: 30px; font-weight: 750; letter-spacing: -.025em; line-height: 1.05; }
-.h2 { font-weight: 700; letter-spacing: -.02em; }
-.stamp-word { font-weight: 900; letter-spacing: -.04em; }
-.summary .num { font-size: 46px; font-weight: 700; letter-spacing: -.03em; }
-.headline, .plan-empty .headline { font-family: var(--display); font-stretch: 112%; letter-spacing: -.01em; }
-.plan-empty .headline { font-size: 21px; }
-.btn, .tab, .btn-pill, .cchip, .modes button { font-family: var(--font); }
-.date { font-weight: 600; letter-spacing: .01em; }
+/* ---------- Type: SF Pro, tuned like Apple's own apps ---------- */
+.display, .title, .h2, .stamp-word, .recap-num, .recap-brand, .pw-mark, .summary .num, .code, .headline { font-family: var(--display); }
+.display { font-weight: 800; letter-spacing: -.035em; line-height: 1; }
+.title { font-size: 34px; font-weight: 700; letter-spacing: .005em; line-height: 1.1; }
+.h2 { font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
+.headline { font-size: 17px; font-weight: 600; letter-spacing: -.02em; }
+.plan-empty .headline { font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
+.stamp-word { font-weight: 900; letter-spacing: -.045em; }
+.summary .num { font-size: 48px; font-weight: 700; letter-spacing: -.02em; }
+.date { font-size: 13px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; color: var(--mute); }
 
 /* ---------- The drop of red: action and heat ---------- */
 .tab-add { background: var(--red); color: #fff; box-shadow: 0 8px 22px -6px rgba(232, 66, 63, .55); }
@@ -510,3 +507,39 @@ input, .big-input, .note, .talkbox textarea { border: 0; color: var(--ink); back
 .pw-mark { background: var(--red); color: #fff; }
 .done-streak .i { color: var(--red); }
 .tab.on { background: none; color: var(--ink); box-shadow: inset 0 -2px 0 var(--red); border-radius: 0; }
+
+/* ---------- Today: stacked commitments ---------- */
+.cm-sec, .day-sec { display: flex; flex-direction: column; gap: 10px; }
+.streak-line { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 600; color: var(--mute); font-variant-numeric: tabular-nums; }
+.streak-line.on { color: var(--ink-2); }
+.streak-line.on .i { color: var(--red); }
+.cm-list { display: flex; flex-direction: column; background: var(--s1); box-shadow: var(--hi); border-radius: var(--r-card); overflow: hidden; }
+.cm { display: flex; align-items: center; gap: 14px; min-height: 68px; padding: 10px 12px 10px 14px; text-align: left; transition: background .2s; }
+.cm + .cm { box-shadow: inset 0 1px 0 rgba(170, 195, 255, .06); }
+.cm:active { background: var(--s2); }
+.cm-ic { width: 38px; height: 38px; flex: none; border-radius: var(--r-ctl); display: grid; place-items: center; background: var(--s2); }
+.cm.done .cm-ic { background: var(--accent); color: var(--on-sel); }
+.cm-txt { flex: 1; min-width: 0; }
+.cm-txt b { display: block; font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+.cm-txt small { display: block; font-size: 14px; color: var(--mute); margin-top: 1px; }
+.cm.done .cm-txt small { color: var(--accent); }
+.cm-shot { width: 46px; height: 46px; flex: none; object-fit: cover; border-radius: var(--r-sm); }
+.cm-go { width: 38px; height: 38px; flex: none; display: grid; place-items: center; color: var(--mute); }
+
+/* ---------- Stats: days stacked ---------- */
+.days-sec { display: flex; flex-direction: column; gap: 10px; }
+.days-key { display: inline-flex; gap: 16px; padding-right: 84px; color: var(--mute); }
+.days { list-style: none; display: flex; flex-direction: column; background: var(--s1); box-shadow: var(--hi); border-radius: var(--r-card); overflow: hidden; }
+.day { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 14px; }
+.day + .day { box-shadow: inset 0 1px 0 rgba(170, 195, 255, .05); }
+.day-d { flex: 1; display: flex; align-items: baseline; gap: 8px; }
+.day-d b { font-size: 16px; font-weight: 600; min-width: 46px; }
+.day-d small { font-size: 13px; color: var(--mute); }
+.day-marks { display: flex; gap: 16px; }
+.day-marks i { width: 14px; height: 14px; border-radius: 4px; background: var(--s3); }
+.day-marks i.on { background: var(--sel); }
+.day-n { width: 58px; text-align: right; font-size: 14px; font-weight: 600; color: var(--mute); font-variant-numeric: tabular-nums; }
+.day.perfect .day-n { color: var(--accent); }
+.day.is-today { background: linear-gradient(90deg, rgba(232, 66, 63, .1), transparent 60%); }
+.day.is-today .day-d b { color: var(--ink); }
+.day.is-today .day-d b::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 2px; background: var(--red); margin-right: 6px; vertical-align: middle; }

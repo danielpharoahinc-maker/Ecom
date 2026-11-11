@@ -5,6 +5,8 @@ import { streak, bestStreak, consistency, perCommitment, lastDays, byDay } from 
 import { ic } from './icons.js';
 import { dayKey } from './util.js';
 
+let showAll = false;
+
 export function renderStats(el) {
   const P = S.profile;
   const st = streak(S.proofs), best = bestStreak(S.proofs);
@@ -19,11 +21,11 @@ export function renderStats(el) {
     <div><span class="lab">Consistency</span><b class="num">${cons}<i>%</i></b><small>of commitments kept</small></div>
   </section>
 
-  <section class="card">
-    <div class="sec-h"><h2 class="headline">Last 12 weeks</h2>
-      <span class="legend" aria-hidden="true">${[0, 1, 2, 3].map((l) => `<i class="l${l}"></i>`).join('')}</span></div>
-    ${heatmap()}
-    <p class="dim small">Each square is a day. Brighter means more of your three commitments done.</p>
+  <section class="days-sec" aria-label="Day by day">
+    <div class="sec-h"><h2 class="headline">Day by day</h2>
+      <span class="days-key">${P.commitments.map((k) => `<span>${ic(commitment(k).icon, 14)}</span>`).join('')}</span></div>
+    <ol class="days">${dayRows(P, showAll ? 30 : 10)}</ol>
+    <button class="btn btn-quiet" data-more>${showAll ? 'Show fewer days' : 'Show 30 days'}</button>
   </section>
 
   <section class="card">
@@ -37,19 +39,23 @@ export function renderStats(el) {
       </div>`;
     }).join('')}
   </section>`;
+
+  el.querySelector('[data-more]').addEventListener('click', () => { showAll = !showAll; renderStats(el); });
 }
 
-function heatmap() {
-  const days = lastDays(84);
+// One row per day, newest first: the date, a mark per commitment, the count.
+function dayRows(P, n) {
   const m = byDay(S.proofs.filter((p) => p.cKey !== 'moment'));
   const today = dayKey();
-  const cell = 22, gap = 5;
-  const firstDow = (new Date(`${days[0]}T12:00`).getDay() + 6) % 7; // Monday first
-  const cells = days.map((k, i) => {
-    const idx = i + firstDow;
-    const n = new Set((m.get(k) || []).map((p) => p.cKey)).size;
-    return `<rect class="l${Math.min(3, n)}${k === today ? ' today' : ''}" x="${Math.floor(idx / 7) * (cell + gap)}" y="${(idx % 7) * (cell + gap)}" width="${cell}" height="${cell}" rx="3"><title>${k}: ${n} of 3</title></rect>`;
+  const start = dayKey(P.createdAt || Date.now());
+  return lastDays(n).reverse().filter((k) => k >= start).map((k) => {
+    const set = new Set((m.get(k) || []).map((p) => p.cKey));
+    const n3 = P.commitments.filter((c) => set.has(c)).length;
+    const d = new Date(`${k}T12:00`);
+    return `<li class="day ${k === today ? 'is-today' : ''} ${n3 === 3 ? 'perfect' : ''}">
+      <span class="day-d"><b>${k === today ? 'Today' : d.toLocaleDateString([], { weekday: 'short' })}</b><small>${d.toLocaleDateString([], { day: 'numeric', month: 'short' })}</small></span>
+      <span class="day-marks">${P.commitments.map((c) => `<i class="${set.has(c) ? 'on' : ''}" title="${commitment(c).label}"></i>`).join('')}</span>
+      <span class="day-n">${n3 === 3 ? 'Perfect' : `${n3}/3`}</span>
+    </li>`;
   }).join('');
-  const cols = Math.ceil((days.length + firstDow) / 7);
-  return `<svg class="heat" viewBox="0 0 ${cols * (cell + gap) - gap} ${7 * (cell + gap) - gap}" role="img" aria-label="Commitments done per day over the last 12 weeks">${cells}</svg>`;
 }

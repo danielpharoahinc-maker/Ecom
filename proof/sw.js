@@ -1,6 +1,6 @@
 // Offline support: the app shell is cached so Proof opens without signal.
 // Bump VERSION whenever you change any file below, so phones get the update.
-const VERSION = 'proof-v5';
+const VERSION = 'proof-v6';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css',
   'js/app.js', 'js/auth.js', 'js/billing.js', 'js/capture.js', 'js/club.js', 'js/config.js', 'js/data.js', 'js/db.js',
