@@ -66,6 +66,44 @@ code, type it in, and they're in. New emails get an account automatically.
 Test: open your Netlify link, tap Continue with email, enter your address,
 type the code from the email. You land on onboarding.
 
+## 2c. Payments with Paystack (do this with a parent)
+Proof Pro is R49/month or R399/year. People pay on Paystack's secure page;
+card details never touch Proof. Only the server can switch Pro on, and only
+after Paystack confirms a real payment.
+
+1. **Paystack account** (paystack.com) in a parent's name, with the business
+   or personal details and the bank account for payouts. Start in **Test mode**.
+2. **Plans:** Paystack > Products > Plans > Create plan, twice:
+   - "Proof Pro Monthly", R49, interval Monthly. Copy its plan code (PLN_...).
+   - "Proof Pro Yearly", R399, interval Annually. Copy its plan code.
+3. **Server functions:** install the Supabase CLI on a computer, then from the
+   `proof` folder:
+   ```
+   supabase login
+   supabase link --project-ref YOUR-PROJECT-REF
+   supabase functions deploy create-checkout
+   supabase functions deploy paystack-webhook --no-verify-jwt
+   supabase secrets set PAYSTACK_SECRET_KEY=sk_test_... \
+     PAYSTACK_PLAN_MONTHLY=PLN_... PAYSTACK_PLAN_YEARLY=PLN_... \
+     APP_URL=https://your-site.netlify.app/
+   ```
+   The secret key goes ONLY into Supabase secrets. Never into the app, never
+   into GitHub, never into a chat.
+4. **Webhook:** Paystack > Settings > API Keys & Webhooks > Test Webhook URL:
+   `https://YOUR-PROJECT-REF.supabase.co/functions/v1/paystack-webhook`
+5. **Test it** with Paystack's test card (on their "Test payments" docs page):
+   pay for Monthly, land back in Proof, and Account should say Proof Pro.
+6. **Go live:** switch Paystack to Live mode, repeat steps 2 to 4 with the live
+   secret key, live plan codes and the Live Webhook URL.
+
+How Pro is decided: `profiles.pro_until`. Each confirmed payment extends it
+(31 days monthly, 366 yearly). Cancelled or failed renewals need no action:
+Pro ends when the paid time runs out. `supabase/test/webhook.test.mjs` checks
+forged, duplicate, underpaid and renewal payments.
+
+Later, on the App Store: Apple requires its own in-app purchase for digital
+subscriptions sold inside an iPhone app. The web version can keep Paystack.
+
 ## 2b. Sign in with Apple, step by step (do this with a parent)
 What the person sees: on an iPhone, iPad or Mac, tapping **Continue with
 Apple** shows Apple's sheet and confirms with **Face ID or Touch ID**. They

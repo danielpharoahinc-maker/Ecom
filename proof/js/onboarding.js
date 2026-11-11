@@ -3,6 +3,7 @@
 // the easiest questions come first so it climbs fast.
 import { STEPS, CATALOG, LABEL, commitment } from './data.js';
 import { S, saveProfile } from './state.js';
+import { pushProfile } from './billing.js';
 import { ic } from './icons.js';
 import { esc, haptic, toast } from './util.js';
 
@@ -169,6 +170,7 @@ function draw(root, onDone) {
         createdAt: Date.now(),
         onboarded: true,
       });
+      pushProfile().catch(() => {}); // live mode: save to the server too
       onDone({ firstProof: first });
     };
     root.querySelector('[data-first]').addEventListener('click', () => finish(true));

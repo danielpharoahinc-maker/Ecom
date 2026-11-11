@@ -40,7 +40,7 @@ const club = made.id; console.log('club code made by server:', made.code);
 await as(B, `select join_club('${made.code.toLowerCase()}')`);
 check('Cannot insert a club directly', await as(A, `insert into clubs (name,code) values ('x','ZZZ999')`), r => typeof r === 'string');
 check('Cannot add someone to a club directly', await as(A, `insert into club_members values ('${club}','${C}')`), r => typeof r === 'string');
-check('Cannot create profile with Pro on', await as(A, `insert into profiles (id,name,commitments,pro) values ('${A}','x','{a,b,c}',true)`), r => typeof r === 'string');
+check('Cannot create profile with Pro on', await as(A, `insert into profiles (id,name,commitments,pro_until) values ('${A}','x','{a,b,c}',now()+interval '9 years')`), r => typeof r === 'string');
 
 check('Signed-out cannot read proofs', await as(null, 'select * from proofs'), r => typeof r === 'string');
 check('Signed-out cannot read profiles', await as(null, 'select * from profiles'), r => typeof r === 'string');
@@ -58,7 +58,7 @@ check('Stranger cannot list club members', await as(C, 'select * from club_membe
 check('Sam cannot post proof as Danny', await as(B, `insert into proofs (user_id,c_key,kind) values ('${A}','train','photo')`), r => typeof r === 'string');
 check('Sam cannot delete Danny proof', await as(B, `delete from proofs where user_id='${A}' returning id`), r => Array.isArray(r) && r.length === 0);
 check('Sam cannot edit Danny profile', await as(B, `update profiles set name='hacked' where id='${A}' returning id`), r => Array.isArray(r) && r.length === 0);
-check('Danny cannot give himself Pro', await as(A, `update profiles set pro=true where id='${A}'`), r => typeof r === 'string');
+check('Danny cannot give himself Pro', await as(A, `update profiles set pro_until=now()+interval '9 years' where id='${A}'`), r => typeof r === 'string');
 check('Danny cannot reset free posts', await as(A, `update profiles set posts_used=0 where id='${A}'`), r => typeof r === 'string');
 check('Sam can read Danny photo file', await as(B, `select name from storage.objects`), r => Array.isArray(r) && r.length === 1);
 check('Stranger cannot read Danny photo file', await as(C, `select name from storage.objects`), r => Array.isArray(r) && r.length === 0);
@@ -67,9 +67,12 @@ check('Bucket is private', await as(A, `select public from storage.buckets`).cat
 console.log('bucket public =', (await q(`select public from storage.buckets where id='proof-media'`)).rows[0].public);
 await as(C, 'select delete_my_account()');
 check('Stranger account deleted with their proof', await q(`select count(*)::int n from proofs where user_id='${C}'`).then(r=>r.rows), r => r[0].n === 0);
+check('App cannot read payment records', await as(A, 'select * from billing'), r => typeof r === 'string');
+check('App cannot write payment records', await as(A, `insert into billing (user_id, plan) values ('${A}','yearly')`), r => typeof r === 'string');
 // Free plan enforcement
 for (let i = 0; i < 25; i++) await as(B, `insert into proofs (c_key,kind) values ('train','photo')`);
 check('Server stops posts after 21 free', await q(`select posts_used, (select count(*)::int from proofs where user_id='${B}') n from profiles where id='${B}'`).then(r => r.rows), r => r[0].posts_used === 21 && r[0].n === 21);
 check('22nd post gets the free-limit error', await as(B, `insert into proofs (c_key,kind) values ('train','photo')`), r => typeof r === 'string' && r.includes('FREE_LIMIT'));
-await q(`update profiles set pro = true where id='${B}'`); // what the payment webhook will do
+await q(`update profiles set pro_until = now() + interval '31 days' where id='${B}'`); // what the payment webhook does
+check('Expired Pro is blocked again', await (async () => { await q(`update profiles set pro_until = now() - interval '1 day' where id='${B}'`); const r = await as(B, `insert into proofs (c_key,kind) values ('train','photo')`); await q(`update profiles set pro_until = now() + interval '31 days' where id='${B}'`); return r; })(), r => typeof r === 'string' && r.includes('FREE_LIMIT'));
 check('Pro account can keep posting', await as(B, `insert into proofs (c_key,kind) values ('train','photo') returning id`), r => Array.isArray(r) && r.length === 1);

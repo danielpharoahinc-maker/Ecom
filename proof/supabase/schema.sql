@@ -25,7 +25,7 @@ create table public.profiles (
   obstacle     text[],
   commitments  text[] not null check (array_length(commitments, 1) = 3),
   posts_used   int not null default 0,
-  pro          boolean not null default false,
+  pro_until    timestamptz,          -- Pro while this is in the future; set only by the payment webhook
   created_at   timestamptz not null default now()
 );
 
@@ -51,6 +51,16 @@ create table public.club_members (
   primary key (club_id, user_id)
 );
 
+-- Payment records. No policies: the app can't read or write this at all;
+-- only the payment webhook (service role) touches it.
+create table public.billing (
+  user_id        uuid primary key references auth.users on delete cascade,
+  customer_code  text unique,
+  plan           text,
+  last_reference text,
+  updated_at     timestamptz not null default now()
+);
+
 create table public.proofs (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null default auth.uid() references auth.users on delete cascade,
@@ -65,8 +75,9 @@ create table public.proofs (
 create index proofs_user_time on public.proofs (user_id, created_at desc);
 
 -- Signed-out visitors get no table access at all.
-revoke all on public.profiles, public.plans, public.clubs, public.club_members, public.proofs from anon;
--- People may only write these profile fields. Pro, the free-post count and
+revoke all on public.profiles, public.plans, public.clubs, public.club_members, public.proofs, public.billing from anon;
+revoke all on public.billing from authenticated;
+-- People may only write these profile fields. Pro (pro_until), the free-post count and
 -- timestamps can't be set from the app; only the server changes them.
 revoke insert, update on public.profiles from authenticated;
 grant insert (id, name, goal, wake, lockin, proof_time, crew, obstacle, commitments) on public.profiles to authenticated;
@@ -147,11 +158,11 @@ grant execute on function public.club_roster, public.join_club, public.create_cl
 -- posts are used up only Pro accounts can post. (Matches FREE_POSTS in config.js.)
 create or replace function public.count_post() returns trigger
 language plpgsql security definer set search_path = public as $$
-declare used int; is_pro boolean;
+declare used int; until timestamptz;
 begin
-  select posts_used, pro into used, is_pro from profiles where id = new.user_id for update;
+  select posts_used, pro_until into used, until from profiles where id = new.user_id for update;
   if used is null then raise exception 'Finish setting up your profile first'; end if;
-  if not is_pro and used >= 21 then raise exception 'FREE_LIMIT: free posts used up'; end if;
+  if coalesce(until > now(), false) = false and used >= 21 then raise exception 'FREE_LIMIT: free posts used up'; end if;
   update profiles set posts_used = used + 1 where id = new.user_id;
   return new;
 end $$;
@@ -165,6 +176,7 @@ alter table public.plans        enable row level security;
 alter table public.clubs        enable row level security;
 alter table public.club_members enable row level security;
 alter table public.proofs       enable row level security;
+alter table public.billing      enable row level security;  -- and no policies: closed to the app
 
 -- Profiles: only you. (Club mates get your first name through club_roster.)
 create policy "read own profile"   on public.profiles for select to authenticated using (id = auth.uid());

@@ -11,6 +11,7 @@ import { renderClub, join } from './club.js';
 import { openCapture } from './capture.js';
 import { ic } from './icons.js';
 import { haptic } from './util.js';
+import { refreshPro, afterCheckout } from './billing.js';
 
 const app = document.getElementById('app');
 
@@ -96,6 +97,11 @@ async function boot() {
   // Home-screen shortcuts: ?action=snap or ?action=talk
   const action = params.get('action');
   route();
+  // Back from Paystack checkout, or a normal open: ask the server about Pro.
+  if (S.profile?.onboarded) {
+    if (params.has('paid')) { history.replaceState(null, '', location.pathname); afterCheckout(); }
+    else refreshPro().catch(() => {});
+  }
   if (S.profile?.onboarded && action === 'snap') openCapture();
   if (S.profile?.onboarded && action === 'talk') openCapture({ mode: 'voice' });
 }

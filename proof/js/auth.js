@@ -26,6 +26,9 @@ async function sb() {
   return client;
 }
 
+// The signed-in Supabase client (null in test mode), for other modules.
+export const getClient = () => sb();
+
 const PROVIDER = { apple: 'apple', google: 'google', microsoft: 'azure' };
 
 // Returns a signed-in user after a live redirect comes back, or null.
