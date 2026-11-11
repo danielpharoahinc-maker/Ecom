@@ -38,6 +38,7 @@
   <!-- /HEAD-META -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="models/tee-hanger.json" as="fetch" crossorigin>
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/cart.css">
@@ -46,6 +47,8 @@
 </head>
 <body>
   <!-- Mount points. Each module fills its own; do not move them. -->
+  <a class="skip-link" href="#app">Skip to the tees</a>
+  <noscript><p style="max-width:520px;margin:40px auto;padding:0 16px;font:16px/1.5 system-ui,sans-serif">AWEZA needs JavaScript to show the clothes rail and take orders. Please turn it on in your browser and reload the page.</p></noscript>
   <div id="nav-root"></div>
   <main id="app" tabindex="-1">
     <section class="rail rail--boot" role="status" aria-label="Loading the tees">

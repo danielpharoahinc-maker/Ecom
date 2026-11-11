@@ -101,6 +101,7 @@
   function railMarkup(list) {
     return `
       <section class="rail" aria-label="The rail. ${list.length} tees">
+        <h1 class="visually-hidden">AWEZA graphic tees from South Africa</h1>
         ${AW.referral.code() && AW.config.referral ? `<p class="rail-gift"><b>A friend sent you ${AW.rand(AW.config.referral.amount)} off.</b> It comes off at checkout on orders of ${AW.rand(AW.config.referral.minSubtotal)} or more.</p>` : ""}
         <p class="rail-tag">Time of your life.</p>
         <p class="rail-hint" id="rail-hint">Run your finger along the rail. Tap a shirt to see it.</p>
@@ -125,7 +126,11 @@
         </div>
         <div class="rail-dots" aria-hidden="true">${list.map(() => "<span></span>").join("")}</div>
       </section>
-      <section class="pick" aria-live="polite"></section>`;
+      <section class="pick" aria-live="polite"></section>
+      <div class="rail-buy" hidden>
+        <p class="rb-info"><span class="rb-name"></span><b class="rb-price"></b></p>
+        <button type="button" class="rb-go">Choose size</button>
+      </div>`;
   }
 
   function dims() {
@@ -178,19 +183,59 @@
     if (bar) {
       bar.hidden = st.sel == null;
       if (st.sel != null) {
-        bar.querySelector(".rf-name").textContent = st.list[st.sel].name;
+        bar.querySelector(".rf-name").textContent = st.list[st.sel].name + " · " + AW.rand(st.list[st.sel].price);
         steps.querySelector('[data-step="-1"]').disabled = st.sel === 0;
         steps.querySelector('[data-step="1"]').disabled = st.sel === st.n - 1;
       }
     }
   }
 
-  function unselect() {
+  /* Each tee has its own address (#/product/<id>), so the Back button returns to the rail instead of leaving the site,
+     and a tee can be shared or bookmarked. The first open adds a history entry; moving between tees replaces it. */
+  const railUrl = "#/";
+  function syncUrl(i) {
+    const want = i == null ? railUrl : "#/product/" + encodeURIComponent(st.list[i].id);
+    if (location.hash === want) return;
+    try {
+      if (st.pushed || i == null) history.replaceState(null, "", want); else history.pushState(null, "", want);
+      if (i != null) st.pushed = true;
+    } catch (e) { /* the page still works without the address change */ }
+  }
+  /* Sticky buy bar: while a tee is open and its real Add to bag button is off screen, a bar at the bottom shows the
+     name and price and takes people to the sizes ("Choose size"), then adds to the bag once a size is picked. */
+  function updateBuy() {
+    const bar = st && st.root.querySelector(".rail-buy"); if (!bar) return;
+    const show = st.sel != null && st.buy && !st.addVisible;
+    bar.hidden = !show;
+    if (!show) return;
+    const { p, size } = st.buy;
+    bar.querySelector(".rb-name").textContent = p.name;
+    bar.querySelector(".rb-price").textContent = AW.rand(AW.priceFor(p, size));
+    bar.querySelector(".rb-go").textContent = size ? "Add to bag" : "Choose size";
+  }
+  function unselect(fromHistory) {
     if (!st || st.sel == null) return;
-    st.sel = null; st.focus = null;
+    st.sel = null; st.focus = null; st.buy = null; st.addVisible = false; updateBuy();
     layout(); setFocusUI();
     st.root.querySelector(".pick").innerHTML = "";
+    document.title = "AWEZA | Graphic tees from South Africa";
+    if (fromHistory === true) { st.pushed = false; return; }
+    if (st.pushed) { st.pushed = false; try { history.back(); } catch (e) { syncUrl(null); } }
+    else syncUrl(null);
   }
+  // Back / forward between the rail and a tee: handled here without rebuilding the 3D rail (see core.js render).
+  AW.railHandles = hash => {
+    if (!st || !st.stage || !document.body.contains(st.stage)) return false;
+    const m = /^#\/product\/([^/?]+)/.exec(hash || "");
+    if (m) {
+      const i = st.list.findIndex(p => p.id === decodeURIComponent(m[1]));
+      if (i < 0) return false;
+      if (st.sel !== i) { select(i, { silent: true }); st.pushed = true; }
+      return true;
+    }
+    if (!hash || hash === "#" || hash === "#/" || /^#\/shop(\/|$)/.test(hash)) { if (st.sel != null) unselect(true); return true; }
+    return false;
+  };
 
   function select(i, opts = {}) {
     if (!st) return;
@@ -199,6 +244,8 @@
     st.sel = i; st.focus = null;
     layout(); setFocusUI();
     renderPick(st.list[i], opts);
+    document.title = st.list[i].name + " | AWEZA";
+    if (!opts.silent) syncUrl(i);
     st.stage.setAttribute("aria-activedescendant", "");
     if (opts.scroll) AW.motion.scrollTo(st.root.querySelector(".pick"));
   }
@@ -209,7 +256,7 @@
     box.innerHTML = `
       <div class="pick-in" data-id="${esc(p.id)}">
         <div class="pick-head">
-          <h1 class="pick-name">${esc(p.name)}</h1>
+          <h2 class="pick-name">${esc(p.name)}</h2>
           <p class="pick-price" data-price>${AW.rand(p.price)}</p>
         </div>
         <p class="pick-sum">${esc(p.summary)}</p>
@@ -227,7 +274,7 @@
         <button type="button" class="pick-add">Add to bag</button>
         ${AW.rail3d && AW.rail3d.active ? `<button type="button" class="pick-turn" aria-pressed="false">Turn it around</button>` : ""}
         <p class="pick-perk">${p.noDeal ? "Premium print, not in the multi-buy." : AW.config.deals ? `<b>${AW.dealLabel()}</b> on any tees. Mix designs and sizes.` : ""}${AW.drop() ? ` <span>${AW.esc(AW.drop().name)} closes ${AW.esc(AW.drop().label)}.</span>` : ""}</p>
-        <div class="pick-photos" aria-label="Photos of the ${esc(p.name)}">
+        <div class="pick-photos" role="region" tabindex="0" aria-label="Photos of the ${esc(p.name)}. Scroll sideways.">
           ${photos.map((src, k) => `<img src="${esc(src)}" alt="${esc((AW.ui && AW.ui.altFor) ? AW.ui.altFor(p, src) : p.name)}" width="1000" height="1000" loading="${k < 2 ? "eager" : "lazy"}" decoding="async">`).join("")}
         </div>
         ${photos.length > 1 ? `<p class="pick-count" role="status" aria-live="polite"><span data-photo-n>1</span> of ${photos.length}</p>` : ""}
@@ -238,10 +285,16 @@
         </p>
       </div>`;
     let size = null;
+    st.buy = { p, size: null }; st.addVisible = false; updateBuy();
+    if (st.buyIO) st.buyIO.disconnect();
+    if ("IntersectionObserver" in window) {
+      st.buyIO = new IntersectionObserver(([e]) => { st.addVisible = e.isIntersecting; updateBuy(); }, { threshold: 0.6 });
+      st.buyIO.observe(box.querySelector(".pick-add"));
+    }
     const note = box.querySelector(".pick-note"), price = box.querySelector("[data-price]");
     const choose = s => {
       const b = box.querySelector(`.pick-size[data-size="${s}"]`); if (!b) return;
-      size = s;
+      size = s; if (st.buy) { st.buy.size = s; updateBuy(); }
       box.querySelectorAll(".pick-size").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
       price.textContent = AW.rand(AW.priceFor(p, size));
       note.textContent = "";
@@ -414,6 +467,13 @@
     const bar = st.root.querySelector(".rail-focusbar");
     bar.querySelector(".rf-back").addEventListener("click", unselect);
     st.root.querySelectorAll(".rf-step").forEach(b => b.addEventListener("click", () => select(st.sel + Number(b.dataset.step))));
+    const buyGo = st.root.querySelector(".rb-go");
+    if (buyGo) buyGo.addEventListener("click", () => {
+      const box = st.root.querySelector(".pick");
+      if (st.buy && st.buy.size) { box.querySelector(".pick-add").click(); return; }
+      const sizes = box.querySelector(".pick-sizes");
+      if (sizes) { sizes.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); const f = sizes.querySelector(".pick-size"); if (f) setTimeout(() => f.focus({ preventScroll: true }), 350); }
+    });
     stage.addEventListener("keydown", e => {
       if (e.key === "Escape" && st.sel != null) { e.preventDefault(); unselect(); return; }
       if (st.sel != null && (e.key === "a" || e.key === "d")) { AW.emit("rail:spin", { phase: "nudge", angle: (e.key === "d" ? 1 : -1) * Math.PI / 8 }); return; }
@@ -473,7 +533,7 @@
     AW.emit("rail:mount", { stage: st.stage, list });
     watchReady(st);
     const pre = preselect ? list.findIndex(p => p.id === preselect) : -1;
-    if (pre >= 0) select(pre);
+    if (pre >= 0) select(pre, { silent: true });
     else {
       layout();
       root.querySelector(".pick").innerHTML = "";
@@ -491,4 +551,7 @@
 
   mountHeader();
   mountFooter();
+  // "Skip to the tees": focus the main area by script (a #app link would collide with the hash router).
+  const skip = document.querySelector(".skip-link");
+  if (skip) skip.addEventListener("click", e => { e.preventDefault(); const m = document.getElementById("app"); if (m) { m.focus({ preventScroll: true }); m.scrollIntoView({ block: "start" }); } });
 })();

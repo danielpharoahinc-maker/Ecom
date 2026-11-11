@@ -77,7 +77,7 @@
 .pg-draft-sticker {
   display: inline-block; transform: rotate(-4deg);
   padding: var(--sp-2) var(--sp-3);
-  background: var(--c-red); color: var(--c-white);
+  background: #b3121a; color: #fff;
   font: 800 var(--fs-sm)/1 var(--font-body); text-transform: uppercase; letter-spacing: var(--ls-caps);
   box-shadow: var(--sh-1);
 }

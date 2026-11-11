@@ -46,3 +46,30 @@
   for = "/data/printify-variants.json"
   [headers.values]
     Cache-Control = "public, max-age=300"
+
+# Caching: pictures, the 3D model and the 3D library change rarely, so browsers may keep them for a day (files are not
+# renamed when they change, so not longer). Code and styles are re-checked every few minutes.
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/models/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/vendor/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"
+
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"

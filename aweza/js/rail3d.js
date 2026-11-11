@@ -33,7 +33,13 @@
     "black-out":           { front: shot("black-out-front"),            back: shot("black-out-back") },
     "time-of-your-life":   { front: shot("time-of-your-life-front"),    back: shot("time-of-your-life-back") },
   };
-  Object.values(PHOTOS).forEach(p => Object.values(p).forEach(v => { const i = new Image(); i.decoding = "async"; i.src = v.src; })); // warm the cache
+  // Warm the cache for the hanging-shot photos once the rail is drawn and the browser is idle, and not at all on a
+  // data-saver or very slow connection (each photo is also fetched when its shirt settles, so nothing breaks).
+  const warmPhotos = () => {
+    const c = navigator.connection; if (c && (c.saveData || /(^|-)2g$/.test(c.effectiveType || ""))) return;
+    Object.values(PHOTOS).forEach(p => Object.values(p).forEach(v => { const i = new Image(); i.decoding = "async"; i.src = v.src; }));
+  };
+  AW.on("rail:ready", () => (window.requestIdleCallback ? window.requestIdleCallback(warmPhotos, { timeout: 4000 }) : setTimeout(warmPhotos, 2000)));
 
   /* ---------- the shirt on its hanger ----------
      models/tee-hanger.json: one 3D tee on a wooden hanger, made with Higgsfield (multi-image to 3D) and shared by

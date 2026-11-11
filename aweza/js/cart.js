@@ -120,16 +120,16 @@
     <div class="bag" data-state="closed" hidden>
       <div class="bag-scrim" data-bag-close></div>
       <section class="bag-panel" role="dialog" aria-modal="true" aria-labelledby="bag-title" tabindex="-1">
-        <header class="bag-head">
+        <div class="bag-head">
           <h2 class="bag-title" id="bag-title">Your bag<span class="bag-count" aria-hidden="true"></span><span class="visually-hidden bag-count-sr"></span></h2>
           <button type="button" class="bag-close" data-bag-close aria-label="Close bag">${ic("close", 22)}</button>
-        </header>
+        </div>
         <div class="bag-ship" aria-live="polite">
           <p class="bag-ship-text"></p>
           <div class="bag-ship-track" role="progressbar" aria-label="Progress to free delivery" aria-valuemin="0" aria-valuemax="100"><span class="bag-ship-fill"></span></div>
         </div>
         <div class="bag-body" data-lenis-prevent></div>
-        <footer class="bag-foot"></footer>
+        <div class="bag-foot"></div>
       </section>
     </div>`;
 

@@ -114,6 +114,7 @@
   AW.route = (name, fn) => { routes[name] = fn; };
   AW.go = h => { location.hash = h; };
   function render() {
+    if (AW.railHandles && AW.railHandles(location.hash)) return;   // rail <-> tee moves are handled in place
     const [, page = "", arg] = (location.hash || "#/").split("/");
     const fn = routes[page] || routes["404"] || (app => { app.innerHTML = "<p style='padding:40px'>Not found</p>"; });
     AW.app.innerHTML = "";

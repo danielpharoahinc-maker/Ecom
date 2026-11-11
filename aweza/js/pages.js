@@ -9,7 +9,9 @@
   const R = n => (AW.rand ? AW.rand(n) : "R" + n);
   const cfg = AW.config || {};
   const U = () => AW.ui || {};
-  const ph = t => `<span class="pg-ph">[${esc(t)}]</span>`;
+  // Owner-fill placeholders: replaced by the real details from AW.config.business when they are filled in.
+  const BIZ = { "Email": "email", "email": "email", "Phone": "phone", "Registered business name": "name", "Registration number": "regNo", "VAT number if registered": "vatNo", "Physical address": "address", "City": "city", "Founder": "founder" };
+  const ph = t => { const v = BIZ[t] && ((AW.config || {}).business || {})[BIZ[t]]; return v ? esc(v) : `<span class="pg-ph">[${esc(t)}]</span>`; };
   const ART = "images/brand/art/";
 
   /* ---------- small helpers with local fallbacks ---------- */

@@ -23,6 +23,9 @@ AW.config = {
     peak: { from: "11-15", to: "01-10", extra: 5 },
     holidays: ["2026-12-16", "2026-12-25", "2026-12-26", "2027-01-01"],   // South African public holidays that stop couriers
   },
+  // Business details for the Help, Terms and Privacy pages. Fill these in and the "[Email]"-style placeholders on those
+  // pages are replaced by the real thing. Anything left empty still shows as a placeholder (see docs/OWNER-TODO.md).
+  business: { name: "", regNo: "", vatNo: "", email: "", phone: "", address: "", city: "", founder: "" },
   // Limited drop: the server stops taking orders after this date (end of day, South African time).
   drop: { name: "Drop 01", ends: "2026-12-31", label: "31 Dec" },
 };
