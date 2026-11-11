@@ -1,5 +1,5 @@
 // First screen: Continue with Apple / Google / Microsoft / email.
-import { signIn, sendEmailCode, verifyEmailCode } from './auth.js';
+import { signIn, sendEmailCode, verifyEmailCode, signedInElsewhere } from './auth.js';
 import { setUser } from './state.js';
 import { LOGO, ic } from './icons.js';
 import { $, toast, haptic } from './util.js';
@@ -27,9 +27,9 @@ export function renderWelcome(root, onDone) {
         <label class="sr" for="email">Email</label>
         <input id="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required>
         <p class="form-err" role="alert" hidden></p>
-        <button class="btn btn-primary" type="submit">${LIVE ? 'Send me a code' : 'Continue'}</button>
+        <button class="btn btn-primary" type="submit">${LIVE ? 'Email me a sign-in link' : 'Continue'}</button>
       </form>
-      <p class="fine">${LIVE ? 'We’ll email you a 6-digit code. No password needed.' : 'Test version: your account and proof are saved in this browser.'}</p>
+      <p class="fine">${LIVE ? 'We’ll email you a sign-in link. No password needed.' : 'Test version: your account and proof are saved in this browser.'}</p>
     </div>
   </section>`;
 
@@ -79,7 +79,7 @@ export function renderWelcome(root, onDone) {
       codeStep(root, email, onDone);
     } catch (e2) {
       showErr(e2.message);
-      btn.disabled = false; btn.textContent = 'Send me a code';
+      btn.disabled = false; btn.textContent = 'Email me a sign-in link';
     }
   });
 }
@@ -90,13 +90,14 @@ function codeStep(root, email, onDone) {
   auth.innerHTML = `
     <form class="code-form" novalidate>
       <h2 class="h2">Check your email</h2>
-      <p class="sub">We sent a 6-digit code to <b class="email-shown"></b>. It can take a minute, and sometimes lands in spam.</p>
+      <p class="sub">We sent a sign-in email to <b class="email-shown"></b>. Open it on this phone and tap the sign-in button. It can take a minute, and sometimes lands in spam.</p>
+      <p class="code-or">Email shows a 6-digit code instead? Type it here.</p>
       <label class="sr" for="otp">6-digit code</label>
       <input id="otp" class="otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" placeholder="000000">
       <p class="form-err" role="alert" hidden></p>
       <button class="btn btn-primary" type="submit" disabled>Sign in</button>
       <div class="code-links">
-        <button type="button" class="link-btn" data-resend disabled>Send a new code</button>
+        <button type="button" class="link-btn" data-resend disabled>Send again</button>
         <button type="button" class="link-btn" data-change>Use a different email</button>
       </div>
     </form>`;
@@ -111,11 +112,19 @@ function codeStep(root, email, onDone) {
   let wait = 30, timer;
   const tick = () => {
     resend.disabled = wait > 0;
-    resend.textContent = wait > 0 ? `Send a new code in ${wait}s` : 'Send a new code';
+    resend.textContent = wait > 0 ? `Send again in ${wait}s` : 'Send again';
     if (wait-- <= 0) clearInterval(timer);
   };
   const startTimer = () => { wait = 30; clearInterval(timer); tick(); timer = setInterval(tick, 1000); };
   startTimer();
+
+  // If they tap the link in the email, Proof opens in a new tab already signed
+  // in. Notice that here too, so this tab moves on by itself.
+  const watch = setInterval(async () => {
+    if (!document.body.contains(form)) return clearInterval(watch);
+    const user = await signedInElsewhere().catch(() => null);
+    if (user) { clearInterval(watch); clearInterval(timer); await setUser(user); onDone(); }
+  }, 3000);
 
   const verify = async () => {
     const code = input.value.replace(/\D/g, '');
@@ -123,7 +132,7 @@ function codeStep(root, email, onDone) {
     btn.disabled = true; btn.textContent = 'Checking…'; showErr('');
     try {
       const user = await verifyEmailCode(email, code);
-      clearInterval(timer);
+      clearInterval(timer); clearInterval(watch);
       haptic(20);
       await setUser(user);
       onDone();
@@ -141,8 +150,8 @@ function codeStep(root, email, onDone) {
   form.addEventListener('submit', (e) => { e.preventDefault(); verify(); });
   resend.addEventListener('click', async () => {
     resend.disabled = true;
-    try { await sendEmailCode(email); toast('New code sent'); startTimer(); } catch (e) { showErr(e.message); resend.disabled = false; }
+    try { await sendEmailCode(email); toast('Sent again. Check your inbox.'); startTimer(); } catch (e) { showErr(e.message); resend.disabled = false; }
   });
-  $('[data-change]', auth).addEventListener('click', () => { clearInterval(timer); renderWelcome(root, onDone); });
+  $('[data-change]', auth).addEventListener('click', () => { clearInterval(timer); clearInterval(watch); renderWelcome(root, onDone); });
   setTimeout(() => input.focus(), 50);
 }

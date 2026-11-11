@@ -72,8 +72,22 @@ const toUser = (u) => ({
 export async function sendEmailCode(email) {
   const c = await sb();
   if (!c) throw new Error('Sign-in server isn’t connected yet.');
-  const { error } = await c.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+  // Supabase's standard email has a sign-in button (link) that opens Proof;
+  // a custom email template can also show a 6-digit code. Both work.
+  const { error } = await c.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: true, emailRedirectTo: location.origin + location.pathname },
+  });
   if (error) throw new Error(friendly(error));
+}
+
+// Signed in from the email link, possibly in another tab: the session is
+// shared through the browser's storage, so check for it.
+export async function signedInElsewhere() {
+  const c = await sb();
+  if (!c) return null;
+  const { data } = await c.auth.getSession();
+  return data.session?.user ? toUser(data.session.user) : null;
 }
 
 export async function verifyEmailCode(email, code) {
