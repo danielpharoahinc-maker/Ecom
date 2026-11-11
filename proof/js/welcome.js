@@ -3,7 +3,7 @@ import { signIn, sendEmailCode, verifyEmailCode } from './auth.js';
 import { setUser } from './state.js';
 import { LOGO, ic } from './icons.js';
 import { $, toast, haptic } from './util.js';
-import { LIVE } from './config.js';
+import { LIVE, SIGN_IN } from './config.js';
 
 export function renderWelcome(root, onDone) {
   root.innerHTML = `
@@ -29,9 +29,19 @@ export function renderWelcome(root, onDone) {
         <p class="form-err" role="alert" hidden></p>
         <button class="btn btn-primary" type="submit">${LIVE ? 'Send me a code' : 'Continue'}</button>
       </form>
-      <p class="fine">${LIVE ? 'By continuing you agree to the Terms and Privacy Policy.' : 'Test version: your account and proof are saved in this browser.'}</p>
+      <p class="fine">${LIVE ? 'We’ll email you a 6-digit code. No password needed.' : 'Test version: your account and proof are saved in this browser.'}</p>
     </div>
   </section>`;
+
+  // Live mode: only show the sign-in options that are set up on the server.
+  if (LIVE) {
+    root.querySelectorAll('[data-p]').forEach((b) => { if (!SIGN_IN.includes(b.dataset.p)) b.remove(); });
+    const only = SIGN_IN.length === 1 && SIGN_IN[0] === 'email';
+    if (only) {
+      root.querySelector('[data-p="email"]')?.remove();
+      root.querySelector('.email-form').hidden = false;
+    }
+  }
 
   const go = async (provider, email = '') => {
     haptic();

@@ -15,4 +15,9 @@ export const FREE_POSTS = 21;
 
 export const PRICES = { monthly: 'R49', yearly: 'R399', yearlySaving: '32%' };
 
+// Which sign-in buttons to show once the server is on. Add 'google',
+// 'apple' or 'microsoft' here only after setting that provider up in
+// Supabase > Authentication > Providers (docs/BACKEND.md).
+export const SIGN_IN = ['email'];
+
 export const LIVE = Boolean(CONFIG.supabaseUrl && CONFIG.supabaseAnonKey);
