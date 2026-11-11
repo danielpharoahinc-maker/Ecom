@@ -47,7 +47,32 @@ function draw(root, onDone) {
   const next = () => { i++; draw(root, onDone); };
   root.querySelector('[data-back]').addEventListener('click', () => { if (i > 0) { i--; draw(root, onDone); } });
 
-  if (step.type === 'choice') {
+  if (step.type === 'choice' && step.multi) {
+    // Pick up to `multi` answers, then Continue.
+    if (!Array.isArray(ans[step.id])) ans[step.id] = [];
+    const cta = root.querySelector('[data-next]');
+    const sync = () => {
+      const picked = ans[step.id];
+      root.querySelectorAll('.choice').forEach((b) => {
+        const on = picked.includes(b.dataset.v);
+        b.classList.toggle('sel', on);
+        b.setAttribute('aria-pressed', on);
+      });
+      cta.disabled = picked.length === 0;
+      root.querySelector('.commit-count').textContent = picked.length === step.multi ? 'Two is the limit. Tap one to swap it.' : picked.length ? 'Add one more, or continue.' : '';
+    };
+    root.querySelectorAll('.choice').forEach((b) => b.addEventListener('click', () => {
+      haptic();
+      const picked = ans[step.id];
+      const v = b.dataset.v;
+      if (picked.includes(v)) ans[step.id] = picked.filter((x) => x !== v);
+      else if (picked.length < step.multi) picked.push(v);
+      else toast('Pick up to two. Tap one to remove it first.');
+      sync();
+    }));
+    cta.addEventListener('click', next);
+    sync();
+  } else if (step.type === 'choice') {
     root.querySelectorAll('.choice').forEach((b) => b.addEventListener('click', () => {
       haptic();
       root.querySelectorAll('.choice').forEach((x) => x.classList.remove('sel'));
@@ -136,13 +161,16 @@ function draw(root, onDone) {
 
 function body(step) {
   if (step.type === 'choice') {
+    const isSel = (v) => (Array.isArray(ans[step.id]) ? ans[step.id].includes(v) : ans[step.id] === v);
     return `<div class="choices">${step.options.map((o) => `
-      <button class="choice ${ans[step.id] === o.v ? 'sel' : ''}" data-v="${o.v}">
+      <button class="choice ${isSel(o.v) ? 'sel' : ''}" data-v="${o.v}" ${step.multi ? 'aria-pressed="false"' : ''}>
+        ${step.multi ? `<span class="choice-tick" aria-hidden="true">${ic('check', 14, 2.6)}</span>` : ''}
         ${step.visual === 'bar'
           ? `<span class="choice-bar" aria-hidden="true"><i style="height:${o.fill}%"></i></span>`
           : `<span class="choice-ic">${ic(o.icon, 26)}</span>`}
         <span class="choice-txt"><b>${o.label}</b><small>${o.hint}</small></span>
-      </button>`).join('')}</div>`;
+      </button>`).join('')}</div>
+      ${step.multi ? `<div class="ob-foot"><p class="commit-count" aria-live="polite"></p><button class="btn btn-primary" data-next disabled>Continue</button></div>` : ''}`;
   }
 
   if (step.type === 'commit') {
@@ -178,12 +206,12 @@ function body(step) {
   }
 
   if (step.type === 'plan') {
-    const goal = LABEL.goal[ans.goal]; const wake = LABEL.wake[ans.wake];
+    const goals = [].concat(ans.goal || []).map((g) => LABEL.goal[g]?.label.toLowerCase()).filter(Boolean); const wake = LABEL.wake[ans.wake];
     const lock = LABEL.lockin[ans.lockin]; const pt = LABEL.proofTime[ans.proofTime];
     return `<div class="plan">
       <div class="plan-card">
         <div class="plan-name"><span class="avatar lg">${esc((ans.name || '?')[0].toUpperCase())}</span>
-          <div><b>${esc(ans.name)}</b><small>Building ${goal ? goal.label.toLowerCase() : 'discipline'}</small></div></div>
+          <div><b>${esc(ans.name)}</b><small>Building ${goals.length ? goals.join(' and ') : 'discipline'}</small></div></div>
         <div class="plan-lock">
           <span class="lab">Daily lock-in</span>
           <div class="lock-bar"><i style="width:${lock?.fill ?? 25}%"></i></div>

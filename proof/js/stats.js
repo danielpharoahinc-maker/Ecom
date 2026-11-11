@@ -1,6 +1,9 @@
 // Pure calculations over proofs. No drawing here: views use these numbers.
 import { dayKey, daysAgo } from './util.js';
 
+// Only commitment proof counts toward streaks and stats, not moments.
+const counted = (proofs) => proofs.filter((p) => p.cKey !== 'moment');
+
 export function byDay(proofs) {
   const m = new Map();
   for (const p of proofs) {
@@ -20,6 +23,7 @@ export function doneToday(proofs) {
 // Days in a row with at least one proof. Today doesn't break the streak
 // until it's over, so a streak still counts if the last proof was yesterday.
 export function streak(proofs) {
+  proofs = counted(proofs);
   const days = new Set(proofs.map((p) => dayKey(p.ts)));
   let n = 0;
   let i = days.has(dayKey()) ? 0 : 1;
@@ -28,6 +32,7 @@ export function streak(proofs) {
 }
 
 export function bestStreak(proofs) {
+  proofs = counted(proofs);
   const days = [...new Set(proofs.map((p) => dayKey(p.ts)))].sort();
   let best = 0, cur = 0, prev = null;
   for (const d of days) {

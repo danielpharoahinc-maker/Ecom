@@ -41,7 +41,7 @@ export function renderStats(el) {
 
 function heatmap() {
   const days = lastDays(84);
-  const m = byDay(S.proofs);
+  const m = byDay(S.proofs.filter((p) => p.cKey !== 'moment'));
   const today = dayKey();
   const cell = 22, gap = 5;
   const firstDow = (new Date(`${days[0]}T12:00`).getDay() + 6) % 7; // Monday first

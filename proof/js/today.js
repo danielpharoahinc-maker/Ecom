@@ -5,6 +5,7 @@ import { S, hydrateMedia, signOut, resetEverything, getPlan, savePlan } from './
 import { commitment } from './data.js';
 import { doneToday, streak } from './stats.js';
 import { openCapture } from './capture.js';
+import { openProof } from './proofview.js';
 import { openSheet, confirmSheet } from './sheet.js';
 import { signOutLive } from './auth.js';
 import { parsePlan } from './planner.js';
@@ -18,7 +19,7 @@ const dictationReady = getDictation().then((d) => { dictation = d; return d; });
 
 function greeting() {
   const h = new Date().getHours();
-  return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+  return h < 12 ? 'Morning' : h < 18 ? 'Afternoon' : 'Evening';
 }
 
 export async function renderToday(el) {
@@ -29,6 +30,7 @@ export async function renderToday(el) {
   const todayStr = new Date().toDateString();
   const proofFor = (k) => S.proofs.find((p) => p.cKey === k && new Date(p.ts).toDateString() === todayStr);
   const left = plan.filter((i) => !i.done).length;
+  const todays = S.proofs.filter((p) => new Date(p.ts).toDateString() === todayStr);
 
   el.innerHTML = `
   <header class="page-top">
@@ -51,6 +53,14 @@ export async function renderToday(el) {
         <span class="commit-txt"><b>${c.label}</b><small>${p ? 'Proven' : 'Prove it'}</small></span>
       </button>`;
     }).join('')}
+  </section>
+
+  <section class="day-strip" aria-label="Your day in photos">
+    <button class="ds-add" data-moment aria-label="Add a photo from your day">${ic('camera', 20)}<span>Moment</span></button>
+    ${todays.map((p) => `<button class="ds-shot" data-open="${p.id}" aria-label="${commitment(p.cKey).label} photo">
+      ${p.photoId ? `<img data-media="${p.photoId}" alt="">` : `<span class="ds-voice">${ic('wave', 20, 1.5)}</span>`}
+    </button>`).join('')}
+    ${todays.length ? '' : '<span class="ds-hint">Snap your day as it happens. Moments don’t count toward your streak, they just tell the story.</span>'}
   </section>
 
   <section class="plan-sec" aria-label="Today's plan">
@@ -81,6 +91,8 @@ export async function renderToday(el) {
   hydrateMedia(el);
   el.querySelectorAll('[data-capture]').forEach((b) => b.addEventListener('click', () => openCapture({ cKey: b.dataset.capture })));
   el.querySelector('[data-settings]').addEventListener('click', settings);
+  el.querySelector('[data-moment]').addEventListener('click', () => openCapture({ cKey: 'moment' }));
+  el.querySelectorAll('.ds-shot').forEach((b) => b.addEventListener('click', () => openProof(b.dataset.open)));
   bindPlan(el, plan, done);
   bindTalk(el, plan);
 }

@@ -16,7 +16,11 @@ export const CATALOG = [
   { key: 'create',  label: 'Create content',     hint: 'Film, write, post',     icon: 'video' },
 ];
 
-export const BY_KEY = Object.fromEntries(CATALOG.map((c) => [c.key, c]));
+// Photos from the rest of your day. Shown in Vault and Club, never counted
+// toward streaks or stats.
+export const MOMENT = { key: 'moment', label: 'Moment', hint: 'Anything from your day', icon: 'image' };
+
+export const BY_KEY = Object.fromEntries([...CATALOG, MOMENT].map((c) => [c.key, c]));
 export const commitment = (key) => BY_KEY[key] || { key, label: key, hint: '', icon: 'sparkle' };
 
 // Onboarding. Ordered easiest first so the progress bar climbs quickly:
@@ -24,9 +28,9 @@ export const commitment = (key) => BY_KEY[key] || { key, label: key, hint: '', i
 // permissions. The bar starts at 20% because creating the account counts.
 export const STEPS = [
   {
-    id: 'goal', type: 'choice',
+    id: 'goal', type: 'choice', multi: 2,
     title: 'What are you here to build?',
-    sub: 'Pick the one that matters most right now.',
+    sub: 'Pick one or two.',
     options: [
       { v: 'discipline', label: 'Discipline',      hint: 'Do it when you don’t feel like it', icon: 'bolt' },
       { v: 'business',   label: 'A business',      hint: 'Ship, sell, grow',                  icon: 'trending' },

@@ -19,7 +19,8 @@ let rec, recStream, recog, meterRAF, talkTimer, audioCtx;
 export function openCapture(opts = {}) {
   if (document.querySelector('.cap')) return;
   const done = doneToday(S.proofs);
-  cKey = opts.cKey || S.profile.commitments.find((k) => !done.has(k)) || S.profile.commitments[0];
+  // Next unproven commitment; once all three are done, default to a moment.
+  cKey = opts.cKey || S.profile.commitments.find((k) => !done.has(k)) || 'moment';
   mode = opts.mode || 'photo';
   photo = null; audio = null; audioSecs = 0; transcript = '';
   
@@ -48,7 +49,7 @@ function close() {
 
 function chips() {
   const done = doneToday(S.proofs);
-  return `<div class="cap-chips" role="tablist" aria-label="Commitment">${S.profile.commitments.map((k) => {
+  return `<div class="cap-chips" role="tablist" aria-label="Commitment">${[...S.profile.commitments, 'moment'].map((k) => {
     const c = commitment(k);
     return `<button class="cchip ${k === cKey ? 'on' : ''}" data-k="${k}" role="tab" aria-selected="${k === cKey}">
       ${done.has(k) ? ic('check', 14, 2.4) : ic(c.icon, 16)}<span>${c.label}</span></button>`;
@@ -368,8 +369,8 @@ function success() {
   root.innerHTML = `
   <div class="done-screen">
     <div class="done-mark">${ic('check', 56, 2.2)}</div>
-    <h2 class="title">Proof posted</h2>
-    <p class="sub">${n === 3 ? 'All three done. That’s a perfect day.' : `${n} of 3 locked in today.`}</p>
+    <h2 class="title">${cKey === 'moment' ? 'Moment saved' : 'Proof posted'}</h2>
+    <p class="sub">${cKey === 'moment' ? 'Added to your day. Your club sees it too.' : n === 3 ? 'All three done. That’s a perfect day.' : `${n} of 3 locked in today.`}</p>
     <div class="done-seg">${S.profile.commitments.map((k) => `<i class="${done.has(k) ? 'on' : ''}"></i>`).join('')}</div>
     <p class="done-streak">${ic('flame', 20)} ${st} day streak</p>
     <button class="btn btn-primary" data-close>Done</button>
