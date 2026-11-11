@@ -8,6 +8,18 @@ switches that on.
 **You're under 18, so a parent must own these accounts** (Apple Developer,
 Google Cloud, Microsoft Azure, Supabase billing). Do this together.
 
+## Privacy: what the database enforces
+- Signed-out visitors can read and write nothing.
+- Your profile, onboarding answers and daily plans: only you.
+- Your proof: you and people in a club with you. Nobody else.
+- Club mates see your first name only, never your email or answers.
+- Photos and voice notes sit in a private bucket with expiring links.
+- Pro and the free-post count can only be changed by the server.
+- Anyone can delete their account and everything in it.
+
+`supabase/test/privacy.test.mjs` checks all of this (29 checks). Run it
+after any change to `schema.sql`.
+
 ## 1. Supabase (database, login, file storage). Free to start.
 1. Create a project at supabase.com.
 2. SQL Editor: paste `supabase/schema.sql` and run it.
