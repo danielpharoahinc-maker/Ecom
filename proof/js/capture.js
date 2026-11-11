@@ -8,12 +8,12 @@ import { commitment } from './data.js';
 import { doneToday, streak } from './stats.js';
 import { ic } from './icons.js';
 import { esc, haptic, toast, fmtDur, emit } from './util.js';
+import { getDictation } from './speech.js';
 
-const MINS = [15, 30, 60, 120];
 const MAX_TALK = 60; // seconds
 
 let root, stream, facing = 'environment', mode, cKey;
-let photo, audio, audioSecs, transcript, mins;
+let photo, audio, audioSecs, transcript;
 let rec, recStream, recog, meterRAF, talkTimer, audioCtx;
 
 export function openCapture(opts = {}) {
@@ -22,8 +22,7 @@ export function openCapture(opts = {}) {
   cKey = opts.cKey || S.profile.commitments.find((k) => !done.has(k)) || S.profile.commitments[0];
   mode = opts.mode || 'photo';
   photo = null; audio = null; audioSecs = 0; transcript = '';
-  mins = defaultMins();
-
+  
   root = document.createElement('div');
   root.className = 'cap';
   root.setAttribute('role', 'dialog');
@@ -33,11 +32,6 @@ export function openCapture(opts = {}) {
   requestAnimationFrame(() => root.classList.add('open'));
   haptic(12);
   mode === 'photo' ? camera() : review();
-}
-
-function defaultMins() {
-  const per = (S.profile.lockin || 60) / S.profile.commitments.length;
-  return MINS.reduce((a, b) => (Math.abs(b - per) < Math.abs(a - per) ? b : a));
 }
 
 function close() {
@@ -82,18 +76,18 @@ async function camera() {
     <video playsinline autoplay muted></video>
     <div class="cam-shade top"></div><div class="cam-shade bottom"></div>
     <header class="cam-top">
-      <button class="icon-btn glass" data-close aria-label="Close">${ic('close', 22)}</button>
-      <button class="icon-btn glass" data-flip aria-label="Switch camera">${ic('flip', 22)}</button>
+      <button class="icon-btn glass round" data-close aria-label="Close">${ic('close', 22)}</button>
+      <button class="icon-btn glass round" data-flip aria-label="Switch camera">${ic('flip', 22)}</button>
     </header>
     ${chips()}
-    <p class="cam-hint" hidden>Camera is blocked. Tap the shutter to choose a photo instead.</p>
+    <p class="cam-hint" hidden>Tap the shutter to open your camera.</p>
     <footer class="cam-bottom">
       <div class="modes" role="tablist">
         <button class="on" role="tab" aria-selected="true">Photo</button>
         <button data-voice role="tab" aria-selected="false">Voice</button>
       </div>
       <div class="shutter-row">
-        <button class="icon-btn glass" data-pick aria-label="Choose from library">${ic('image', 22)}</button>
+        <button class="icon-btn glass round" data-pick aria-label="Choose from library">${ic('image', 22)}</button>
         <button class="shutter" data-shoot aria-label="Take photo"><i></i></button>
         <span class="icon-btn" aria-hidden="true"></span>
       </div>
@@ -186,22 +180,20 @@ function review() {
     </header>
     ${mode === 'voice' ? chips() : ''}
     ${photoURL ? `<div class="rev-photo"><img src="${photoURL}" alt="Your proof photo"></div>` : ''}
-    <div class="talk glass ${mode === 'voice' ? 'big' : ''}">
-      <button class="mic" data-mic aria-label="Record what you did">${ic('mic', mode === 'voice' ? 34 : 26)}</button>
-      <div class="talk-body">
-        <b data-talk-title>Tap and say what you did</b>
-        <span data-talk-sub>“Chest and back, 45 minutes. New PR on bench.”</span>
-        <div class="meter" aria-hidden="true">${'<i></i>'.repeat(18)}</div>
+    <div class="talk ${mode === 'voice' ? 'big' : ''}">
+      <div class="talk-row">
+        <button class="mic" data-mic aria-label="Record what you did">${ic('mic', 24)}</button>
+        <div class="talk-body">
+          <b data-talk-title>Tap and say what you did</b>
+          <span data-talk-sub>“Chest and back. New PR on bench.”</span>
+          <div class="meter" aria-hidden="true">${'<i></i>'.repeat(18)}</div>
+        </div>
       </div>
+      <label class="sr" for="note">What you did</label>
+      <textarea id="note" class="note" rows="2" maxlength="280" placeholder="Or type it">${esc(transcript)}</textarea>
       <audio data-playback hidden></audio>
     </div>
-    <label class="sr" for="note">What you did</label>
-    <textarea id="note" class="note glass" rows="2" maxlength="280" placeholder="Or type it">${esc(transcript)}</textarea>
-    <div class="mins" role="radiogroup" aria-label="How long">
-      <span>How long?</span>
-      ${MINS.map((m) => `<button role="radio" aria-checked="${m === mins}" class="${m === mins ? 'on' : ''}" data-m="${m}">${m < 60 ? `${m}m` : `${m / 60}h${m === 120 ? '+' : ''}`}</button>`).join('')}
-    </div>
-    <button class="btn btn-white post" data-post>${ic('check', 20, 2.2)}<span>Post proof</span></button>
+    <button class="btn btn-primary post" data-post>${ic('check', 20, 2.2)}<span>Post proof</span></button>
   </div>`;
 
   if (mode === 'voice') bindChips();
@@ -209,14 +201,7 @@ function review() {
   root.querySelector('[data-retake]').addEventListener('click', () => {
     stopTalk(true); photo = null; audio = null; transcript = ''; mode = 'photo'; camera();
   });
-  root.querySelector('[data-mic]').addEventListener('click', () => (rec ? stopTalk() : startTalk()));
-  root.querySelectorAll('[data-m]').forEach((b) => b.addEventListener('click', () => {
-    haptic();
-    mins = +b.dataset.m;
-    root.querySelectorAll('[data-m]').forEach((x) => {
-      x.classList.toggle('on', x === b); x.setAttribute('aria-checked', x === b);
-    });
-  }));
+  root.querySelector('[data-mic]').addEventListener('click', () => (dictating ? dict.stop() : rec ? stopTalk() : startTalk()));
   root.querySelector('#note').addEventListener('input', (e) => { transcript = e.target.value; });
   root.querySelector('[data-post]').addEventListener('click', post);
   if (audio) showRecorded();
@@ -225,11 +210,11 @@ function review() {
 /* ---------- Voice ---------- */
 
 async function startTalk() {
-  if (!window.MediaRecorder) return toast('Voice recording isn’t supported here. Type it instead.');
+  if (!window.MediaRecorder || !navigator.mediaDevices?.getUserMedia) return dictateOnly();
   try {
     recStream = await navigator.mediaDevices.getUserMedia({ audio: true });
   } catch {
-    return toast('Microphone is blocked. Allow it in Settings, or type it.');
+    return dictateOnly();
   }
   haptic(15);
   const type = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm'].find((t) => MediaRecorder.isTypeSupported?.(t)) || '';
@@ -245,7 +230,7 @@ async function startTalk() {
 
   const talk = root.querySelector('.talk');
   talk.classList.add('live');
-  root.querySelector('[data-mic]').innerHTML = ic('stop', 26, 2);
+  root.querySelector('[data-mic]').innerHTML = ic('stop', 20, 2);
   root.querySelector('[data-talk-title]').textContent = 'Listening. Tap to finish.';
   const started = Date.now();
   const sub = root.querySelector('[data-talk-sub]');
@@ -322,7 +307,7 @@ function showRecorded() {
   talk.classList.remove('live');
   talk.classList.add('has');
   const mic = root.querySelector('[data-mic]');
-  mic.innerHTML = ic('mic', 26);
+  mic.innerHTML = ic('mic', 24);
   mic.setAttribute('aria-label', 'Record again');
   root.querySelector('[data-talk-title]').textContent = 'Voice note saved';
   const sub = root.querySelector('[data-talk-sub]');
@@ -330,6 +315,31 @@ function showRecorded() {
   const player = root.querySelector('[data-playback]');
   player.src = URL.createObjectURL(audio);
   sub.querySelector('[data-play]').addEventListener('click', () => (player.paused ? player.play() : player.pause()));
+}
+
+// Where recording is blocked (some embedded views), still turn speech into
+// the text of the proof.
+let dict = null;
+getDictation().then((d) => { dict = d; });
+let dictating = false;
+function dictateOnly() {
+  if (!dict) return toast('Voice isn’t available here. Type what you did.');
+  const talk = root.querySelector('.talk');
+  const note = root.querySelector('#note');
+  const mic = root.querySelector('[data-mic]');
+  if (dictating) { dict.stop(); return; }
+  let base = note.value ? `${note.value.trim()} ` : '';
+  dict.on('partial', (t) => { if (dictating) note.value = (base + t).trim(); });
+  dict.on('final', (t) => { if (dictating) { base = `${(base + t).trim()} `; note.value = base.trim(); transcript = note.value; } });
+  dict.on('state', (st) => {
+    dictating = st === 'listening';
+    if (!root) return;
+    talk.classList.toggle('live', dictating);
+    mic.innerHTML = dictating ? ic('stop', 20, 2) : ic('mic', 24);
+    root.querySelector('[data-talk-title]').textContent = dictating ? 'Listening. Tap to finish.' : 'Tap and say what you did';
+    if (st === 'denied') toast('Microphone is off. Type what you did.');
+  });
+  dict.start();
 }
 
 /* ---------- Post ---------- */
@@ -345,7 +355,7 @@ async function post() {
   btn.disabled = true;
   await addProof({
     cKey, kind: photo ? 'photo' : 'voice',
-    note, audioSecs: audio ? Math.round(audioSecs) : 0, mins,
+    note, audioSecs: audio ? Math.round(audioSecs) : 0,
   }, photo, audio);
   haptic(25);
   success();
@@ -358,11 +368,11 @@ function success() {
   root.innerHTML = `
   <div class="done-screen">
     <div class="done-mark">${ic('check', 56, 2.2)}</div>
-    <h2 class="h1">Proof posted</h2>
+    <h2 class="title">Proof posted</h2>
     <p class="sub">${n === 3 ? 'All three done. That’s a perfect day.' : `${n} of 3 locked in today.`}</p>
     <div class="done-seg">${S.profile.commitments.map((k) => `<i class="${done.has(k) ? 'on' : ''}"></i>`).join('')}</div>
     <p class="done-streak">${ic('flame', 20)} ${st} day streak</p>
-    <button class="btn btn-white" data-close>Done</button>
+    <button class="btn btn-primary" data-close>Done</button>
   </div>`;
   root.querySelector('[data-close]').addEventListener('click', finish);
   const t = setTimeout(finish, 2600);

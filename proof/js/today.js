@@ -1,121 +1,196 @@
-// Today: the widget screen. Every widget does work when tapped. A commitment
-// widget opens the camera already set to that commitment.
-import { S, hydrateMedia, signOut, resetEverything } from './state.js';
+// Today: four things only. Header, your three commitments, today's plan,
+// and a box to talk (or type) your plan. Say "gym at 6, then school,
+// work on the business after school and read before bed" and it becomes a list.
+import { S, hydrateMedia, signOut, resetEverything, getPlan, savePlan } from './state.js';
 import { commitment } from './data.js';
 import { doneToday, streak } from './stats.js';
 import { openCapture } from './capture.js';
-import { openProof } from './proofview.js';
-import { openSheet } from './sheet.js';
+import { openSheet, confirmSheet } from './sheet.js';
 import { signOutLive } from './auth.js';
+import { parsePlan } from './planner.js';
+import { getDictation } from './speech.js';
 import { ic } from './icons.js';
-import { esc, fmtDay, timeAgo, fmtDur, emit } from './util.js';
+import { esc, fmtDay, emit, haptic, toast } from './util.js';
 import { LIVE } from './config.js';
+
+let dictation; // resolved once, reused
+const dictationReady = getDictation().then((d) => { dictation = d; return d; });
 
 function greeting() {
   const h = new Date().getHours();
-  return h < 12 ? 'Morning' : h < 18 ? 'Afternoon' : 'Evening';
+  return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
 }
 
-export function renderToday(el) {
+export async function renderToday(el) {
   const P = S.profile;
   const done = doneToday(S.proofs);
-  const n = P.commitments.filter((k) => done.has(k)).length;
   const st = streak(S.proofs);
-  const last = S.proofs[0];
-  const club = S.clubs[0];
-  const todays = (k) => S.proofs.find((p) => p.cKey === k && done.has(k) && new Date(p.ts).toDateString() === new Date().toDateString());
+  const plan = await getPlan();
+  const todayStr = new Date().toDateString();
+  const proofFor = (k) => S.proofs.find((p) => p.cKey === k && new Date(p.ts).toDateString() === todayStr);
+  const left = plan.filter((i) => !i.done).length;
 
   el.innerHTML = `
   <header class="page-top">
     <div>
       <p class="date">${fmtDay(Date.now())}</p>
-      <h1 class="h1">${greeting()}, ${esc(P.name)}</h1>
+      <h1 class="title">${greeting()}, ${esc(P.name)}</h1>
     </div>
-    <button class="avatar" data-settings aria-label="Settings">${esc(P.name[0].toUpperCase())}</button>
+    <div class="top-actions">
+      <span class="streak-chip ${st ? 'on' : ''}" aria-label="${st} day streak">${ic('flame', 16)}${st}</span>
+      <button class="avatar" data-settings aria-label="Account">${esc(P.name[0].toUpperCase())}</button>
+    </div>
   </header>
 
-  <section class="widgets">
-    <button class="w w-day glass" data-go="stats">
-      <span class="w-lab">Locked in today</span>
-      <span class="w-big">${n}<small>/3</small></span>
-      <span class="seg">${P.commitments.map((k) => `<i class="${done.has(k) ? 'on' : ''}"></i>`).join('')}</span>
-    </button>
+  <section class="commits" aria-label="Your three commitments">
+    ${P.commitments.map((k) => {
+      const c = commitment(k); const p = proofFor(k);
+      return `<button class="commit ${p ? 'done' : ''}" data-capture="${k}" aria-label="${c.label}: ${p ? 'proven today' : 'post proof'}">
+        ${p?.photoId ? `<img data-media="${p.photoId}" alt="">` : ''}
+        <span class="commit-ic">${p ? ic('check', 18, 2.4) : ic(c.icon, 20)}</span>
+        <span class="commit-txt"><b>${c.label}</b><small>${p ? 'Proven' : 'Prove it'}</small></span>
+      </button>`;
+    }).join('')}
+  </section>
 
-    <button class="w w-streak glass" data-go="stats">
-      <span class="w-lab">Streak</span>
-      <span class="w-big">${st}<small>${st === 1 ? 'day' : 'days'}</small></span>
-      <span class="w-flame ${st ? 'lit' : ''}">${ic('flame', 30)}</span>
-    </button>
+  <section class="plan-sec" aria-label="Today's plan">
+    ${plan.length ? `
+      <div class="sec-h"><h2 class="headline">Today’s plan</h2><span class="dim">${left ? `${left} to go` : 'All done'}</span></div>
+      <ul class="plan-list">${plan.map((it) => {
+        const c = it.cKey ? commitment(it.cKey) : null;
+        return `<li class="pi ${it.done ? 'done' : ''}" data-id="${it.id}">
+          <button class="pi-check" data-check aria-label="${it.done ? 'Mark not done' : 'Mark done'}">${it.done ? ic('check', 14, 2.6) : ''}</button>
+          <span class="pi-body">${it.when ? `<span class="pi-when">${esc(it.when)}</span>` : ''}<span class="pi-text">${esc(it.text)}</span></span>
+          ${c ? `<span class="pi-tag" title="${c.label}">${ic(c.icon, 15)}</span>` : ''}
+          <button class="pi-x" data-del aria-label="Remove">${ic('close', 14)}</button>
+        </li>`;
+      }).join('')}</ul>` : `
+      <div class="plan-empty">
+        <h2 class="headline">What’s the plan today?</h2>
+        <p class="dim">Say it the way you’d tell a friend. “Gym at 6, then school, work on the business after school, read before bed.”</p>
+      </div>`}
 
-    ${last ? `
-    <article class="w w-last glass wide" data-open="${last.id}" tabindex="0" role="button" aria-label="Open your last proof">
-      ${last.photoId ? `<img data-media="${last.photoId}" alt="">` : `<div class="w-last-voice" aria-hidden="true">${ic('wave', 64, 1.5)}</div>`}
-      <div class="w-last-shade"></div>
-      <div class="w-last-body">
-        <span class="w-lab">Last proof</span>
-        <b>${commitment(last.cKey).label}</b>
-        ${last.note ? `<p>“${esc(last.note)}”</p>` : ''}
-        <span class="w-meta">${timeAgo(last.ts)}${last.audioId ? ` <span class="pill">${ic('play', 12)} ${fmtDur(last.audioSecs || 0)}</span>` : ''}</span>
-      </div>
-    </article>` : `
-    <button class="w w-empty glass wide" data-capture>
-      <span class="w-empty-ic">${ic('camera', 30)}</span>
-      <b>Post your first proof</b>
-      <span>One photo, a few words. Takes 10 seconds.</span>
-    </button>`}
-
-    <div class="w-row wide">
-      ${P.commitments.map((k) => {
-        const c = commitment(k); const p = todays(k);
-        return `<button class="w w-commit glass ${p ? 'done' : ''}" data-capture="${k}" aria-label="${c.label}: ${p ? 'done today, add another' : 'post proof'}">
-          ${p?.photoId ? `<img data-media="${p.photoId}" alt="">` : ''}
-          <span class="w-commit-ic">${p ? ic('check', 22, 2.4) : ic(c.icon, 22)}</span>
-          <b>${c.label}</b>
-          <small>${p ? 'Done' : 'Prove it'}</small>
-        </button>`;
-      }).join('')}
-    </div>
-
-    <div class="w w-quick glass wide">
-      <button data-capture>${ic('camera', 24)}<span>Snap</span></button>
-      <button data-talk>${ic('mic', 24)}<span>Talk</span></button>
-    </div>
-
-    <button class="w w-club glass wide" data-go="club">
-      <span class="w-club-ic">${ic('club', 26)}</span>
-      <span class="w-club-txt">
-        <b>${club ? esc(club.name) : 'Lock in with your crew'}</b>
-        <small>${club ? `${club.members.length} ${club.members.length === 1 ? 'member' : 'members'}. Invite code ${club.code}` : 'Start a club and invite your friends.'}</small>
-      </span>
-      ${ic('chevron', 20)}
-    </button>
+    <form class="talkbox" data-talkbox>
+      <label class="sr" for="plan-in">Add to your plan</label>
+      <textarea id="plan-in" rows="1" placeholder="${plan.length ? 'Add more' : 'Talk or type your plan'}" enterkeyhint="done"></textarea>
+      <button type="button" class="talk-mic" data-mic aria-label="Talk your plan" hidden>${ic('mic', 22)}</button>
+      <button type="submit" class="talk-send" data-send aria-label="Add to plan" hidden>${ic('check', 20, 2.4)}</button>
+    </form>
   </section>`;
 
   hydrateMedia(el);
-  el.querySelectorAll('[data-capture]').forEach((b) => b.addEventListener('click', () => openCapture({ cKey: b.dataset.capture || undefined })));
-  el.querySelector('[data-talk]').addEventListener('click', () => openCapture({ mode: 'voice' }));
-  el.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => emit('proof:tab', b.dataset.go)));
-  el.querySelector('[data-open]')?.addEventListener('click', (e) => openProof(e.currentTarget.dataset.open));
+  el.querySelectorAll('[data-capture]').forEach((b) => b.addEventListener('click', () => openCapture({ cKey: b.dataset.capture })));
   el.querySelector('[data-settings]').addEventListener('click', settings);
+  bindPlan(el, plan, done);
+  bindTalk(el, plan);
+}
+
+function bindPlan(el, plan, done) {
+  el.querySelectorAll('.pi').forEach((row) => {
+    const it = plan.find((x) => x.id === row.dataset.id);
+    row.querySelector('[data-check]').addEventListener('click', async () => {
+      haptic();
+      // Ticking a linked item that hasn't been proven yet: offer to prove it.
+      if (!it.done && it.cKey && !done.has(it.cKey)) return proveIt(it, plan, el);
+      it.done = !it.done;
+      await savePlan(plan);
+      renderToday(el);
+    });
+    row.querySelector('[data-del]').addEventListener('click', async () => {
+      await savePlan(plan.filter((x) => x.id !== it.id));
+      renderToday(el);
+    });
+  });
+}
+
+function proveIt(it, plan, el) {
+  const c = commitment(it.cKey);
+  openSheet(`
+    <h2 class="h2">Prove it?</h2>
+    <p class="sub">“${esc(it.text)}” counts toward ${esc(c.label)}. Post a photo and it ticks itself off.</p>
+    <div class="stack">
+      <button class="btn btn-primary" data-prove>${ic('camera', 20)}<span>Post proof</span></button>
+      <button class="btn btn-quiet" data-tick>Just tick it off</button>
+    </div>`, {
+    onMount(body, close) {
+      body.querySelector('[data-prove]').addEventListener('click', () => { close(); openCapture({ cKey: it.cKey }); });
+      body.querySelector('[data-tick]').addEventListener('click', async () => {
+        it.done = true; await savePlan(plan); close(); renderToday(el);
+      });
+    },
+  });
+}
+
+function bindTalk(el, plan) {
+  const form = el.querySelector('[data-talkbox]');
+  const input = form.querySelector('textarea');
+  const mic = form.querySelector('[data-mic]');
+  const send = form.querySelector('[data-send]');
+  let base = '';
+  let listening = false;
+
+  const grow = () => { input.style.height = 'auto'; input.style.height = `${Math.min(input.scrollHeight, 140)}px`; };
+  const sync = () => { send.hidden = !input.value.trim(); mic.hidden = !dictation || !!input.value.trim() && !listening; };
+  input.addEventListener('input', () => { grow(); sync(); });
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
+
+  const commit = async () => {
+    const text = input.value.trim();
+    if (!text) return;
+    const items = parsePlan(text, S.profile.commitments);
+    if (!items.length) return toast('Couldn’t find any plans in that. Try “gym at 6, then read”.');
+    await savePlan([...(await getPlan()), ...items]);
+    haptic(15);
+    toast(items.length === 1 ? 'Added to your plan' : `${items.length} things added to your plan`);
+    renderToday(el);
+  };
+  form.addEventListener('submit', (e) => { e.preventDefault(); if (listening) dictation.stop(); commit(); });
+
+  dictationReady.then((d) => {
+    if (!d || !el.contains(form)) return;
+    sync();
+    d.on('partial', (t) => { if (listening) { input.value = (base + t).trim(); grow(); } });
+    d.on('final', (t) => { if (listening) { base = `${(base + t).trim()} `; input.value = base.trim(); grow(); } });
+    d.on('state', (s) => {
+      const was = listening;
+      listening = s === 'listening';
+      form.classList.toggle('live', listening);
+      mic.innerHTML = listening ? ic('stop', 20, 2) : ic('mic', 22);
+      mic.setAttribute('aria-label', listening ? 'Stop and add' : 'Talk your plan');
+      if (s === 'denied') toast('Microphone is off. You can type your plan instead.');
+      if (was && !listening && el.contains(form)) commit();
+      sync();
+    });
+    mic.addEventListener('click', () => {
+      haptic(12);
+      if (listening) return d.stop();
+      base = input.value ? `${input.value.trim()} ` : '';
+      input.placeholder = 'Listening…';
+      d.start(); // straight from the click
+    });
+  });
 }
 
 function settings() {
   const u = S.user;
   openSheet(`
     <h2 class="h2">Account</h2>
-    <div class="set-row glass"><span class="avatar">${esc(S.profile.name[0].toUpperCase())}</span>
+    <div class="set-row"><span class="avatar">${esc(S.profile.name[0].toUpperCase())}</span>
       <span><b>${esc(S.profile.name)}</b><small>${esc(u?.email || `Signed in with ${u?.provider || 'Proof'}`)}</small></span></div>
-    <p class="fine">${LIVE ? 'Synced to your Proof account.' : 'Local mode. Your proof is stored on this phone only. Clearing your browser data deletes it.'}</p>
-    <button class="btn btn-glass" data-out>${ic('logout', 20)}<span>Sign out</span></button>
-    <button class="btn btn-ghost danger" data-reset>${ic('trash', 20)}<span>Delete all my data</span></button>
-  `, {
+    <p class="fine">${LIVE ? 'Synced to your Proof account.' : 'Test version: your proof is saved in this browser only.'}</p>
+    <div class="stack">
+      <button class="btn btn-secondary" data-out>${ic('logout', 20)}<span>Sign out</span></button>
+      <button class="btn btn-quiet danger" data-reset>${ic('trash', 18)}<span>Delete all my data</span></button>
+    </div>`, {
     onMount(body, close) {
       body.querySelector('[data-out]').addEventListener('click', async () => {
         await signOutLive(); await signOut(); close(); emit('proof:route');
       });
       body.querySelector('[data-reset]').addEventListener('click', async () => {
-        if (!confirm('Delete every proof, photo, voice note and club on this phone? This can’t be undone.')) return;
-        await signOutLive(); await resetEverything(); close(); emit('proof:route');
+        close();
+        const ok = await confirmSheet('Delete everything?', 'Every proof, photo, voice note, plan and club in this browser goes. This can’t be undone.', 'Delete everything');
+        if (!ok) return;
+        await signOutLive(); await resetEverything(); emit('proof:route');
       });
     },
   });

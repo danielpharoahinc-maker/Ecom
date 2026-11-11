@@ -56,9 +56,9 @@ function route(opts = {}) {
 function shell() {
   app.innerHTML = `
     <main id="view" class="view" tabindex="-1"></main>
-    <nav class="tabbar" aria-label="Main">
+    <nav class="tabbar glass" aria-label="Main">
       ${TABS.map((t) => t.id === 'add'
-        ? `<button class="tab-add" data-add aria-label="Post proof">${ic('plus', 30, 2.4)}</button>`
+        ? `<button class="tab-add" data-add aria-label="Post proof">${ic('plus', 26, 2.4)}</button>`
         : `<button class="tab" data-tab="${t.id}" aria-label="${t.label}">${ic(t.icon, 24)}<span>${t.label}</span></button>`).join('')}
     </nav>`;
   app.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => {

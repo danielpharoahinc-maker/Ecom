@@ -19,16 +19,16 @@ export function renderWelcome(root, onDone) {
       <p class="lede">Three commitments. One photo and a few words each. Your crew sees it.</p>
     </div>
     <div class="auth">
-      <button class="btn btn-white" data-p="apple">${LOGO.apple}<span>Continue with Apple</span></button>
-      <button class="btn btn-glass" data-p="google">${LOGO.google}<span>Continue with Google</span></button>
-      <button class="btn btn-glass" data-p="microsoft">${LOGO.microsoft}<span>Continue with Microsoft</span></button>
-      <button class="btn btn-ghost" data-p="email">${ic('mail', 20)}<span>Continue with email</span></button>
+      <button class="btn btn-primary" data-p="apple">${LOGO.apple}<span>Continue with Apple</span></button>
+      <button class="btn btn-secondary" data-p="google">${LOGO.google}<span>Continue with Google</span></button>
+      <button class="btn btn-secondary" data-p="microsoft">${LOGO.microsoft}<span>Continue with Microsoft</span></button>
+      <button class="btn btn-quiet" data-p="email">${ic('mail', 20)}<span>Continue with email</span></button>
       <form class="email-form" hidden>
         <label class="sr" for="email">Email</label>
         <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" required>
-        <button class="btn btn-white" type="submit">Continue</button>
+        <button class="btn btn-primary" type="submit">Continue</button>
       </form>
-      <p class="fine">${LIVE ? 'By continuing you agree to the Terms and Privacy Policy.' : 'Local mode: your account and proof are saved on this phone.'}</p>
+      <p class="fine">${LIVE ? 'By continuing you agree to the Terms and Privacy Policy.' : 'Test version: your account and proof are saved in this browser.'}</p>
     </div>
   </section>`;
 

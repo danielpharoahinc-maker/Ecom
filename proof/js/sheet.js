@@ -33,3 +33,22 @@ export function openSheet(html, { onMount, tall = false } = {}) {
   onMount?.(body, close);
   return close;
 }
+
+// In-page "Are you sure?" (browser confirm() boxes are blocked in some views).
+export function confirmSheet(title, detail, action = 'Delete') {
+  return new Promise((resolve) => {
+    let answered = false;
+    openSheet(`
+      <h2 class="h2">${title}</h2>
+      <p class="sub">${detail}</p>
+      <div class="stack">
+        <button class="btn btn-danger" data-yes>${action}</button>
+        <button class="btn btn-quiet" data-close>Cancel</button>
+      </div>`, {
+      onMount(body, close) {
+        body.closest('.sheet-wrap').addEventListener('sheet:close', () => { if (!answered) resolve(false); });
+        body.querySelector('[data-yes]').addEventListener('click', () => { answered = true; resolve(true); close(); });
+      },
+    });
+  });
+}

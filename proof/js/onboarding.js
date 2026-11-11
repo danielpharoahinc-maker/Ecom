@@ -32,7 +32,7 @@ function draw(root, onDone) {
       <span class="icon-btn" aria-hidden="true"></span>
     </header>
     <div class="ob-head">
-      <h1 class="h1">${step.title}</h1>
+      <h1 class="title">${step.title}</h1>
       <p class="sub">${step.sub}</p>
     </div>
     <div class="ob-body">${body(step)}</div>
@@ -137,7 +137,7 @@ function draw(root, onDone) {
 function body(step) {
   if (step.type === 'choice') {
     return `<div class="choices">${step.options.map((o) => `
-      <button class="choice glass ${ans[step.id] === o.v ? 'sel' : ''}" data-v="${o.v}">
+      <button class="choice ${ans[step.id] === o.v ? 'sel' : ''}" data-v="${o.v}">
         ${step.visual === 'bar'
           ? `<span class="choice-bar" aria-hidden="true"><i style="height:${o.fill}%"></i></span>`
           : `<span class="choice-ic">${ic(o.icon, 26)}</span>`}
@@ -147,14 +147,14 @@ function body(step) {
 
   if (step.type === 'commit') {
     return `<div class="ctiles">${CATALOG.map((c) => `
-      <button class="ctile glass" data-k="${c.key}" aria-pressed="false">
+      <button class="ctile" data-k="${c.key}" aria-pressed="false">
         <span class="ctile-n" aria-hidden="true"></span>
         ${ic(c.icon, 26)}
         <b>${c.label}</b><small>${c.hint}</small>
       </button>`).join('')}</div>
       <div class="ob-foot">
         <p class="commit-count" aria-live="polite"></p>
-        <button class="btn btn-white" data-next disabled>Continue</button>
+        <button class="btn btn-primary" data-next disabled>Continue</button>
       </div>`;
   }
 
@@ -162,17 +162,17 @@ function body(step) {
     return `<form class="name-form">
       <label class="sr" for="name">Your name</label>
       <input id="name" class="big-input" maxlength="24" autocomplete="given-name" placeholder="First name" value="${esc(ans.name)}">
-      <div class="ob-foot"><button class="btn btn-white" data-next type="submit">Continue</button></div>
+      <div class="ob-foot"><button class="btn btn-primary" data-next type="submit">Continue</button></div>
     </form>`;
   }
 
   if (step.type === 'perm') {
     return `<div class="perm">
-      <div class="perm-row glass">${ic('camera', 28)}<span><b>Camera</b><small>Take the photo that proves it. It never posts without you tapping Post.</small></span></div>
-      <div class="perm-row glass">${ic('mic', 28)}<span><b>Microphone</b><small>Say what you did instead of typing it.</small></span></div>
+      <div class="perm-row">${ic('camera', 28)}<span><b>Camera</b><small>Take the photo that proves it. It never posts without you tapping Post.</small></span></div>
+      <div class="perm-row">${ic('mic', 28)}<span><b>Microphone</b><small>Say what you did instead of typing it.</small></span></div>
       <div class="ob-foot">
-        <button class="btn btn-white" data-allow>Allow camera and mic</button>
-        <button class="btn btn-ghost" data-later>Not now</button>
+        <button class="btn btn-primary" data-allow>Allow camera and mic</button>
+        <button class="btn btn-quiet" data-later>Not now</button>
       </div>
     </div>`;
   }
@@ -181,7 +181,7 @@ function body(step) {
     const goal = LABEL.goal[ans.goal]; const wake = LABEL.wake[ans.wake];
     const lock = LABEL.lockin[ans.lockin]; const pt = LABEL.proofTime[ans.proofTime];
     return `<div class="plan">
-      <div class="plan-card glass">
+      <div class="plan-card">
         <div class="plan-name"><span class="avatar lg">${esc((ans.name || '?')[0].toUpperCase())}</span>
           <div><b>${esc(ans.name)}</b><small>Building ${goal ? goal.label.toLowerCase() : 'discipline'}</small></div></div>
         <div class="plan-lock">
@@ -203,8 +203,8 @@ function body(step) {
         </div>
       </div>
       <div class="ob-foot">
-        <button class="btn btn-white" data-first>${ic('camera', 20)}<span>Post my first proof</span></button>
-        <button class="btn btn-ghost" data-skip>Go to the app</button>
+        <button class="btn btn-primary" data-first>${ic('camera', 20)}<span>Post my first proof</span></button>
+        <button class="btn btn-quiet" data-skip>Go to the app</button>
       </div>
     </div>`;
   }

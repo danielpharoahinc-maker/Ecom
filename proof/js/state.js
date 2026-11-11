@@ -1,6 +1,6 @@
 // App state held in memory, loaded from the local database at start-up.
 import * as db from './db.js';
-import { uid, emit } from './util.js';
+import { uid, emit, dayKey } from './util.js';
 
 export const S = {
   user: null,     // { id, name, email, provider }
@@ -27,6 +27,14 @@ export async function saveProfile(profile) {
   await db.put('kv', profile, 'profile');
 }
 
+// Today's spoken plan. One list per day; a new day starts empty.
+export async function getPlan(day = dayKey()) {
+  return (await db.get('kv', `plan:${day}`)) || [];
+}
+export async function savePlan(items, day = dayKey()) {
+  await db.put('kv', items, `plan:${day}`);
+}
+
 // Saves a proof plus its photo and voice files.
 export async function addProof(proof, photo, audio) {
   const p = { id: uid(), ts: Date.now(), ...proof };
@@ -34,6 +42,11 @@ export async function addProof(proof, photo, audio) {
   if (audio) { p.audioId = uid(); await db.put('media', audio, p.audioId); }
   await db.put('proofs', p);
   S.proofs.unshift(p);
+  // Proof ticks off any plan item linked to the same commitment.
+  const plan = await getPlan();
+  if (plan.some((it) => it.cKey === p.cKey && !it.done)) {
+    await savePlan(plan.map((it) => (it.cKey === p.cKey ? { ...it, done: true } : it)));
+  }
   emit('proof:changed');
   return p;
 }
