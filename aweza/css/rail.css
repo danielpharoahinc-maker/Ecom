@@ -275,7 +275,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .rf-back:focus-visible, .rf-step:focus-visible { outline: 2px solid var(--rl-on); outline-offset: 2px; }
 
 .rail .rail-tag, .rail .rail-hint { transition: opacity .35s var(--rl-ease), max-height .45s var(--rl-ease), margin .45s var(--rl-ease); max-height: 80px; }
-.rail--focus .rail-tag, .rail--focus .rail-hint { opacity: 0; max-height: 0; margin-block: 0; overflow: hidden; }
+.rail--focus .rail-tag, .rail--focus .rail-hint, .rail--focus .rail-gift { opacity: 0; max-height: 0; margin-block: 0; padding-block: 0; border-width: 0; overflow: hidden; }
 .rail--focus { padding-top: 70px; }
 .rail-stage.is-3d { transition: height .55s var(--rl-ease); }
 .rail--focus .rail-stage.is-3d { height: min(80svh, calc(var(--rl-fw, 340px) * 1.12 + 34px)); cursor: ew-resize; }
@@ -359,3 +359,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .pick-eta span { display: block; font-size: 13px; color: var(--rl-ice); }
 .bag-sum-row.bag-eta, .bag-sum-row.bag-eta dt, .bag-sum-row.bag-eta dd,
 .co-trow.co-eta, .co-trow.co-eta dt, .co-trow.co-eta dd { font-size: 14px; font-weight: 700; color: #0a0a0a; }
+
+/* refer a friend: banner for the friend, share buttons for the sender */
+.rail-gift { margin: 12px auto 0; width: calc(100% - 32px); max-width: 520px; box-sizing: border-box; padding: 10px 16px; border-radius: 12px; background: #fff; border: 1px solid #d7191f; color: #0a0a0a; text-align: center; font-size: 14px; line-height: 1.45; }
+.rail-gift b { color: #d7191f; }
+.mf-ref-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.mf-ref-btns .mf-ref-btn { margin-top: 0; display: inline-flex; align-items: center; text-decoration: none; word-break: break-all; }
+.mf-ref-btn--alt { background: #fff !important; color: #0a0a0a !important; border: 1px solid #0a0a0a !important; }
+.mf-ref-btn--alt:hover { background: #f1f1ee !important; }

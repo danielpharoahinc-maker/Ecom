@@ -40,6 +40,25 @@
   }
 
   /* ---------- footer ---------- */
+  /* Refer a friend: the message and share links for WhatsApp and email. The link ends in ?ref=YOURCODE. */
+  function refShareLinks() {
+    const amount = AW.rand(AW.config.referral.amount), link = AW.referral.link();
+    const msg = `Get ${amount} off your first AWEZA tee. Loud prints on clean white cotton: ${link}`;
+    return {
+      wa: "https://wa.me/?text=" + encodeURIComponent(msg),
+      mail: "mailto:?subject=" + encodeURIComponent(`${amount} off AWEZA tees`) + "&body=" + encodeURIComponent(`${msg}\n\nThe ${amount} comes off at checkout.`),
+    };
+  }
+  async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); return true; } catch (e) { /* fall back below */ }
+    try {
+      const t = document.createElement("textarea");
+      t.value = text; t.setAttribute("readonly", ""); t.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0";
+      document.body.appendChild(t); t.select(); t.setSelectionRange(0, text.length);
+      const ok = document.execCommand("copy"); t.remove(); return ok;
+    } catch (e) { return false; }
+  }
+
   function mountFooter() {
     const old = document.getElementById("footer-root");
     if (old) old.hidden = true;
@@ -53,7 +72,7 @@
           <p><strong>Delivery</strong> ${AW.rand(c.delivery)} anywhere in South Africa. Free over ${AW.rand(c.freeDeliveryOver)}.</p>
           <p><strong>Printed to order</strong> Every tee is printed when you buy it, so nothing sits in a warehouse.</p>
           <p><strong>Payment</strong> Card, Apple Pay or Google Pay through a secure checkout. Prices in Rand.</p>
-          ${c.referral ? `<div class="mf-ref"><p><strong>Give ${AW.rand(c.referral.amount)}, get ${AW.rand(c.referral.amount)}</strong> Send a friend your link. They get ${AW.rand(c.referral.amount)} off their order. When they buy, message us your code <b>${AW.esc(AW.referral.mine())}</b> and ${AW.rand(c.referral.amount)} comes off your next tee.</p><button type="button" class="mf-ref-btn" data-ref-share>Copy my link</button></div>` : ""}
+          ${c.referral ? `<div class="mf-ref"><p><strong>Give ${AW.rand(c.referral.amount)}, get ${AW.rand(c.referral.amount)}</strong> Send a friend your link. They get ${AW.rand(c.referral.amount)} off their order. When they buy, message us your code <b>${AW.esc(AW.referral.mine())}</b> and ${AW.rand(c.referral.amount)} comes off your next tee.</p><div class="mf-ref-btns"><button type="button" class="mf-ref-btn" data-ref-share>Copy my link</button><a class="mf-ref-btn mf-ref-btn--alt" data-ref-wa target="_blank" rel="noopener" href="${AW.esc(refShareLinks().wa)}">WhatsApp</a><a class="mf-ref-btn mf-ref-btn--alt" data-ref-mail href="${AW.esc(refShareLinks().mail)}">Email a friend</a></div></div>` : ""}
         </div>
         <nav class="mf-links" aria-label="Help">
           <a href="#/size-guide">Size guide</a>
@@ -67,11 +86,10 @@
       </footer>`;
     const share = f.querySelector("[data-ref-share]");
     if (share) share.addEventListener("click", async () => {
-      const link = AW.referral.link(), text = `Get ${AW.rand(AW.config.referral.amount)} off AWEZA tees:`;
-      try {
-        if (navigator.share) await navigator.share({ title: "AWEZA", text, url: link });
-        else { await navigator.clipboard.writeText(link); share.textContent = "Link copied"; setTimeout(() => { share.textContent = "Copy my link"; }, 2200); }
-      } catch { /* cancelled */ }
+      const link = AW.referral.link();
+      const ok = await copyText(link);
+      share.textContent = ok ? "Link copied" : link;       // if copying is blocked, show the link so it can be copied by hand
+      setTimeout(() => { share.textContent = "Copy my link"; }, ok ? 2200 : 9000);
     });
   }
 
@@ -81,6 +99,7 @@
   function railMarkup(list) {
     return `
       <section class="rail" aria-label="The rail. ${list.length} tees">
+        ${AW.referral.code() && AW.config.referral ? `<p class="rail-gift"><b>A friend sent you ${AW.rand(AW.config.referral.amount)} off.</b> It comes off at checkout on orders of ${AW.rand(AW.config.referral.minSubtotal)} or more.</p>` : ""}
         <p class="rail-tag">Time of your life.</p>
         <p class="rail-hint" id="rail-hint">Run your finger along the rail. Tap a shirt to see it.</p>
         <div class="rail-focusbar" hidden>
