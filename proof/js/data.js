@@ -96,6 +96,7 @@ export const STEPS = [
   { id: 'commitments', type: 'commit', title: 'Pick your 3 commitments', sub: 'You’ll post proof of these every day.' },
   { id: 'name', type: 'name', title: 'What should your crew call you?', sub: 'This shows on your proof and in clubs.' },
   { id: 'perm', type: 'perm', title: 'Proof needs your camera and mic', sub: 'A photo shows what you did. Your voice says it in 5 seconds.' },
+  { id: 'install', type: 'install', title: 'Put Proof on your home screen', sub: 'One tap to open, full screen, like a real app.' },
   { id: 'plan', type: 'plan', title: 'Your plan', sub: 'Here’s what you’re signing up for.' },
 ];
 

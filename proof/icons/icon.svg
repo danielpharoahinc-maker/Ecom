@@ -1,14 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <radialGradient id="g" cx="50%" cy="20%" r="85%">
-      <stop offset="0" stop-color="#1c3a8a"/>
-      <stop offset=".55" stop-color="#07142f"/>
-      <stop offset="1" stop-color="#000"/>
-    </radialGradient>
-  </defs>
+  <!-- Proof: a viewfinder (capture it) with the recording dot (on record). -->
+  <defs><radialGradient id="g" cx="50%" cy="0%" r="110%"><stop offset="0" stop-color="#1c3a8a"/><stop offset=".55" stop-color="#08122b"/><stop offset="1" stop-color="#03060d"/></radialGradient></defs>
   <rect width="512" height="512" fill="url(#g)"/>
-  <g transform="rotate(-6 256 256)">
-    <rect x="96" y="176" width="320" height="160" fill="#fff"/>
-    <text x="256" y="292" text-anchor="middle" font-family="-apple-system, Helvetica, Arial, sans-serif" font-size="112" font-weight="900" letter-spacing="-6" fill="#000">Proof</text>
+  <g fill="none" stroke="#eef2f9" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M150 196v-30a16 16 0 0 1 16-16h30"/><path d="M316 150h30a16 16 0 0 1 16 16v30"/>
+    <path d="M362 316v30a16 16 0 0 1-16 16h-30"/><path d="M196 362h-30a16 16 0 0 1-16-16v-30"/>
   </g>
+  <circle cx="256" cy="256" r="21" fill="#e8423f"/>
 </svg>

@@ -1,7 +1,7 @@
 // First screen: Continue with Apple / Google / Microsoft / email.
 import { signIn, sendEmailCode, verifyEmailCode, signedInElsewhere } from './auth.js';
 import { setUser } from './state.js';
-import { LOGO, ic } from './icons.js';
+import { LOGO, ic, MARK } from './icons.js';
 import { $, toast, haptic } from './util.js';
 import { LIVE, SIGN_IN } from './config.js';
 
@@ -9,10 +9,7 @@ export function renderWelcome(root, onDone) {
   root.innerHTML = `
   <section class="welcome">
     <div class="welcome-art" aria-hidden="true">
-      <div class="stamp">
-        <span class="stamp-word">Proof</span>
-        <span class="stamp-line">Day 1</span>
-      </div>
+      <div class="brand">${MARK(112)}<span class="brand-word">Proof</span></div>
     </div>
     <div class="welcome-copy">
       <h1 class="display">Lock in.<br>Post proof.<br>Every day.</h1>

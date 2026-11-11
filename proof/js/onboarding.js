@@ -4,6 +4,7 @@
 import { STEPS, CATALOG, LABEL, commitment } from './data.js';
 import { S, saveProfile } from './state.js';
 import { pushProfile } from './billing.js';
+import { installBody, bindInstall, isInstalled } from './install.js';
 import { ic } from './icons.js';
 import { esc, haptic, toast } from './util.js';
 
@@ -19,7 +20,8 @@ export function renderOnboarding(root, onDone) {
 
 const pct = (step) => Math.round(HEAD_START + ((100 - HEAD_START) * step) / (STEPS.length - 1));
 
-function draw(root, onDone) {
+function draw(root, onDone, dir = 1) {
+  if (STEPS[i].type === 'install' && isInstalled()) { i += dir; return draw(root, onDone, dir); }
   const step = STEPS[i];
   const p = pct(i);
   root.innerHTML = `
@@ -46,7 +48,7 @@ function draw(root, onDone) {
   }));
 
   const next = () => { i++; draw(root, onDone); };
-  root.querySelector('[data-back]').addEventListener('click', () => { if (i > 0) { i--; draw(root, onDone); } });
+  root.querySelector('[data-back]').addEventListener('click', () => { if (i > 0) { i--; draw(root, onDone, -1); } });
 
   if (step.type === 'choice' && step.multi) {
     // Pick up to `multi` answers, then Continue.
@@ -160,6 +162,8 @@ function draw(root, onDone) {
     cont.addEventListener('click', next);
   }
 
+  if (step.type === 'install') bindInstall(root, next);
+
   if (step.type === 'plan') {
     const finish = async (first) => {
       await saveProfile({
@@ -227,6 +231,8 @@ function body(step) {
       <div class="ob-foot"><button class="btn btn-quiet" data-next>Skip for now</button></div>
     </div>`;
   }
+
+  if (step.type === 'install') return installBody();
 
   if (step.type === 'plan') {
     const goals = [].concat(ans.goal || []).map((g) => LABEL.goal[g]?.label.toLowerCase()).filter(Boolean); const wake = LABEL.wake[ans.wake];

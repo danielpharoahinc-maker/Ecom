@@ -56,6 +56,12 @@ const P = {
   image: 'M3 4h18v16H3zM3 16l5-5 4 4 3-3 6 6M15.5 7.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z',
   logout: 'M10 4H4v16h6M15 8l4 4-4 4M9 12h10',
   wave: 'M3 12h2M7 8v8M11 5v14M15 8v8M19 10v4',
+  addhome: 'M4 4h16v16H4zM12 8v8M8 12h8',
+  dotsv: 'M11 4h2v2h-2zM11 11h2v2h-2zM11 18h2v2h-2z',
+  dotsh: 'M4 11h2v2H4zM11 11h2v2h-2zM18 11h2v2h-2z',
+  compass: 'M12 3a9 9 0 100 18 9 9 0 000-18zM15.5 8.5l-2 5-5 2 2-5z',
+  globe: 'M12 3a9 9 0 100 18 9 9 0 000-18zM12 8.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zM12 8.5h8M9 13.7L5 6.8M15 13.7l-4 7',
+  tabs: 'M7 7h13v13H7zM4 4h13v3',
 };
 
 export function ic(name, size = 24, sw = 1.75) {
@@ -68,3 +74,12 @@ export const LOGO = {
   google: `<svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>`,
   microsoft: `<svg width="18" height="18" viewBox="0 0 23 23" aria-hidden="true"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#7fba00" d="M12 1h10v10H12z"/><path fill="#00a4ef" d="M1 12h10v10H1z"/><path fill="#ffb900" d="M12 12h10v10H12z"/></svg>`,
 };
+
+// The Proof mark (viewfinder + recording dot), no background, for in-app use.
+export const MARK = (size = 96) => `<svg class="mark" width="${size}" height="${size}" viewBox="140 140 232 232" aria-hidden="true">
+  <g fill="none" stroke="currentColor" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M150 196v-30a16 16 0 0 1 16-16h30"/><path d="M316 150h30a16 16 0 0 1 16 16v30"/>
+    <path d="M362 316v30a16 16 0 0 1-16 16h-30"/><path d="M196 362h-30a16 16 0 0 1-16-16v-30"/>
+  </g>
+  <circle class="mark-dot" cx="256" cy="256" r="21" fill="#e8423f"/>
+</svg>`;
