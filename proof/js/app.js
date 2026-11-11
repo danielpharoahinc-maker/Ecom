@@ -13,6 +13,7 @@ import { ic } from './icons.js';
 import { haptic } from './util.js';
 import { refreshPro, afterCheckout } from './billing.js';
 import { mountProff, unmountProff, startTour, tourNeeded } from './proff.js';
+import { askReminders, syncSoon } from './reminders.js';
 
 const app = document.getElementById('app');
 
@@ -43,7 +44,10 @@ function route(opts = {}) {
       S.tab = 'today';
       route();
       // Proff explains the app first, then (if they chose it) the first proof.
-      setTimeout(() => startTour(() => { if (o?.firstProof) setTimeout(() => openCapture(), 300); }), 450);
+      // Proff explains the app, asks about reminders, then the first proof.
+      setTimeout(() => startTour(() => askReminders({
+        onDone: () => { if (o?.firstProof) setTimeout(() => openCapture(), 300); },
+      })), 450);
     });
   }
   shell();
@@ -106,6 +110,7 @@ async function boot() {
   if (S.profile?.onboarded) {
     if (params.has('paid')) { history.replaceState(null, '', location.pathname); afterCheckout(); }
     else refreshPro().catch(() => {});
+    syncSoon(); // keep the reminder server up to date with today
   }
   if (S.profile?.onboarded && action === 'snap') openCapture();
   if (S.profile?.onboarded && action === 'talk') openCapture({ mode: 'voice' });

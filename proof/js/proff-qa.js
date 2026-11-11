@@ -99,8 +99,10 @@ export const QA = [
     a: 'Type your email and tap the link we send you. No password needed. Check spam if it doesn’t arrive.' },
   { t: 7, q: 'Can I change my commitments?', k: 'change edit commitments swap',
     a: 'Not yet. That’s coming soon. Pick the three that matter most for now.' },
-  { t: 7, q: 'Will Proof remind me to post?', k: 'reminder notification alert',
-    a: 'Reminders are coming. For now, your plan on Today and your streak are your reminders.' },
+  { t: 7, q: 'Will Proof remind me to post?', k: 'reminder notification alert remind ping',
+    a: 'Yes, if you let me. Tap your initial on Today, then Reminders. I nudge you at your proof time, at 8 pm if your streak is at risk, and 10 minutes before anything timed in your plan. On iPhone, add Proof to your home screen first.' },
+  { t: 7, q: 'Why am I not getting reminders?', k: 'not getting notifications reminders no ping silent',
+    a: 'Check three things: Proof is on your home screen (iPhone needs this), notifications for Proof are allowed in your phone’s Settings, and Reminders are on in Account. Then tap “Send me a test”.' },
   { t: 7, q: 'How do I delete my data?', k: 'delete account data remove',
     a: 'Tap your initial at the top of Today, then Delete all my data. It can’t be undone.' },
 ];

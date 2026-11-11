@@ -731,7 +731,7 @@ input, .big-input, .note, .talkbox textarea { border: 0; color: var(--ink); back
 .tour-dots i.on { width: 18px; background: var(--red); }
 .tour-back { height: 40px; padding: 0 14px; color: var(--ink-2); font-weight: 600; }
 .tour-next { height: 40px; padding: 0 20px; border-radius: var(--pill); background: var(--ink); color: var(--on-sel); font-weight: 700; }
-.tour-skip { position: absolute; top: 8px; right: 10px; padding: 6px 8px; font-size: 13px; font-weight: 600; color: var(--mute); }
+.tour-skip { position: absolute; z-index: 2; top: 6px; right: 6px; padding: 8px 10px; min-height: 36px; font-size: 13px; font-weight: 600; color: var(--mute); }
 
 /* Post celebration: Proff jumps and slams the stamp */
 .done-stamp { position: relative; display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
@@ -747,3 +747,20 @@ input, .big-input, .note, .talkbox textarea { border: 0; color: var(--ink); back
 }
 /* Proff perches on the tab bar, right above Club, out of the way of buttons. */
 .proff-fab .pf-shadow { display: none; }
+
+/* ---------- Reminders ---------- */
+.ask-head .h2 { display: block; }
+.rem-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.rem-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: var(--r-ctl); background: var(--s2); box-shadow: var(--hi); }
+.rem-list .i { color: var(--red); margin-top: 2px; }
+.rem-list b { display: block; font-size: 16px; }
+.rem-list small { display: block; color: var(--mute); font-size: 13px; margin-top: 2px; }
+.rem-set { display: flex; flex-direction: column; gap: 12px; }
+.rem-times { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.rem-times input { height: 44px; padding: 0 12px; border-radius: var(--r-ctl); background: var(--s2); box-shadow: var(--hi); font-size: 17px; font-variant-numeric: tabular-nums; color-scheme: dark; }
+.rem-toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: var(--r-ctl); background: var(--s2); }
+.rem-toggle b { display: block; font-size: 16px; }
+.rem-toggle small { color: var(--mute); font-size: 13px; }
+.rem-toggle input { width: 22px; height: 22px; accent-color: var(--red); flex: none; }
+.rem-install .inst { gap: 10px; }
+.tour-txt { padding-right: 44px; }
