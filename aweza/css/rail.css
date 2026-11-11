@@ -439,6 +439,5 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 }
 
 /* struck-through "was" price */
-.pk-was { color: #6b6b6b; font-weight: 400; font-size: .72em; margin-right: 6px; text-decoration: line-through; text-decoration-thickness: 2px; text-decoration-color: #d7191f; }
+.pk-was { color: #6b6b6b; font: inherit; font-weight: 700; margin-right: 8px; text-decoration: line-through; text-decoration-thickness: 2px; text-decoration-color: #d7191f; }
 .pk-now { color: #d7191f; font-weight: 700; }
-.rb-price .pk-was { font-size: 13px; }
