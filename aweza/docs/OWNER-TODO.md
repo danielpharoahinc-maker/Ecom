@@ -31,3 +31,10 @@ Personality rights, trademark and (for alcohol imagery) advertising rules can al
 - Place one real test order end to end (Yoco test mode, then a Printify order) and check tracking, the confirmation page and the Printify email to the customer.
 - Decide whether to set `PRINTIFY_AUTO_SEND=true` so paid orders go straight to print (otherwise you approve each one in Printify).
 - Log delivery times of the first 10 orders and tune `shipping.days` in `data/products.js`.
+
+## 6. The struck-through "was R600" price
+The tee pages show R600 struck through next to the real R450, because the tees were advertised to customers at R600 before the price was lowered. To keep that honest:
+- **Keep the evidence:** screenshots of the messages, posts or pictures where you quoted R600, with dates. If a customer or the Advertising Regulatory Board ever asks, that is your proof the earlier price was real.
+- **It switches itself off on 31 January 2027** (`AW.config.was.until` in `data/products.js`). A reference price should not stay on a product for ever. Do not extend it unless you genuinely still sell or advertise at R600.
+- **Only for tees you actually advertised at R600.** Black Out Or Back Out and Time of Your Life were added later: if they were never advertised at R600, add `noWas: true` to them in `data/products.js` and the strike-through disappears for those two.
+- Bigger sizes show the matching "was" price (R640 for 2XL, R670 for 3XL to 5XL). The bag, checkout and card total always use the real prices.

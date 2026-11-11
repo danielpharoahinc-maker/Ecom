@@ -85,6 +85,18 @@
     const fmt = d => DAYS[d.getDay()] + " " + d.getDate() + " " + MONTHS[d.getMonth()];
     return { from, to, days: [lo, hi], peak, text: fmt(from) + " to " + fmt(to) };
   };
+  /* The struck-through "was" price for a tee (and size), or 0 when none applies: switched off, expired, or not above
+     the real price. Size extras are added to both, so the saving is the same for every size. */
+  AW.was = (p, size) => {
+    const w = AW.config.was; if (!w || !p || p.noWas) return 0;
+    if (w.until && Date.parse(w.until + "T23:59:59+02:00") < Date.now()) return 0;
+    const now = AW.priceFor(p, size), was = w.price + (now - p.price);
+    return was > now ? was : 0;
+  };
+  AW.priceHTML = (p, size) => {
+    const now = AW.priceFor(p, size), was = AW.was(p, size);
+    return was ? `<s class="pk-was"><span class="visually-hidden">Was </span>${AW.rand(was)}</s> <span class="pk-now"><span class="visually-hidden">Now </span>${AW.rand(now)}</span>` : AW.rand(now);
+  };
   AW.drop = () => {
     const d = AW.config.drop; if (!d) return null;
     return { name: d.name, label: d.label, closed: Date.parse(d.ends + "T23:59:59+02:00") < Date.now() };

@@ -210,7 +210,7 @@
     if (!show) return;
     const { p, size } = st.buy;
     bar.querySelector(".rb-name").textContent = p.name;
-    bar.querySelector(".rb-price").textContent = AW.rand(AW.priceFor(p, size));
+    bar.querySelector(".rb-price").innerHTML = AW.priceHTML(p, size);
     bar.querySelector(".rb-go").textContent = size ? "Add to bag" : "Choose size";
   }
   function unselect(fromHistory) {
@@ -257,7 +257,7 @@
       <div class="pick-in" data-id="${esc(p.id)}">
         <div class="pick-head">
           <h2 class="pick-name">${esc(p.name)}</h2>
-          <p class="pick-price" data-price>${AW.rand(p.price)}</p>
+          <p class="pick-price" data-price>${AW.priceHTML(p)}</p>
         </div>
         <p class="pick-sum">${esc(p.summary)}</p>
         <fieldset class="pick-sizes">
@@ -296,7 +296,7 @@
       const b = box.querySelector(`.pick-size[data-size="${s}"]`); if (!b) return;
       size = s; if (st.buy) { st.buy.size = s; updateBuy(); }
       box.querySelectorAll(".pick-size").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
-      price.textContent = AW.rand(AW.priceFor(p, size));
+      price.innerHTML = AW.priceHTML(p, size);
       note.textContent = "";
     };
     box.querySelectorAll(".pick-size").forEach(b => b.addEventListener("click", () => choose(b.dataset.size)));

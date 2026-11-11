@@ -23,6 +23,11 @@ AW.config = {
     peak: { from: "11-15", to: "01-10", extra: 5 },
     holidays: ["2026-12-16", "2026-12-25", "2026-12-26", "2027-01-01"],   // South African public holidays that stop couriers
   },
+  // "Was" price shown struck through next to the real price. The tees were advertised to customers at R600 before the
+  // price was lowered to R450, so R600 is a genuine earlier price. It is shown only until `until` (end of that day, South
+  // African time): a reference price should not sit on a product for ever. Set `noWas: true` on any tee that was never
+  // advertised at R600. Keep the screenshots of the R600 messages (see docs/OWNER-TODO.md).
+  was: { price: 600, until: "2027-01-31" },
   // Business details for the Help, Terms and Privacy pages. Fill these in and the "[Email]"-style placeholders on those
   // pages are replaced by the real thing. Anything left empty still shows as a placeholder (see docs/OWNER-TODO.md).
   business: { name: "", regNo: "", vatNo: "", email: "", phone: "", address: "", city: "", founder: "" },
