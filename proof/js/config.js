@@ -5,7 +5,7 @@
 // follow docs/BACKEND.md, then paste the two values below. The anon key is
 // designed to be public; never paste the service_role key here.
 export const CONFIG = {
-  supabaseUrl: '',
+  supabaseUrl: 'https://kfnetfsyvhyysjjhpwue.supabase.co',
   supabaseAnonKey: '',
 };
 
