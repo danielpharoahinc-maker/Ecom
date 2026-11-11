@@ -54,6 +54,9 @@ export async function findExistingOrder({ externalId, label, pages = 3 }) {
   return null;
 }
 
+/** Find one order by its label (our customer-facing order number), newest first. Used by the tracking page. */
+export const findOrderByLabel = (label, pages = 6) => findExistingOrder({ label, pages });
+
 export const createOrder = (order) => call("POST", `/shops/${shopId()}/orders.json`, order, 8000);
 
 export const sendToProduction = (orderId) =>

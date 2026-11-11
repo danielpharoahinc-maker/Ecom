@@ -354,7 +354,7 @@
         ["I'm between sizes. Now what?", `<p>Size up for a relaxed fit. Size down if you like it close.</p>`],
         ["Why do bigger sizes cost more?", up ? `<p>Sizes ${esc(up.from)} and up use more fabric, so they cost ${R(up.min)}${up.max !== up.min ? " to " + R(up.max) : ""} more. The price updates when you pick a size.</p>` : `<p>They don't. One price for every size.</p>`],
         ["How do I wash it?", `<p>Cold wash, inside out. No bleach, no hot tumble dry. Iron inside out and never on the print. That's how the print stays sharp.</p>`],
-        ["Where's my order?", `<p>Your tracking link arrives by email when your tee ships. No link after 10 working days? Email ${ph("Email")} with your order number.</p>`],
+        ["Where's my order?", `<p>Use <a href="#/track">Track your order</a> with your order number and the email you ordered with. It shows where your tee is, from printing to your door. Your tracking link also arrives by email when your tee ships. No link after 10 working days? Email ${ph("Email")} with your order number.</p>`],
         ["Can I change or cancel my order?", `<p>Yes, if it hasn't gone to print. Email us within ${ph("X hours")} of ordering. Once it's printed, it's yours.</p>`],
         ["Do you deliver outside South Africa?", `<p>Not yet. South Africa only for now. ${ph("Owner to update when international shipping opens")}.</p>`],
         ["Can I send a tee as a gift?", `<p>Yes. Put their name and address at checkout and add a note for the courier. Gift wrapping isn't available yet.</p>`],

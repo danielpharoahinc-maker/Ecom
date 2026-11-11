@@ -367,3 +367,43 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .mf-ref-btns .mf-ref-btn { margin-top: 0; display: inline-flex; align-items: center; text-decoration: none; word-break: break-all; }
 .mf-ref-btn--alt { background: #fff !important; color: #0a0a0a !important; border: 1px solid #0a0a0a !important; }
 .mf-ref-btn--alt:hover { background: #f1f1ee !important; }
+
+/* ---------- track your order ---------- */
+.mh-track { margin-left: auto; margin-right: 14px; font: 600 13px/1 var(--font-body); color: var(--rl-on); text-decoration: underline; text-underline-offset: 4px; min-height: 44px; display: inline-flex; align-items: center; }
+.tk { max-width: 560px; margin: 0 auto; padding: 24px 16px 64px; color: #0a0a0a; }
+.tk-eyebrow { margin: 0 0 10px; font: 600 12px/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase; }
+.tk-title { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(36px, 9vw, 52px); line-height: 1; }
+.tk-title em { color: #d7191f; }
+.tk-lede { margin: 14px 0 22px; font-size: 15px; line-height: 1.55; color: #3d3d3d; }
+.tk-form { display: grid; gap: 14px; }
+.tk-field { display: grid; gap: 6px; font: 600 12px/1 var(--font-body); letter-spacing: .1em; text-transform: uppercase; }
+.tk-field input { min-height: 52px; padding: 0 14px; border: 1px solid #bdbdbd; border-bottom: 2px solid #0a0a0a; border-radius: 6px; background: #fff; color: #0a0a0a; font: 400 17px/1 var(--font-body); letter-spacing: normal; text-transform: none; }
+.tk-field input[name="ref"] { text-transform: uppercase; letter-spacing: .06em; }
+.tk-field input:focus-visible { outline: 2px solid #0a0a0a; outline-offset: 2px; }
+.tk-error { margin: 0; color: #d7191f; font-weight: 600; font-size: 14px; }
+.tk-go[disabled] { opacity: .7; cursor: progress; }
+.tk-result { margin-top: 26px; }
+.tk-card { border: 1px solid #d4d4d4; border-radius: 14px; padding: 20px 18px; background: #fff; }
+.tk-card.is-issue { border-color: #d7191f; }
+.tk-order { margin: 0 0 6px; font-size: 13px; color: #3d3d3d; }
+.tk-status { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 30px; line-height: 1.1; color: #d7191f; }
+.tk-detail { margin: 8px 0 18px; font-size: 15px; line-height: 1.5; }
+.tk-steps { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 0; }
+.tk-steps li { position: relative; display: grid; grid-template-columns: 22px 1fr; column-gap: 12px; padding: 0 0 18px; color: #8a8a8a; }
+.tk-steps li:last-child { padding-bottom: 0; }
+.tk-steps li::before { content: ""; position: absolute; left: 10px; top: 18px; bottom: -2px; width: 2px; background: #d4d4d4; }
+.tk-steps li:last-child::before { display: none; }
+.tk-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #bdbdbd; background: #fff; grid-row: 1 / span 2; box-sizing: border-box; }
+.tk-step-t { font-weight: 700; font-size: 15px; }
+.tk-step-d { font-size: 13px; }
+.tk-steps li.is-done { color: #0a0a0a; } .tk-steps li.is-done .tk-dot { background: #0a0a0a; border-color: #0a0a0a; } .tk-steps li.is-done::before { background: #0a0a0a; }
+.tk-steps li.is-now { color: #0a0a0a; } .tk-steps li.is-now .tk-dot { background: #d7191f; border-color: #d7191f; box-shadow: 0 0 0 5px rgba(215, 25, 31, .18); }
+.tk-cancel { margin: 0 0 14px; font-weight: 700; color: #d7191f; }
+.tk-ships, .tk-items { list-style: none; margin: 0; padding: 0; }
+.tk-ship { margin: 0 0 14px; padding: 14px; border-radius: 10px; background: #f6f6f4; }
+.tk-ship p { margin: 0 0 6px; font-size: 14px; } .tk-ship-c { font-weight: 700; } .tk-ship-n b { font-family: ui-monospace, monospace; word-break: break-all; }
+.tk-ship-a { margin-top: 6px; text-decoration: none; }
+.tk-items { border-top: 1px solid #d4d4d4; padding-top: 14px; font-size: 14px; line-height: 1.7; }
+.co-ordnum { margin: 0 0 18px; font-size: 15px; } .co-ordnum b { font-family: ui-monospace, monospace; letter-spacing: .06em; color: #d7191f; font-size: 17px; }
+.tk .btn--primary, .co-result-actions .btn--primary { --btn-bg: #d7191f; --btn-fg: #fff; --btn-bd: #d7191f; }
+.tk .btn--primary:hover, .co-result-actions .btn--primary:hover { --btn-bg: #a90f14; --btn-bd: #a90f14; }

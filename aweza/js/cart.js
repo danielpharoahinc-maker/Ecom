@@ -645,6 +645,7 @@
       if (!AW.cart.lines().length) { AW.go("#/checkout"); return; }
       const order = buildOrder(form);
       saveDraft(form);
+      try { localStorage.setItem("aweza-last-order", JSON.stringify({ email: order.customer.email })); } catch (e) { /* tracking just won't be prefilled */ }
       const btn = form.querySelector(".co-pay");
       if (typeof window.AW_PAY === "function") {
         btn.classList.add("is-loading");
@@ -761,6 +762,16 @@
       while (AW.cart.lines().length) AW.cart.remove(0);
       clearDraft();
       app.innerHTML = resultShell("success");
+      // The payment page sends people back with ?order=<their order number>: show it and remember it for tracking.
+      const ordRef = (new URLSearchParams(location.search).get("order") || "").toUpperCase();
+      if (/^AW[A-Z0-9]{6,12}$/.test(ordRef)) {
+        try { const s = JSON.parse(localStorage.getItem("aweza-last-order") || "{}"); localStorage.setItem("aweza-last-order", JSON.stringify({ ...s, ref: ordRef })); } catch (e) { /* ignore */ }
+        const lede = app.querySelector(".co-result-lede");
+        if (lede) lede.insertAdjacentHTML("afterend", `<p class="co-ordnum">Your order number <b>${esc(ordRef)}</b></p>`);
+        try { history.replaceState(null, "", location.pathname + location.hash); } catch (e) { /* ignore */ }
+      }
+      const acts = app.querySelector(".co-result-actions");
+      if (acts) acts.insertAdjacentHTML("afterbegin", btn("Track your order", { href: "#/track/go", size: "lg", iconAfter: "arrow-right" }));
       return;
     }
     if (arg === "cancelled" || arg === "failed") { app.innerHTML = resultShell(arg); return; }

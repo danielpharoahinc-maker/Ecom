@@ -158,3 +158,14 @@ Printify API v1 reference (orders: `external_id`, `line_items`, `shipping_method
 Every tee shows the same model: the man with his hand on his hip, saved as `images/<id>/male-front-5.jpg`. Printify renumbers its model cameras, so do not trust the name: on 10 November 2026 that man is the camera **`person-4`** (id `92661`), and `person-5` is a different woman. Download it with
 `https://images-api.printify.com/mockup/<printify product id>/12100/92661/<product slug>.jpg?camera_label=person-4`
 and check it by eye before publishing. The other photos (`back` 92571, `front` 92570, `collar` 92586, `folded` 102001, `hanging-1` 102002) have kept their ids.
+
+## Track your order
+
+Customers can track an order at `#/track` ("Track order" in the header, "Track your order" in the footer, the FAQ and the order-confirmed page).
+
+- **How it works:** the customer enters their order number (it starts with `AW`, and is shown on the order-confirmed page, because the payment page now returns them to `/?order=<number>#/checkout/success`) and the email they ordered with. `netlify/functions/track-order.mjs` finds the order in Printify by its label (the same number), checks the email matches, and returns only a stage, the items and tracking links, never the address or phone. It uses the same `PRINTIFY_API_TOKEN` as the webhook, nothing new to set up.
+- **Stages:** Order received, Being printed, On its way (with the courier and tracking number, linking to the carrier's page or to 17TRACK when Printify gives only a number), Delivered. Printify statuses `has-issues`, `on-hold` and similar show "We're checking your order". Cancelled orders say so.
+- **Orders stay on "Order received" until they are approved in Printify.** Unless `PRINTIFY_AUTO_SEND=true`, the webhook only creates the order (status `pending`); it moves to "Being printed" once you approve it (or once auto-send is on).
+- **Printify also emails customers** when their parcel ships (`send_shipping_notification` is on), so they get the tracking link even if they never visit the page.
+- **Safety:** wrong order number or email gives the same "couldn't find" message (so nobody can probe for orders), and there is a best-effort limit of 12 lookups per 10 minutes per visitor.
+- **Tested against the documented Printify order shape, not a real order:** the shop had no orders on 11 November 2026. Place one test order and watch it on the page before you promote this.

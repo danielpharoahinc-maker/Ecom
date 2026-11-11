@@ -24,6 +24,7 @@
     root.innerHTML = `
       <header class="mh">
         <a class="mh-logo" href="#/" aria-label="AWEZA, home">AWEZA<sup>™</sup></a>
+        <a class="mh-track" href="#/track">Track order</a>
         <button type="button" class="mh-bag" data-bag-target aria-label="Bag, 0 items">
           <span>Bag</span><span class="mh-count" aria-hidden="true">0</span>
         </button>
@@ -75,6 +76,7 @@
           ${c.referral ? `<div class="mf-ref"><p><strong>Give ${AW.rand(c.referral.amount)}, get ${AW.rand(c.referral.amount)}</strong> Send a friend your link. They get ${AW.rand(c.referral.amount)} off their order. When they buy, message us your code <b>${AW.esc(AW.referral.mine())}</b> and ${AW.rand(c.referral.amount)} comes off your next tee.</p><div class="mf-ref-btns"><button type="button" class="mf-ref-btn" data-ref-share>Copy my link</button><a class="mf-ref-btn mf-ref-btn--alt" data-ref-wa target="_blank" rel="noopener" href="${AW.esc(refShareLinks().wa)}">WhatsApp</a><a class="mf-ref-btn mf-ref-btn--alt" data-ref-mail href="${AW.esc(refShareLinks().mail)}">Email a friend</a></div></div>` : ""}
         </div>
         <nav class="mf-links" aria-label="Help">
+          <a href="#/track">Track your order</a>
           <a href="#/size-guide">Size guide</a>
           <a href="#/help">Help</a>
           <a href="#/returns">Returns</a>

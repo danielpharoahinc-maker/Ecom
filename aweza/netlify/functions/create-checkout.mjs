@@ -81,7 +81,7 @@ export default async function handler(req) {
   const body = {
     amount: pricing.totalCents,
     currency: "ZAR",
-    successUrl: `${origin}/#/checkout/success`,
+    successUrl: `${origin}/?order=${ref}#/checkout/success`,
     cancelUrl: `${origin}/#/checkout/cancelled`,
     failureUrl: `${origin}/#/checkout/failed`,
     clientReferenceId: ref,
