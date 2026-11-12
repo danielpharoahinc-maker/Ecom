@@ -176,7 +176,7 @@ export function openAsk() {
 const TOUR = [
   { sel: null, pose: 'talk', t: 'Hi, I’m Proff.', b: 'I approve your proof. Let me show you around. It takes 30 seconds.' },
   { sel: '.cm-list', pose: 'point', t: 'Your goals', b: 'Tap one to post proof for it. You can have 1 to 6, and change them any time.' },
-  { sel: '.need-line', pose: 'cheer', t: 'Half is enough', b: 'Prove at least half your goals in a day and your streak lives. Miss one? You’re still good. Showing up most days beats perfect days.' },
+  { sel: '.next-up', pose: 'cheer', t: 'Half is enough', b: 'Prove at least half your goals in a day and your streak lives. Miss one? You’re still good. Showing up most days beats perfect days.' },
   { sel: '.talkbox', pose: 'point', t: 'Plan your day', b: 'Tap the mic and say your plan like you’d tell a friend. I turn it into a list.' },
   { sel: '[data-add]', pose: 'point', t: 'The + button', b: 'The fastest way to post proof: take a photo, say what you did, post. I’ll stamp it.' },
   { sel: '.day-sec', pose: 'point', t: 'Your day', b: 'Snap moments from your day here. They tell the story but don’t count toward your streak.' },

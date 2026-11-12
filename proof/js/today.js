@@ -5,6 +5,7 @@ import { S, hydrateMedia, signOut, resetEverything, getPlan, savePlan, saveProfi
 import { startTour } from './proff.js';
 import { reminderSettings } from './reminders.js';
 import { commitment } from './data.js';
+import { sfx } from './fx.js';
 import { doneToday, streak, needFor } from './stats.js';
 import { openGoals } from './goals.js';
 import { focusLine } from './review.js';
@@ -39,6 +40,8 @@ export async function renderToday(el) {
   const proofFor = (k) => S.proofs.find((p) => p.cKey === k && new Date(p.ts).toDateString() === todayStr);
   const left = plan.filter((i) => !i.done).length;
   const todays = S.proofs.filter((p) => new Date(p.ts).toDateString() === todayStr);
+  const nextKey = P.commitments.find((k) => !done.has(k));
+  const fresh = (p) => p && p.ts > Date.now() - 9000; // just proven: play the little celebration
 
   el.innerHTML = `
   <header class="page-top">
@@ -49,20 +52,23 @@ export async function renderToday(el) {
     <button class="avatar" data-settings aria-label="Account">${esc(P.name[0].toUpperCase())}</button>
   </header>
 
+  <section class="next-up ${have >= need ? 'kept' : ''}" aria-label="What to do next">
+    <p class="nu-state">${have >= total ? `${ic('check', 16, 2.6)} Every goal done. Perfect day.` : have >= need ? `${ic('check', 16, 2.6)} Streak kept for today` : `${need - have} more to keep today’s streak`}</p>
+    ${nextKey ? `<button class="btn ${have >= need ? 'btn-secondary' : 'btn-primary'} nu-btn" data-capture="${nextKey}">${ic('camera', 22)}<span>${have >= need ? 'Keep going: ' : ''}Prove ${esc(commitment(nextKey).label)}</span></button>` : ''}
+    <p class="nu-sub">${have} of ${total} proven · half is enough to keep your streak</p>
+  </section>
+
   <section class="cm-sec" aria-label="Your goals">
     <div class="sec-h">
-      <h2 class="headline">${have} of ${total} proven</h2>
-      <span class="streak-line ${st ? 'on' : ''}">${ic('flame', 15)}${st} day streak</span>
+      <h2 class="headline">Your goals</h2>
+      <span class="streak-line ${st ? 'on' : ''}">${ic('flame', 15)}<b class="streak-n">${st}</b> day streak</span>
     </div>
-    <p class="need-line ${have >= need ? 'met' : ''}">
-      <span>${have >= need ? `Streak kept for today. ${have === total ? 'Every goal done.' : 'Extra goals are a bonus.'}` : `Prove ${need - have} more to keep today’s streak. Half your goals is enough.`}</span>
-      <button class="link-btn" data-goals>Edit goals</button>
-    </p>
+    <p class="need-line"><button class="link-btn" data-goals>Edit goals</button></p>
     ${focusLine()}
     <div class="cm-list">
       ${P.commitments.map((k) => {
         const c = commitment(k); const p = proofFor(k);
-        return `<button class="cm ${p ? 'done' : ''}" data-capture="${k}" aria-label="${c.label}: ${p ? 'proven today, add another' : 'post proof'}">
+        return `<button class="cm ${p ? 'done' : ''} ${k === nextKey ? 'next' : ''} ${fresh(p) ? 'pop' : ''}" data-capture="${k}" aria-label="${c.label}: ${p ? 'proven today, add another' : 'post proof'}">
           <span class="cm-ic">${p ? ic('check', 18, 2.4) : ic(c.icon, 20)}</span>
           <span class="cm-txt"><b>${c.label}</b><small>${p ? `Proven at ${fmtClock(p.ts)}` : c.hint}</small></span>
           <span class="cm-go">${ic(p ? 'plus' : 'camera', 18)}</span>
@@ -215,6 +221,7 @@ function settings() {
       <button class="btn btn-secondary" data-edit-goals>${ic('target', 20)}<span>Your goals</span></button>
       <button class="btn btn-secondary" data-rem>${ic('clock', 20)}<span>Reminders</span></button>
       <button class="btn btn-secondary" data-tour>Show me around again</button>
+      <button class="btn btn-secondary" data-sounds>${S.profile.sounds ? 'Sounds: on' : 'Sounds: off'}</button>
       <button class="btn btn-secondary" data-proff>${S.profile.hideProff ? 'Show Proff' : 'Hide Proff'}</button>
       <button class="btn btn-secondary" data-out>${ic('logout', 20)}<span>Sign out</span></button>
       <button class="btn btn-quiet danger" data-reset>${ic('trash', 18)}<span>Delete my account and data</span></button>
@@ -225,6 +232,11 @@ function settings() {
       body.querySelector('[data-edit-goals]').addEventListener('click', () => { close(); setTimeout(openGoals, 320); });
       body.querySelector('[data-tour]').addEventListener('click', () => { close(); setTimeout(() => startTour(), 320); });
       body.querySelector('[data-rem]').addEventListener('click', () => { close(); setTimeout(() => reminderSettings(), 320); });
+      body.querySelector('[data-sounds]').addEventListener('click', async (e) => {
+        await saveProfile({ ...S.profile, sounds: !S.profile.sounds });
+        e.currentTarget.textContent = S.profile.sounds ? 'Sounds: on' : 'Sounds: off';
+        sfx('stamp');
+      });
       body.querySelector('[data-proff]').addEventListener('click', async () => {
         await saveProfile({ ...S.profile, hideProff: !S.profile.hideProff });
         close(); emit('proof:changed');

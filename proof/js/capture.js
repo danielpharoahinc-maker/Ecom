@@ -11,6 +11,7 @@ import { esc, haptic, toast, fmtDur, emit } from './util.js';
 import { getDictation } from './speech.js';
 import { canPost, paywall } from './billing.js';
 import { proffSVG, inkMark } from './proff.js';
+import { sfx, buzz, countUp } from './fx.js';
 
 const MAX_TALK = 60; // seconds
 
@@ -378,10 +379,12 @@ function success() {
     <h2 class="title">${cKey === 'moment' ? 'Moment saved' : 'Proof posted'}</h2>
     <p class="sub">${cKey === 'moment' ? 'Added to your day. Your club sees it too.' : first ? 'Your first proof. This is how it starts.' : n >= total ? 'Every goal done. That’s a perfect day.' : n >= need ? `Streak kept for today. ${n} of ${total} proven.` : `${n} of ${total} proven. ${need - n} more keeps today’s streak.`}</p>
     <div class="done-seg">${S.profile.commitments.map((k) => `<i class="${done.has(k) ? 'on' : ''}"></i>`).join('')}</div>
-    <p class="done-streak">${ic('flame', 20)} ${st} day streak</p>
+    <p class="done-streak">${ic('flame', 20)} <b data-streak-n>${st}</b> day streak</p>
     <button class="btn btn-primary" data-close>Done</button>
   </div>`;
   root.querySelector('[data-close]').addEventListener('click', finish);
+  sfx('stamp'); buzz([18, 40, 30]);
+  countUp(root.querySelector('[data-streak-n]'), st);
   const t = setTimeout(finish, 2600);
   function finish() {
     clearTimeout(t);
