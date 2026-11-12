@@ -16,6 +16,12 @@ export function renderWelcome(root, onDone) {
       <p class="lede">Your goals. One photo and a few words each. Your crew sees it.</p>
     </div>
     <div class="auth">
+      <fieldset class="consent">
+        <legend class="sr">Age and agreement</legend>
+        <label class="chk"><input type="radio" name="age" value="adult"><span>I’m 18 or older</span></label>
+        <label class="chk"><input type="radio" name="age" value="minor"><span>I’m under 18 and my parent or guardian agrees to me using Proof</span></label>
+        <label class="chk"><input type="checkbox" name="agree"><span>I agree to the <a href="terms.html" target="_blank" rel="noopener">Terms</a> and <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a></span></label>
+      </fieldset>
       <button class="btn btn-primary" data-p="apple">${LOGO.apple}<span>Continue with Apple</span></button>
       <button class="btn btn-secondary" data-p="google">${LOGO.google}<span>Continue with Google</span></button>
       <button class="btn btn-secondary" data-p="microsoft">${LOGO.microsoft}<span>Continue with Microsoft</span></button>
@@ -29,6 +35,15 @@ export function renderWelcome(root, onDone) {
       <p class="fine">${LIVE ? 'We’ll email you a sign-in link. No password needed.' : 'Test version: your account and proof are saved in this browser.'}</p>
     </div>
   </section>`;
+
+  // Consent comes first: nothing below works until age and agreement are given.
+  const gate = () => {
+    const ok = root.querySelector('[name=age]:checked') && root.querySelector('[name=agree]').checked;
+    root.querySelectorAll('.auth .btn').forEach((b) => { b.disabled = !ok; });
+    if (ok) { try { localStorage.setItem('proof:consent', JSON.stringify({ age: root.querySelector('[name=age]:checked').value, terms: 1, ts: Date.now() })); } catch { /* ignore */ } }
+  };
+  root.querySelectorAll('.consent input').forEach((i) => i.addEventListener('change', gate));
+  gate();
 
   // Live mode: only show the sign-in options that are set up on the server.
   if (LIVE) {

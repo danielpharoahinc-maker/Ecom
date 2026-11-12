@@ -104,7 +104,7 @@ export const QA = [
   { t: 7, q: 'Why am I not getting reminders?', k: 'not getting notifications reminders no ping silent',
     a: 'Check three things: Proof is on your home screen (iPhone needs this), notifications for Proof are allowed in your phone’s Settings, and Reminders are on in Account. Then tap “Send me a test”.' },
   { t: 7, q: 'How do I delete my data?', k: 'delete account data remove',
-    a: 'Tap your initial at the top of Today, then Delete all my data. It can’t be undone.' },
+    a: 'Tap your initial at the top of Today, then Delete my account and data. It removes your account, proof, photos and club memberships from our servers and cancels any subscription. It can’t be undone.' },
   { t: 2, q: 'How many goals can I have?', k: 'goals how many limit number six max',
     a: 'From 1 to 6. Start with what you can really do. A few goals you keep beat a long list you drop.' },
   { t: 2, q: 'Why do I only need half my goals?', k: 'half why need streak goals forgive miss',

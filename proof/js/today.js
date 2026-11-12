@@ -12,7 +12,7 @@ import { openCapture } from './capture.js';
 import { openProof } from './proofview.js';
 import { paywall, planState, subscriptionSheet, trialBanner, daysLeft } from './billing.js';
 import { openSheet, confirmSheet } from './sheet.js';
-import { signOutLive } from './auth.js';
+import { signOutLive, deleteAccountLive } from './auth.js';
 import { parsePlan } from './planner.js';
 import { getDictation } from './speech.js';
 import { ic } from './icons.js';
@@ -217,8 +217,9 @@ function settings() {
       <button class="btn btn-secondary" data-tour>Show me around again</button>
       <button class="btn btn-secondary" data-proff>${S.profile.hideProff ? 'Show Proff' : 'Hide Proff'}</button>
       <button class="btn btn-secondary" data-out>${ic('logout', 20)}<span>Sign out</span></button>
-      <button class="btn btn-quiet danger" data-reset>${ic('trash', 18)}<span>Delete all my data</span></button>
-    </div>`, {
+      <button class="btn btn-quiet danger" data-reset>${ic('trash', 18)}<span>Delete my account and data</span></button>
+    </div>
+    <p class="fine legal-links"><a href="terms.html" target="_blank" rel="noopener">Terms</a> · <a href="privacy.html" target="_blank" rel="noopener">Privacy</a> · <a href="refunds.html" target="_blank" rel="noopener">Refunds</a></p>`, {
     onMount(body, close) {
       body.querySelector('[data-plan-row]').addEventListener('click', () => { close(); setTimeout(subscriptionSheet, 320); });
       body.querySelector('[data-edit-goals]').addEventListener('click', () => { close(); setTimeout(openGoals, 320); });
@@ -233,9 +234,13 @@ function settings() {
       });
       body.querySelector('[data-reset]').addEventListener('click', async () => {
         close();
-        const ok = await confirmSheet('Delete everything?', 'Every proof, photo, voice note, plan and club in this browser goes. This can’t be undone.', 'Delete everything');
+        const ok = await confirmSheet('Delete your account?', LIVE && S.user?.email ? 'Your account, every proof, photo, voice note, club membership and reminder is deleted from our servers and this phone. Any subscription is cancelled first. This can’t be undone.' : 'Every proof, photo, voice note and plan in this browser goes. This can’t be undone.', 'Delete everything');
         if (!ok) return;
-        await signOutLive(); await resetEverything(); emit('proof:route');
+        if (LIVE && S.user?.email) {
+          const r = await deleteAccountLive();
+          if (!r.ok) return toast(r.error);
+        }
+        await signOutLive().catch(() => {}); await resetEverything(); emit('proof:route'); toast('Your data is deleted');
       });
     },
   });

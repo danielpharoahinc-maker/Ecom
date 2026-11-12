@@ -71,7 +71,7 @@ export function openReview(offset = sundayOffset()) {
       ${photos.length ? `<div><h3 class="headline">Your best moments</h3>
         <div class="prints rv-prints">${photos.map((p) => `
           <button class="print" data-open="${p.id}" style="--tilt:0deg" aria-label="${commitment(p.cKey).label} at ${fmtClock(p.ts)}">
-            <span class="print-img"><img data-media="${p.photoId}" alt=""></span>
+            <span class="print-img"><img data-media="${p.photoId}" alt="Proof photo"></span>
             <span class="print-cap">${ic(commitment(p.cKey).icon, 13)}<time>${esc(fmtShortDay(p.ts))}</time></span>
           </button>`).join('')}</div></div>` : ''}
       <div class="rv-goals">

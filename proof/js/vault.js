@@ -103,7 +103,7 @@ function renderInside(el, animate) {
       <h2 class="vday-h">${k === today ? 'Today' : fmtShortDay(ps[0].ts)}</h2>
       <div class="prints">${ps.map((p) => `
         <button class="print" data-open="${p.id}" style="--tilt:${tilt(p.id)}deg" aria-label="${commitment(p.cKey).label} at ${fmtClock(p.ts)}">
-          <span class="print-img">${p.photoId ? `<img data-media="${p.photoId}" alt="" loading="lazy">` : `<span class="print-voice">“${esc((p.note || 'Voice proof').slice(0, 60))}”</span>`}</span>
+          <span class="print-img">${p.photoId ? `<img data-media="${p.photoId}" alt="${commitment(p.cKey).label} proof from ${fmtShortDay(p.ts)}" loading="lazy">` : `<span class="print-voice">“${esc((p.note || 'Voice proof').slice(0, 60))}”</span>`}</span>
           <span class="print-cap">${ic(commitment(p.cKey).icon, 13)}<time>${fmtClock(p.ts)}</time></span>
         </button>`).join('')}</div>
     </section>`).join('') : `
@@ -152,7 +152,7 @@ async function recap() {
   ov.className = 'recap';
   ov.innerHTML = `
     <div class="recap-bars">${shots.map(() => '<i><b></b></i>').join('')}</div>
-    <img alt="">
+    <img alt="Proof photo">
     <div class="recap-cap"><b></b><span></span></div>
     <button class="icon-btn glass round recap-x" aria-label="Close recap">${ic('close', 20)}</button>
     <div class="recap-end" hidden><p class="recap-num">${shots.length}</p><p>proofs in 30 days</p><span class="recap-brand">Proof</span></div>`;

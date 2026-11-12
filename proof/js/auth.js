@@ -110,3 +110,16 @@ export async function signOutLive() {
   const c = await sb();
   if (c) await c.auth.signOut();
 }
+
+// Deletes the account and all its data on the server (stops any subscription first).
+export async function deleteAccountLive() {
+  const c = await sb();
+  if (!c) return { ok: false, error: 'Couldn’t reach Proof’s server. Try again.' };
+  const { data, error } = await c.functions.invoke('delete-account', { body: {} });
+  if (error || !data?.ok) {
+    let msg = data?.error;
+    try { if (!msg && error?.context) msg = (await error.context.json()).error; } catch { /* ignore */ }
+    return { ok: false, error: msg || 'Couldn’t delete your account. Try again.' };
+  }
+  return { ok: true };
+}

@@ -42,7 +42,7 @@ async function finish(onDone) {
   const now = Date.now();
   await saveProfile({
     name: ans.name, goal: ans.goal, proofTime: ans.proofTime, commitments: ans.commitments,
-    goalLog: [{ ts: now, keys: ans.commitments }], createdAt: now, onboarded: true, tourDone: false,
+    goalLog: [{ ts: now, keys: ans.commitments }], createdAt: now, onboarded: true, tourDone: false, consent: store.get('proof:consent') || null,
   });
   store.del(DRAFT);
   try { sessionStorage.removeItem('proof:paid'); } catch { /* ignore */ }

@@ -148,7 +148,7 @@ function feedItem(p) {
   const url = p.photo_path && st.urls.get(p.photo_path);
   const c = commitment(p.c_key);
   return `<article class="fcard">
-    ${url ? `<img src="${esc(url)}" alt="" loading="lazy">` : `<span class="fitem-voice">${ic('wave', 24, 1.5)}</span>`}
+    ${url ? `<img src="${esc(url)}" alt="${esc(nameOf(p.user_id))}’s ${esc(c.label)} proof" loading="lazy">` : `<span class="fitem-voice">${ic('wave', 24, 1.5)}</span>`}
     <div class="fcard-t">
       <span><b>${esc(nameOf(p.user_id))}</b> <span class="dim">${esc(c.label)}</span></span>
       ${p.note ? `<small>“${esc(p.note)}”</small>` : ''}

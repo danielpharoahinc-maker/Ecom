@@ -59,7 +59,7 @@ export function renderClub(el) {
     <h2 class="headline">Latest proof</h2>
     <div class="feed">${feed.map((p) => `
       <button class="fitem" data-open="${p.id}">
-        ${p.photoId ? `<img data-media="${p.photoId}" alt="" loading="lazy">` : `<span class="fitem-voice">${ic('wave', 24, 1.5)}</span>`}
+        ${p.photoId ? `<img data-media="${p.photoId}" alt="Club proof photo" loading="lazy">` : `<span class="fitem-voice">${ic('wave', 24, 1.5)}</span>`}
         <span class="fitem-t"><b>${esc(me.name)}</b> <span>${commitment(p.cKey).label}</span>${p.note ? `<small>“${esc(p.note)}”</small>` : ''}<small class="dim">${timeAgo(p.ts)}</small></span>
       </button>`).join('')}</div>
   </section>` : ''}`;
