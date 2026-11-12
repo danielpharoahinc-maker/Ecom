@@ -116,7 +116,7 @@ function paint() {
       <button class="icon-btn round quiet" data-manage aria-label="Club settings">${ic('settings', 20)}</button>
     </div>
   </header>
-  ${st.clubs.length > 1 ? `<div class="filters" role="tablist">${st.clubs.map((x) => `<button class="${x.id === club.id ? 'on' : ''}" data-club="${x.id}">${esc(x.name)}</button>`).join('')}</div>` : ''}
+  <div class="filters" role="tablist">${st.clubs.map((x) => `<button class="${x.id === club.id ? 'on' : ''}" data-club="${x.id}">${esc(x.name)}</button>`).join('')}<button class="club-add" data-addclub aria-label="Join or start another club">${ic('plus', 14, 2.4)}<span>Club</span></button></div>
 
   <section class="card board">
     <div class="sec-h"><h2 class="headline">Today</h2><span class="dim">${new Date().toLocaleDateString([], { weekday: 'long' })}</span></div>
@@ -146,6 +146,7 @@ function paint() {
     try { localStorage.setItem('proof:club', st.sel.id); } catch { /* ignore */ }
     refresh();
   }));
+  host.querySelector('[data-addclub]').addEventListener('click', addClubSheet);
   host.querySelectorAll('[data-respect]').forEach((b) => b.addEventListener('click', () => respect(b.dataset.respect)));
 }
 
@@ -196,6 +197,20 @@ async function respect(proofId) {
     ? await c.from('respects').delete().eq('proof_id', proofId).eq('user_id', S.user.id)
     : await c.from('respects').insert({ proof_id: proofId });
   if (error) { st.resp.set(proofId, cur); paint(); toast('Couldn’t save that. Try again.'); }
+}
+
+function addClubSheet() {
+  openSheet(`
+    <h2 class="h2">Another club</h2>
+    <div class="stack">
+      <button class="btn btn-primary" data-create>${ic('plus', 20)}<span>Start a club</span></button>
+      <button class="btn btn-secondary" data-join>${ic('link', 20)}<span>Join with a code</span></button>
+    </div>`, {
+    onMount(body, close) {
+      body.querySelector('[data-create]').addEventListener('click', () => { close(); setTimeout(createLive, 320); });
+      body.querySelector('[data-join]').addEventListener('click', () => { close(); setTimeout(() => joinLive(), 320); });
+    },
+  });
 }
 
 export function createLive() {
