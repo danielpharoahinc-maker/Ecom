@@ -101,7 +101,11 @@ export async function mediaURL(id) {
 export async function hydrateMedia(root) {
   for (const el of root.querySelectorAll('[data-media]')) {
     const url = await mediaURL(el.dataset.media);
-    if (url) el.src = url;
+    if (url) {
+      el.classList.add('img-fade');
+      el.addEventListener('load', () => el.classList.add('loaded'), { once: true });
+      el.src = url;
+    }
   }
 }
 

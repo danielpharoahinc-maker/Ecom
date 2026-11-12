@@ -1,6 +1,15 @@
 // Bottom sheet: slides up over the app, tap outside or swipe the grabber to close.
 import { haptic } from './util.js';
 
+const stack = [];
+let skipPop = 0;
+// The phone's Back button closes the top sheet instead of leaving the app.
+window.addEventListener('popstate', () => {
+  if (skipPop) { skipPop--; return; }
+  const top = stack[stack.length - 1];
+  if (top) top.close(true);
+});
+
 export function openSheet(html, { onMount, tall = false } = {}) {
   const wrap = document.createElement('div');
   wrap.className = 'sheet-wrap';
@@ -15,9 +24,14 @@ export function openSheet(html, { onMount, tall = false } = {}) {
   haptic();
 
   let closed = false;
-  const close = () => {
+  const entry = { close: null };
+  stack.push(entry);
+  try { history.pushState({ sheet: true }, ''); } catch { /* ignore */ }
+  const close = (fromBack = false) => {
     if (closed) return;
     closed = true;
+    stack.splice(stack.indexOf(entry), 1);
+    if (fromBack !== true) { try { skipPop++; history.back(); } catch { skipPop--; } }
     wrap.classList.remove('open');
     wrap.dispatchEvent(new Event('sheet:close'));
     setTimeout(() => {
@@ -25,8 +39,33 @@ export function openSheet(html, { onMount, tall = false } = {}) {
       if (!document.querySelector('.sheet-wrap, .cap')) document.body.classList.remove('noscroll');
     }, 280);
   };
+  entry.close = close;
   wrap.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) close(); });
+
+  // Drag the sheet down to dismiss it. Follows your finger; flicks close it too.
+  const sheet = wrap.querySelector('.sheet');
+  let y0 = null, dy = 0, t0 = 0;
+  sheet.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('input, textarea, button, a, select') && !e.target.closest('.grabber')) return;
+    if (sheet.scrollTop > 0 && !e.target.closest('.grabber')) return;
+    y0 = e.clientY; dy = 0; t0 = Date.now();
+  });
+  sheet.addEventListener('pointermove', (e) => {
+    if (y0 === null) return;
+    dy = Math.max(0, e.clientY - y0);
+    if (dy > 6) { sheet.style.transition = 'none'; sheet.style.transform = `translate(-50%, ${dy}px)`; }
+  });
+  const end = () => {
+    if (y0 === null) return;
+    const fast = dy / Math.max(1, Date.now() - t0) > 0.6;
+    sheet.style.transition = ''; sheet.style.transform = '';
+    y0 = null;
+    if (dy > 110 || (fast && dy > 30)) close();
+  };
+  sheet.addEventListener('pointerup', end);
+  sheet.addEventListener('pointercancel', end);
   const onKey = (e) => { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onKey); } };
+  wrap.addEventListener('sheet:close', () => document.removeEventListener('keydown', onKey), { once: true });
   document.addEventListener('keydown', onKey);
 
   const body = wrap.querySelector('.sheet-body');

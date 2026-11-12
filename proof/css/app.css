@@ -837,3 +837,16 @@ input, .big-input, .note, .talkbox textarea { border: 0; color: var(--ink); back
 .chk a, .legal-links a { color: var(--accent); }
 .auth .btn:disabled { opacity: .4; cursor: not-allowed; }
 .legal-links { text-align: center; }
+
+/* Polish: balanced headlines, skeletons, image fade, undo toast, view transitions */
+.title, .h2, .headline, .display, .coach-head h2, .lede, .sub { text-wrap: balance; }
+p, li, .fcard-t small { text-wrap: pretty; }
+.skel-list { display: flex; flex-direction: column; gap: 12px; }
+.skel-list i { display: block; height: 62px; border-radius: var(--r-card); background: linear-gradient(100deg, var(--s1) 30%, var(--s2) 50%, var(--s1) 70%); background-size: 220% 100%; animation: shim 1.3s linear infinite; }
+@keyframes shim { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+img.img-fade { opacity: 0; transition: opacity .35s ease; background: var(--s2); }
+img.img-fade.loaded { opacity: 1; }
+.toast { display: flex; align-items: center; gap: 14px; }
+.toast-act { font-weight: 700; color: var(--accent); padding: 8px 4px; min-height: 36px; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .18s; }
+@media (prefers-reduced-motion: reduce) { .skel-list i { animation: none; } ::view-transition-group(*) { animation: none; } }

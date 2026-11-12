@@ -87,8 +87,9 @@ function draw(scrollTop = false) {
     b.classList.toggle('on', on);
     if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
   });
-  tab.render(view);
-  if (scrollTop) window.scrollTo(0, 0);
+  const paint = () => { tab.render(view); if (scrollTop) window.scrollTo(0, 0); };
+  if (scrollTop && document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(paint);
+  else paint();
 }
 
 window.addEventListener('proof:changed', () => { if (S.profile?.onboarded && S.user) { draw(); mountProff(); } });

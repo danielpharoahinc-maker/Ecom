@@ -47,7 +47,7 @@ export function fmtMins(m) {
 export const haptic = (ms = 8) => { try { navigator.vibrate?.(ms); } catch { /* not supported */ } };
 
 let toastTimer;
-export function toast(msg) {
+export function toast(msg, { action, label = 'Undo', ms } = {}) {
   let el = document.querySelector('.toast');
   if (!el) {
     el = document.createElement('div');
@@ -56,9 +56,15 @@ export function toast(msg) {
     document.body.appendChild(el);
   }
   el.textContent = msg;
+  if (action) {
+    const b = document.createElement('button');
+    b.className = 'toast-act'; b.textContent = label;
+    b.addEventListener('click', () => { el.classList.remove('show'); clearTimeout(toastTimer); action(); });
+    el.append(b);
+  }
   el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+  toastTimer = setTimeout(() => el.classList.remove('show'), ms || (action ? 5000 : 2200));
 }
 
 // Fires an app-wide event; views listen for it and redraw.

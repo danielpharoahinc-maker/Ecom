@@ -17,11 +17,17 @@ let host = null;
 let timer = null;
 let busy = false;
 
+const CACHE = 'proof:clubcache';
+const readCache = () => { try { return JSON.parse(localStorage.getItem(CACHE) || 'null'); } catch { return null; } };
+const writeCache = () => { try { localStorage.setItem(CACHE, JSON.stringify({ uid: S.user.id, clubs: st.clubs, sel: st.sel, board: st.board })); } catch { /* ignore */ } };
 const savedSel = () => { try { return localStorage.getItem('proof:club'); } catch { return null; } };
 const nameOf = (uid) => (uid === S.user.id ? S.profile.name : st.board.find((r) => r.user_id === uid)?.name || 'A friend');
 
 export function renderClubLive(el) {
   host = el;
+  // Show the last known club straight away, then update it quietly.
+  const c = readCache();
+  if (st.phase === 'loading' && c && c.uid === S.user?.id && c.sel) { st.clubs = c.clubs; st.sel = c.sel; st.board = c.board; st.feed = []; st.phase = 'ready'; }
   paint();
   refresh();
   if (!timer) timer = setInterval(() => { if (host?.isConnected && S.tab === 'club' && !document.hidden) refresh(); }, 60000);
@@ -74,6 +80,7 @@ async function refresh() {
       });
     }
     st.phase = 'ready';
+    writeCache();
   } catch (e) {
     if (st.phase !== 'ready') { st.phase = 'error'; st.error = 'Couldn’t reach your club. Check your connection.'; }
   } finally {
@@ -87,7 +94,7 @@ async function refresh() {
 function paint() {
   if (!host?.isConnected) return;
   if (st.phase === 'loading') {
-    host.innerHTML = `<header class="page-top"><div><p class="date">Multiplayer</p><h1 class="title">Club</h1></div></header><p class="dim club-wait">Loading your club…</p>`;
+    host.innerHTML = `<header class="page-top"><div><p class="date">Multiplayer</p><h1 class="title">Club</h1></div></header><div class="skel-list" aria-busy="true" aria-label="Loading your club"><i></i><i></i><i></i></div>`;
     return;
   }
   if (st.phase === 'error') {

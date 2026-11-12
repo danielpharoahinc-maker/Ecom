@@ -33,9 +33,20 @@ export async function openProof(id) {
       }
       body.querySelector('[data-more]').addEventListener('click', async () => {
         close();
-        if (!(await confirmSheet('Delete this proof?', 'Your streak and stats will update.', 'Delete proof'))) return;
-        await deleteProof(p.id);
-        toast('Proof deleted');
+        // Hidden at once, really deleted after 5 seconds unless you tap Undo.
+        S.proofs = S.proofs.filter((x) => x.id !== p.id);
+        window.dispatchEvent(new Event('proof:changed'));
+        let undone = false;
+        const timer = setTimeout(async () => {
+          if (undone) return;
+          S.proofs.push(p);
+          await deleteProof(p.id);
+        }, 5200);
+        toast('Proof deleted', { action: () => {
+          undone = true; clearTimeout(timer);
+          S.proofs.push(p); S.proofs.sort((a, b) => b.ts - a.ts);
+          window.dispatchEvent(new Event('proof:changed'));
+        } });
       });
     },
   });
