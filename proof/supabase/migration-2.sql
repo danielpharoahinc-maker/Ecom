@@ -158,3 +158,9 @@ end $$;
 drop trigger if exists proofs_notify_club on public.proofs;
 create trigger proofs_notify_club after insert on public.proofs
   for each row execute function public.notify_club_proof();
+
+-- supabase-js upserts send the key column too, so it must be updatable (row-level
+-- rules still only allow your own row). Without these, profile and reminder saves
+-- were rejected with "permission denied".
+grant update (id) on public.profiles to authenticated;
+grant update (user_id) on public.reminders to authenticated;
