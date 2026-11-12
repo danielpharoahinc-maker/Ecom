@@ -13,7 +13,7 @@ import { ic } from './icons.js';
 import { esc, uid, toast, haptic, timeAgo } from './util.js';
 import { LIVE } from './config.js';
 import { inviteSheet } from './clubshare.js';
-import { renderClubLive, createLive, joinLive } from './clublive.js';
+import { renderClubLive, createLive, joinLive, autoJoin } from './clublive.js';
 
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O or 1/I mix-ups
 const makeCode = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => ALPHABET[b % ALPHABET.length]).join('');
@@ -133,7 +133,7 @@ function create() {
 export function newClub() { return LIVE ? createLive() : create(); }
 
 export function join(prefill = '') {
-  if (LIVE) return joinLive(prefill);
+  if (LIVE) return prefill.length === 6 ? autoJoin(prefill) : joinLive(prefill);
   openSheet(`
     <h2 class="h2">Join a club</h2>
     <form class="stack">

@@ -941,3 +941,6 @@ img.img-fade.loaded { opacity: 1; }
 .wd-c small { color: var(--mute); font-size: 12px; }
 .st-tot { grid-template-columns: repeat(4, 1fr); }
 .qa-btns .btn { white-space: nowrap; padding: 0 10px; font-size: 15px; }
+
+.invite-banner { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 12px 14px; border-radius: var(--r-card); background: var(--accent-deep); color: var(--ink); font-size: 15px; font-weight: 600; box-shadow: var(--hi), inset 3px 0 0 var(--accent); }
+.invite-banner .i { color: var(--accent); flex: none; }

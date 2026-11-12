@@ -4,6 +4,7 @@ import { setUser } from './state.js';
 import { LOGO, ic, WORDMARK } from './icons.js';
 import { $, toast, haptic } from './util.js';
 import { LIVE, SIGN_IN } from './config.js';
+import { pendingInvite } from './invite.js';
 
 export function renderWelcome(root, onDone) {
   root.innerHTML = `
@@ -12,6 +13,7 @@ export function renderWelcome(root, onDone) {
       <div class="brand">${WORDMARK(84)}</div>
     </div>
     <div class="welcome-copy">
+      ${pendingInvite() ? `<p class="invite-banner">${ic('club', 18)}<span>You’re invited to a club. Sign in and you’ll be added.</span></p>` : ''}
       <h1 class="display">Lock in.<br>Post proof.<br>Every day.</h1>
     </div>
     <div class="auth">

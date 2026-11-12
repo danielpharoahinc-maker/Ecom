@@ -2,6 +2,7 @@
 //   Vault | Stats | + | Today | Club
 import { S, load, setUser, signOut } from './state.js';
 import { LIVE } from './config.js';
+import { rememberInvite, pendingInvite, clearInvite } from './invite.js';
 import { currentLiveUser } from './auth.js';
 import { renderWelcome } from './welcome.js';
 import { renderOnboarding } from './onboarding.js';
@@ -30,14 +31,7 @@ const TABS = [
 
 // An invite link looks like ...?join=ABC123. Remember it through sign-up.
 const params = new URLSearchParams(location.search);
-// Kept in sessionStorage so it survives the Apple/Google/Microsoft redirect.
-const JOIN_KEY = 'proof:join';
-let pendingJoin = params.get('join')?.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) || '';
-try {
-  if (pendingJoin) sessionStorage.setItem(JOIN_KEY, pendingJoin);
-  else pendingJoin = sessionStorage.getItem(JOIN_KEY) || '';
-} catch { /* private mode: keep it in memory only */ }
-if (params.has('join')) history.replaceState(null, '', location.pathname);
+if (params.has('join')) { rememberInvite(params.get('join')); history.replaceState(null, '', location.pathname); }
 
 function route(opts = {}) {
   if (!S.user) { unmountProff(); return renderWelcome(app, () => route()); }
@@ -53,12 +47,11 @@ function route(opts = {}) {
   shell();
   mountProff();
   if (tourNeeded() && !opts.fromOnboarding) setTimeout(() => startTour(), 600);
-  if (pendingJoin) {
-    const code = pendingJoin;
-    pendingJoin = '';
-    try { sessionStorage.removeItem(JOIN_KEY); } catch { /* ignore */ }
+  const invite = pendingInvite();
+  if (invite && S.user) {
+    clearInvite();
     S.tab = 'club'; draw();
-    setTimeout(() => join(code), 300);
+    setTimeout(() => join(invite), 300);
   }
   if (opts.capture) openCapture();
 }

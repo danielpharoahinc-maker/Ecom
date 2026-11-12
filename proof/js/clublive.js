@@ -261,6 +261,26 @@ export function createLive() {
   });
 }
 
+// An invite link: once signed in, add the person to the club straight away.
+export async function autoJoin(code) {
+  const ens = await ensureProfile();
+  const c = await getClient().catch(() => null);
+  if (!ens.ok || !c) { toast(ens.message || 'Couldn’t reach Proof’s server.'); return joinLive(code); }
+  const { data, error } = await c.rpc('join_club', { invite: code });
+  if (error) {
+    const m = error.message || '';
+    if (/No club/i.test(m)) { toast('That invite code doesn’t match a club.'); return joinLive(code); }
+    if (/full/i.test(m)) return toast('That club is full.');
+    toast(`Couldn’t join: ${m}`); return joinLive(code);
+  }
+  haptic(20);
+  st.sel = { id: data }; st.phase = 'loading';
+  try { localStorage.setItem('proof:club', data); } catch { /* ignore */ }
+  if (S.tab !== 'club') window.dispatchEvent(new CustomEvent('proof:tab', { detail: 'club' }));
+  refresh();
+  toast('You’re in. Post today to show up on the board.');
+}
+
 export function joinLive(prefill = '') {
   openSheet(`
     <h2 class="h2">Join a club</h2>
