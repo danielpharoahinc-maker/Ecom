@@ -12,6 +12,7 @@ import { getDictation } from './speech.js';
 import { canPost, paywall } from './billing.js';
 import { proffSVG, inkMark } from './proff.js';
 import { sfx, buzz, countUp } from './fx.js';
+import { checkPhoto } from './quality.js';
 
 const MAX_TALK = 60; // seconds
 
@@ -350,7 +351,9 @@ function dictateOnly() {
 
 /* ---------- Post ---------- */
 
-async function post() {
+let qa = null; // the photo check for the proof being posted
+
+async function post(force) {
   if (rec) stopTalk();
   await new Promise((r) => setTimeout(r, rec ? 150 : 0));
   const note = root.querySelector('#note').value.trim();
@@ -359,12 +362,32 @@ async function post() {
 
   const btn = root.querySelector('[data-post]');
   btn.disabled = true;
+  qa = null;
+  // Proff looks at the photo first: focus, light, covered lens, and reposts.
+  if (photo && cKey !== 'moment') {
+    const label = btn.querySelector('span'); label.textContent = 'Proff is checking…';
+    try { qa = await checkPhoto(photo, S.proofs.map((p) => p.qa?.hash)); } catch { qa = null; }
+    if (qa && !qa.ok && force !== true) { label.textContent = 'Post proof'; btn.disabled = false; return qaWarning(qa); }
+  }
   await addProof({
     cKey, kind: photo ? 'photo' : 'voice',
     note, audioSecs: audio ? Math.round(audioSecs) : 0,
+    ...(qa ? { qa: { ok: qa.ok, score: qa.score, tags: qa.tags, hash: qa.hash, forced: !qa.ok } } : {}),
   }, photo, audio);
   haptic(25);
   success();
+}
+
+function qaWarning(r) {
+  root.querySelector('.qa-warn')?.remove();
+  const el = document.createElement('div');
+  el.className = 'qa-warn'; el.setAttribute('role', 'alert');
+  el.innerHTML = `${proffSVG('worried', 52)}<div class="qa-txt"><b>Proff isn’t convinced.</b><ul>${r.problems.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
+    <div class="qa-btns"><button class="btn btn-secondary" data-qa-retake>Retake</button><button class="btn btn-quiet" data-qa-anyway>Post anyway</button></div></div>`;
+  root.querySelector('[data-post]').before(el);
+  haptic(15);
+  el.querySelector('[data-qa-retake]').addEventListener('click', () => root.querySelector('[data-retake]').click());
+  el.querySelector('[data-qa-anyway]').addEventListener('click', () => { el.remove(); post(true); });
 }
 
 function success() {
@@ -378,6 +401,7 @@ function success() {
   <div class="done-screen">
     <div class="done-stamp">${proffSVG('cheer', 132)}${inkMark()}</div>
     <h2 class="title">${cKey === 'moment' ? 'Moment saved' : 'Proof posted'}</h2>
+    ${qa?.ok ? `<p class="qa-ok"><b>Proff approved</b>${qa.tags.map((t) => `<span>${esc(t)}</span>`).join('')}</p>` : qa ? '<p class="qa-ok soft">Posted. Proff wasn’t convinced.</p>' : ''}
     <p class="sub">${cKey === 'moment' ? 'Added to your day. Your club sees it too.' : first ? 'Your first proof. This is how it starts.' : n >= total ? 'Every goal done. That’s a perfect day.' : n >= need ? `Streak kept for today. ${n} of ${total} proven.` : `${n} of ${total} proven. ${need - n} more keeps today’s streak.`}</p>
     <div class="done-seg">${S.profile.commitments.map((k) => `<i class="${done.has(k) ? 'on' : ''}"></i>`).join('')}</div>
     <p class="done-streak">${ic('flame', 20)} <b data-streak-n>${st}</b> day streak</p>
