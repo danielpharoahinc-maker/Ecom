@@ -13,7 +13,7 @@ import { openCapture } from './capture.js';
 import { openProof } from './proofview.js';
 import { paywall, planState, subscriptionSheet, trialBanner, daysLeft } from './billing.js';
 import { openSheet, confirmSheet } from './sheet.js';
-import { signOutLive, deleteAccountLive } from './auth.js';
+import { signOutLive, deleteAccountLive, emailStatus, resendConfirmation } from './auth.js';
 import { parsePlan } from './planner.js';
 import { getDictation } from './speech.js';
 import { ic } from './icons.js';
@@ -214,7 +214,8 @@ function settings() {
     <div class="set-row"><span class="avatar">${esc(S.profile.name[0].toUpperCase())}</span>
       <span><b>${esc(S.profile.name)}</b><small>${esc(u?.email || `Signed in with ${u?.provider || 'Proof'}`)}</small></span></div>
     <button class="set-row set-plan" data-plan-row><span><b>${{ trial: 'Free trial', 'trial-free': 'Free trial', active: 'Proof Pro', cancelled: 'Pro (cancelled)', ended: 'Trial over' }[planState().kind]}</b><small>${planState().kind === 'active' ? 'Renews until you cancel' : planState().kind === 'ended' ? 'Pick a plan to keep posting' : `${daysLeft()} ${daysLeft() === 1 ? 'day' : 'days'} left`}</small></span><span class="btn-pill">Manage</span></button>
-    <p class="fine">${LIVE ? 'Synced to your Proof account.' : 'Test version: your proof is saved in this browser only.'}</p>
+    <div class="set-row confirm-row" data-confirm hidden><span><b>Confirm your email</b></span><button class="btn-pill" data-resend-confirm>Resend</button></div>
+    ${LIVE ? '' : '<p class="fine">Test version: your proof is saved in this browser only.</p>'}
     <div class="stack">
       <button class="btn btn-secondary" data-edit-goals>${ic('target', 20)}<span>Your goals</span></button>
       <button class="btn btn-secondary" data-rem>${ic('clock', 20)}<span>Reminders</span></button>
@@ -226,6 +227,15 @@ function settings() {
     </div>
     <p class="fine legal-links"><a href="terms.html" target="_blank" rel="noopener">Terms</a> · <a href="privacy.html" target="_blank" rel="noopener">Privacy</a> · <a href="refunds.html" target="_blank" rel="noopener">Refunds</a></p>`, {
     onMount(body, close) {
+      if (LIVE) emailStatus().then((s) => {
+        if (s.confirmed || !S.user?.email) return;
+        const row = body.querySelector('[data-confirm]'); row.hidden = false;
+        row.querySelector('button').addEventListener('click', async (e) => {
+          e.currentTarget.disabled = true;
+          try { await resendConfirmation(S.user.email); toast('Sent. Check your email.'); } catch (err) { toast(err.message); }
+          e.currentTarget.disabled = false;
+        });
+      }).catch(() => {});
       body.querySelector('[data-plan-row]').addEventListener('click', () => { close(); setTimeout(subscriptionSheet, 320); });
       body.querySelector('[data-edit-goals]').addEventListener('click', () => { close(); setTimeout(openGoals, 320); });
       body.querySelector('[data-tour]').addEventListener('click', () => { close(); setTimeout(() => startTour(), 320); });
@@ -244,9 +254,9 @@ function settings() {
       });
       body.querySelector('[data-reset]').addEventListener('click', async () => {
         close();
-        const ok = await confirmSheet('Delete your account?', LIVE && S.user?.email ? 'Your account, every proof, photo, voice note, club membership and reminder is deleted from our servers and this phone. Any subscription is cancelled first. This can’t be undone.' : 'Every proof, photo, voice note and plan in this browser goes. This can’t be undone.', 'Delete everything');
+        const ok = await confirmSheet('Delete your account?', LIVE ? 'Your account, every proof, photo, voice note, club membership and reminder is deleted from our servers and this phone. Any subscription is cancelled first. This can’t be undone.' : 'Every proof, photo, voice note and plan in this browser goes. This can’t be undone.', 'Delete everything');
         if (!ok) return;
-        if (LIVE && S.user?.email) {
+        if (LIVE) {
           const r = await deleteAccountLive();
           if (!r.ok) return toast(r.error);
         }

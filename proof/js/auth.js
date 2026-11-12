@@ -123,3 +123,51 @@ export async function deleteAccountLive() {
   }
   return { ok: true };
 }
+
+/* ---------- Play first, confirm the email in the background ---------- */
+
+const taken = (e) => /already|registered|exists|taken/i.test(`${e?.message || ''} ${e?.code || ''}`);
+
+// New person: a guest account is created at once so they can start straight away,
+// and the email is attached to it. The link in the email confirms it. Nothing is
+// blocked while they wait. Returns { user } to carry on now, or { existing: true }
+// when that email already has an account (then a sign-in link is sent instead).
+export async function startAccount(email) {
+  const c = await sb();
+  if (!c) throw new Error('Sign-in server isn’t connected yet.');
+  const redirectTo = location.origin + location.pathname;
+  let { data: { session } } = await c.auth.getSession();
+  if (!session) {
+    const r = await c.auth.signInAnonymously();
+    if (r.error && /anonymous/i.test(r.error.message || '')) { await sendEmailCode(email); return { existing: true }; } // guest accounts not switched on: use the email link
+    if (r.error || !r.data.session) throw new Error('Couldn’t start. Check your connection and try again.');
+    session = r.data.session;
+  }
+  const { error } = await c.auth.updateUser({ email }, { emailRedirectTo: redirectTo });
+  if (error) {
+    if (taken(error)) {
+      await c.auth.signOut();
+      await sendEmailCode(email);
+      return { existing: true };
+    }
+    throw new Error(friendly(error));
+  }
+  return { user: { ...toUser(session.user), email } };
+}
+
+// Is the email on this account confirmed yet?
+export async function emailStatus() {
+  const c = await sb();
+  if (!c) return { confirmed: true };
+  const { data } = await c.auth.getSession();
+  const u = data.session?.user;
+  if (!u) return { confirmed: true };
+  return { confirmed: Boolean(u.email_confirmed_at && u.email), email: u.new_email || u.email || '' };
+}
+
+export async function resendConfirmation(email) {
+  const c = await sb();
+  if (!c) throw new Error('Sign-in server isn’t connected yet.');
+  const { error } = await c.auth.updateUser({ email }, { emailRedirectTo: location.origin + location.pathname });
+  if (error) throw new Error(friendly(error));
+}

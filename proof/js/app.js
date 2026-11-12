@@ -121,7 +121,7 @@ async function boot() {
   // Coming back from Apple/Google/Microsoft in live mode.
   if (!S.user) {
     const live = await currentLiveUser().catch(() => null);
-    if (live) await setUser(live);
+    if (live) await setUser({ ...live, email: live.email || S.user?.email || '' });
   }
   // A new phone: bring your goals and proof back from your account.
   if (S.user && !S.profile?.onboarded) await restoreProfile().then((ok) => ok && load()).catch(() => {});

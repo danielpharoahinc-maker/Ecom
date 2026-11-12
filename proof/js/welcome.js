@@ -1,5 +1,5 @@
 // First screen: Continue with Apple / Google / Microsoft / email.
-import { signIn, sendEmailCode, verifyEmailCode, signedInElsewhere } from './auth.js';
+import { signIn, sendEmailCode, startAccount, signedInElsewhere } from './auth.js';
 import { setUser } from './state.js';
 import { LOGO, ic, WORDMARK } from './icons.js';
 import { $, toast, haptic } from './util.js';
@@ -29,9 +29,9 @@ export function renderWelcome(root, onDone) {
         <label class="sr" for="email">Email</label>
         <input id="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required>
         <p class="form-err" role="alert" hidden></p>
-        <button class="btn btn-primary" type="submit">${LIVE ? 'Email me a sign-in link' : 'Continue'}</button>
+        <button class="btn btn-primary" type="submit">Continue</button>
       </form>
-      <p class="fine">${LIVE ? 'We’ll email you a sign-in link. No password needed.' : 'Test version: your account and proof are saved in this browser.'}</p>
+      ${LIVE ? '' : '<p class=\"fine\">Test version: your account and proof are saved in this browser.</p>'}
     </div>
   </section>`;
 
@@ -84,85 +84,48 @@ export function renderWelcome(root, onDone) {
     showErr('');
     if (!LIVE) return go('email', email);
     const btn = form.querySelector('button');
-    btn.disabled = true; btn.textContent = 'Sending…';
+    btn.disabled = true; btn.textContent = 'One moment…';
     try {
-      await sendEmailCode(email);
-      codeStep(root, email, onDone);
+      const res = await startAccount(email);
+      if (res.existing) return waitStep(root, email, onDone);
+      haptic(20);
+      await setUser(res.user);
+      toast('Link sent to your email. Tap it to save your account. Keep playing.');
+      onDone();
     } catch (e2) {
       showErr(e2.message);
-      btn.disabled = false; btn.textContent = 'Email me a sign-in link';
+      btn.disabled = false; btn.textContent = 'Continue';
     }
   });
 }
 
-// Step 2: type the 6-digit code from the email.
-function codeStep(root, email, onDone) {
+// Returning accounts only: the link in the email signs you in. No code to type.
+function waitStep(root, email, onDone) {
   const auth = $('.auth', root);
   auth.innerHTML = `
-    <form class="code-form" novalidate>
+    <div class="wait-step">
       <h2 class="h2">Check your email</h2>
-      <p class="sub">We sent a sign-in email to <b class="email-shown"></b>. Open it on this phone and tap the sign-in button. It can take a minute, and sometimes lands in spam.</p>
-      <p class="code-or">Email shows a 6-digit code instead? Type it here.</p>
-      <label class="sr" for="otp">6-digit code</label>
-      <input id="otp" class="otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" placeholder="000000">
-      <p class="form-err" role="alert" hidden></p>
-      <button class="btn btn-primary" type="submit" disabled>Sign in</button>
+      <p class="sub">Tap the link we sent to <b class="email-shown"></b>. You’ll be signed in.</p>
       <div class="code-links">
         <button type="button" class="link-btn" data-resend disabled>Send again</button>
         <button type="button" class="link-btn" data-change>Use a different email</button>
       </div>
-    </form>`;
-  $('.email-shown', auth).textContent = email; // set as text, never HTML
-  const form = $('.code-form', auth);
-  const input = $('#otp', auth);
-  const btn = form.querySelector('[type=submit]');
-  const err = $('.form-err', form);
+    </div>`;
+  $('.email-shown', auth).textContent = email; // text, never HTML
   const resend = $('[data-resend]', auth);
-  const showErr = (m) => { err.textContent = m; err.hidden = !m; };
-
-  let wait = 30, timer;
-  const tick = () => {
-    resend.disabled = wait > 0;
-    resend.textContent = wait > 0 ? `Send again in ${wait}s` : 'Send again';
-    if (wait-- <= 0) clearInterval(timer);
-  };
-  const startTimer = () => { wait = 30; clearInterval(timer); tick(); timer = setInterval(tick, 1000); };
+  let wait = 45, timer;
+  const tick = () => { resend.disabled = wait > 0; resend.textContent = wait > 0 ? `Send again in ${wait}s` : 'Send again'; if (wait-- <= 0) clearInterval(timer); };
+  const startTimer = () => { wait = 45; clearInterval(timer); tick(); timer = setInterval(tick, 1000); };
   startTimer();
-
-  // If they tap the link in the email, Proof opens in a new tab already signed
-  // in. Notice that here too, so this tab moves on by itself.
+  // The link signs you in; this screen notices and moves on by itself.
   const watch = setInterval(async () => {
-    if (!document.body.contains(form)) return clearInterval(watch);
+    if (!document.body.contains(auth.querySelector('.wait-step'))) return clearInterval(watch);
     const user = await signedInElsewhere().catch(() => null);
     if (user) { clearInterval(watch); clearInterval(timer); await setUser(user); onDone(); }
-  }, 3000);
-
-  const verify = async () => {
-    const code = input.value.replace(/\D/g, '');
-    if (code.length !== 6) return;
-    btn.disabled = true; btn.textContent = 'Checking…'; showErr('');
-    try {
-      const user = await verifyEmailCode(email, code);
-      clearInterval(timer); clearInterval(watch);
-      haptic(20);
-      await setUser(user);
-      onDone();
-    } catch (e) {
-      showErr(e.message);
-      btn.disabled = false; btn.textContent = 'Sign in';
-      input.select();
-    }
-  };
-  input.addEventListener('input', () => {
-    input.value = input.value.replace(/\D/g, '').slice(0, 6);
-    btn.disabled = input.value.length !== 6;
-    if (input.value.length === 6) verify(); // auto-fill from the email or SMS bar
-  });
-  form.addEventListener('submit', (e) => { e.preventDefault(); verify(); });
+  }, 2500);
   resend.addEventListener('click', async () => {
     resend.disabled = true;
-    try { await sendEmailCode(email); toast('Sent again. Check your inbox.'); startTimer(); } catch (e) { showErr(e.message); resend.disabled = false; }
+    try { await sendEmailCode(email); toast('Sent again.'); startTimer(); } catch (e) { toast(e.message); resend.disabled = false; }
   });
   $('[data-change]', auth).addEventListener('click', () => { clearInterval(timer); clearInterval(watch); renderWelcome(root, onDone); });
-  setTimeout(() => input.focus(), 50);
 }
