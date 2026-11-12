@@ -51,7 +51,8 @@ function renderDoor(el) {
     clearTimeout(t); t = null;
     haptic(30);
     stage.classList.add('opening');
-    setTimeout(() => { opened = true; renderInside(el, true); window.scrollTo(0, 0); }, 900);
+    setTimeout(() => stage.classList.add('fading'), 850);
+    setTimeout(() => { opened = true; renderInside(el, true); window.scrollTo(0, 0); }, 1250);
   };
   const start = (e) => {
     e.preventDefault();
@@ -77,9 +78,10 @@ function renderInside(el, animate) {
   const today = dayKey();
   const r = S.proofs.length ? coachReport(S.proofs, S.profile) : null;
   const C = 2 * Math.PI * 34;
+  let n = 0; // frames fade in one after another when the vault has just opened
 
   el.innerHTML = `
-  <header class="page-top">
+  <header class="page-top ${animate ? 'vin' : ''}">
     <div><p class="date">${S.proofs.length} ${S.proofs.length === 1 ? 'proof' : 'proofs'}</p><h1 class="title">Vault</h1></div>
     ${S.proofs.some((p) => p.photoId) ? `<button class="btn-pill" data-recap>${ic('play', 14)}<span>Recap</span></button>` : ''}
   </header>
@@ -99,10 +101,10 @@ function renderInside(el, animate) {
   </section>` : ''}
 
   ${days.length ? days.map(([k, ps]) => `
-    <section class="vday">
+    <section class="vday ${animate ? 'vin' : ''}">
       <h2 class="vday-h">${k === today ? 'Today' : fmtShortDay(ps[0].ts)}</h2>
       <div class="prints">${ps.map((p) => `
-        <button class="print" data-open="${p.id}" style="--tilt:${tilt(p.id)}deg" aria-label="${commitment(p.cKey).label} at ${fmtClock(p.ts)}">
+        <button class="print" data-open="${p.id}" style="--d:${animate ? Math.min(n++, 14) * 80 : 0}ms" aria-label="${commitment(p.cKey).label} at ${fmtClock(p.ts)}">
           <span class="print-img">${p.photoId ? `<img data-media="${p.photoId}" alt="${commitment(p.cKey).label} proof from ${fmtShortDay(p.ts)}" loading="lazy">` : `<span class="print-voice">“${esc((p.note || 'Voice proof').slice(0, 60))}”</span>`}</span>
           <span class="print-cap">${ic(commitment(p.cKey).icon, 13)}<time>${fmtClock(p.ts)}</time></span>
         </button>`).join('')}</div>

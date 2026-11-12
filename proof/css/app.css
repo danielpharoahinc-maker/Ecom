@@ -944,3 +944,28 @@ img.img-fade.loaded { opacity: 1; }
 
 .invite-banner { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 12px 14px; border-radius: var(--r-card); background: var(--accent-deep); color: var(--ink); font-size: 15px; font-weight: 600; box-shadow: var(--hi), inset 3px 0 0 var(--accent); }
 .invite-banner .i { color: var(--accent); flex: none; }
+
+/* Bottom bar: nearly solid glass so page text never shows through, with a soft fade above it */
+.tabbar.glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .02)), rgba(15, 15, 14, .98);
+  -webkit-backdrop-filter: blur(30px) saturate(150%); backdrop-filter: blur(30px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 -14px 30px -10px rgba(0, 0, 0, .7);
+}
+.tabbar::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 38px; background: linear-gradient(to top, rgba(10, 10, 11, .8), rgba(10, 10, 11, 0)); pointer-events: none; }
+
+/* Vault frames: a dark bronze frame, a bone mat, the picture set in. */
+.print { padding: 6px 6px 0; border-radius: 3px; background: linear-gradient(150deg, #4d4636 0%, #221e17 46%, #3b352a 100%); color: var(--ink); transform: none;
+  box-shadow: 0 18px 28px -14px rgba(0, 0, 0, .95), 0 2px 0 rgba(0, 0, 0, .6), inset 0 1px 0 rgba(216, 201, 168, .4), inset 0 0 0 1px rgba(216, 201, 168, .16); transition: transform .35s var(--spring); }
+.print:active, .print:focus-visible { transform: scale(1.03); }
+.print-img { box-sizing: border-box; border: 7px solid #ece8df; background: #151412; box-shadow: 0 0 0 1px rgba(0, 0, 0, .55), inset 0 3px 8px rgba(0, 0, 0, .5); }
+.print-cap { color: var(--ink-2); padding: 7px 2px 8px; }
+.print-cap time { color: var(--mute); }
+
+/* When the vault opens, the door fades and the frames fade in one by one */
+.vault-stage { transition: opacity .4s ease; }
+.vault-stage.fading { opacity: 0; }
+.vin { animation: vinFade .6s ease both; }
+.vin .print { animation: frameIn .75s var(--spring) var(--d, 0ms) backwards; }
+@keyframes vinFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes frameIn { from { opacity: 0; transform: scale(.93) translateY(12px); filter: blur(5px); } to { opacity: 1; transform: none; filter: none; } }
+@media (prefers-reduced-motion: reduce) { .vin, .vin .print { animation: none; } }
