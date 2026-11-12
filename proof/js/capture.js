@@ -96,7 +96,7 @@ async function camera() {
       <div class="shutter-row">
         <button class="icon-btn glass round" data-pick aria-label="Choose from library">${ic('image', 22)}</button>
         <button class="shutter" data-shoot aria-label="Take photo"><i></i></button>
-        <span class="icon-btn" aria-hidden="true"></span>
+        <button class="cancel-btn glass" data-close>Cancel</button>
       </div>
     </footer>
     <input type="file" accept="image/*" capture="environment" hidden>
@@ -105,7 +105,7 @@ async function camera() {
   const video = root.querySelector('video');
   const file = root.querySelector('input[type=file]');
 
-  root.querySelector('[data-close]').addEventListener('click', close);
+  root.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
   root.querySelector('[data-voice]').addEventListener('click', () => { stopCamera(); mode = 'voice'; review(); });
   root.querySelector('[data-pick]').addEventListener('click', () => { file.removeAttribute('capture'); file.click(); });
   root.querySelector('[data-flip]').addEventListener('click', async () => {
