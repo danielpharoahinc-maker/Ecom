@@ -55,7 +55,7 @@ export async function renderToday(el) {
   <section class="next-up ${have >= need ? 'kept' : ''}" aria-label="What to do next">
     <p class="nu-state">${have >= total ? `${ic('check', 16, 2.6)} Every goal done. Perfect day.` : have >= need ? `${ic('check', 16, 2.6)} Streak kept for today` : `${need - have} more to keep today’s streak`}</p>
     ${nextKey ? `<button class="btn ${have >= need ? 'btn-secondary' : 'btn-primary'} nu-btn" data-capture="${nextKey}">${ic('camera', 22)}<span>${have >= need ? 'Keep going: ' : ''}Prove ${esc(commitment(nextKey).label)}</span></button>` : ''}
-    <p class="nu-sub">${have} of ${total} proven · half is enough to keep your streak</p>
+    <p class="nu-sub">${have} of ${total} proven</p>
   </section>
 
   <section class="cm-sec" aria-label="Your goals">
@@ -70,7 +70,7 @@ export async function renderToday(el) {
         const c = commitment(k); const p = proofFor(k);
         return `<button class="cm ${p ? 'done' : ''} ${k === nextKey ? 'next' : ''} ${fresh(p) ? 'pop' : ''}" data-capture="${k}" aria-label="${c.label}: ${p ? 'proven today, add another' : 'post proof'}">
           <span class="cm-ic">${p ? ic('check', 18, 2.4) : ic(c.icon, 20)}</span>
-          <span class="cm-txt"><b>${c.label}</b><small>${p ? `Proven at ${fmtClock(p.ts)}` : c.hint}</small></span>
+          <span class="cm-txt"><b>${c.label}</b>${p ? `<small>Proven at ${fmtClock(p.ts)}</small>` : ''}</span>
           <span class="cm-go">${ic(p ? 'plus' : 'camera', 18)}</span>
         </button>`;
       }).join('')}
@@ -93,7 +93,6 @@ export async function renderToday(el) {
       }).join('')}</ul>` : `
       <div class="plan-empty">
         <h2 class="headline">What’s the plan today?</h2>
-        <p class="dim">Say it the way you’d tell a friend. “Gym at 6, then school, work on the business after school, read before bed.”</p>
       </div>`}
 
     <form class="talkbox" data-talkbox>
@@ -105,7 +104,7 @@ export async function renderToday(el) {
   </section>
 
   <section class="day-sec" aria-label="Your day in photos">
-    <div class="sec-h"><h2 class="headline">Your day</h2><span class="dim">${todays.length ? `${todays.length} ${todays.length === 1 ? 'photo' : 'photos'} in your Vault` : 'Moments don’t affect your streak'}</span></div>
+    <div class="sec-h"><h2 class="headline">Your day</h2></div>
     <div class="day-strip">
       <button class="ds-add" data-moment aria-label="Add a photo from your day">${ic('plus', 20, 2.2)}<span>Moment</span></button>
 
@@ -145,7 +144,6 @@ function proveIt(it, plan, el) {
   const c = commitment(it.cKey);
   openSheet(`
     <h2 class="h2">Prove it?</h2>
-    <p class="sub">“${esc(it.text)}” counts toward ${esc(c.label)}. Post a photo and it ticks itself off.</p>
     <div class="stack">
       <button class="btn btn-primary" data-prove>${ic('camera', 20)}<span>Post proof</span></button>
       <button class="btn btn-quiet" data-tick>Just tick it off</button>

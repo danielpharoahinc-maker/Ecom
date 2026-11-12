@@ -10,7 +10,6 @@ export function inviteSheet(club) {
   const text = `Lock in with me on Proof. Join ${club.name} with code ${club.code}`;
   openSheet(`
     <h2 class="h2">Invite your crew</h2>
-    <p class="sub">Send them this code, or the link. They open it, sign in, and they’re in ${esc(club.name)}.</p>
     <div class="code-box"><b class="code">${club.code}</b></div>
     <div class="stack">
       <button class="btn btn-primary" data-share>${ic('share', 20)}<span>Share invite</span></button>

@@ -115,7 +115,6 @@ export function askReminders({ onDone } = {}) {
       <li>${ic('club', 20)}<span><b>Your club</b><small>“Sipho proved Train”. At most 2 a day.</small></span></li>
       <li>${ic('stats', 20)}<span><b>Sunday Review</b><small>Sunday evening, once a week</small></span></li>
     </ul>
-    <p class="fine">Nothing between 10 pm and 6 am except the streak saver. Change or switch off any time in Account.</p>
     <div class="stack">
       <button class="btn btn-primary" data-on>Turn on reminders</button>
       <button class="btn btn-quiet" data-close>Not now</button>
@@ -137,10 +136,10 @@ export function reminderSettings() {
       <span class="lab">Proof time</span>
       <div class="rem-times">${r.times.map((t, i) => `<label class="sr" for="rt${i}">Reminder ${i + 1}</label><input id="rt${i}" type="time" value="${esc(t)}" data-time>`).join('')}
         ${r.times.length < 3 ? '<button class="btn-pill" data-add-time>+ Add time</button>' : ''}</div>
-      <label class="rem-toggle"><span><b>Streak saver</b><small>8 pm if nothing’s posted</small></span><input type="checkbox" data-streak ${r.streakSaver ? 'checked' : ''}></label>
-      <label class="rem-toggle"><span><b>Plan reminders</b><small>10 minutes before timed plan items</small></span><input type="checkbox" data-plan ${r.plan ? 'checked' : ''}></label>
-      <label class="rem-toggle"><span><b>Club activity</b><small>When a friend proves a goal</small></span><input type="checkbox" data-club ${r.clubPings !== false ? 'checked' : ''}></label>
-      <label class="rem-toggle"><span><b>Sunday Review</b><small>Sunday evening</small></span><input type="checkbox" data-sunday ${r.sunday !== false ? 'checked' : ''}></label>
+      <label class="rem-toggle"><span><b>Streak saver</b></span><input type="checkbox" data-streak ${r.streakSaver ? 'checked' : ''}></label>
+      <label class="rem-toggle"><span><b>Plan reminders</b></span><input type="checkbox" data-plan ${r.plan ? 'checked' : ''}></label>
+      <label class="rem-toggle"><span><b>Club activity</b></span><input type="checkbox" data-club ${r.clubPings !== false ? 'checked' : ''}></label>
+      <label class="rem-toggle"><span><b>Sunday Review</b></span><input type="checkbox" data-sunday ${r.sunday !== false ? 'checked' : ''}></label>
     </div>
     <div class="stack">
       <button class="btn btn-primary" data-save>Save</button>

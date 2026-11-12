@@ -1,3 +1,5 @@
+@font-face { font-family: "Bricolage Grotesque"; src: url("../fonts/bricolage.woff2") format("woff2"); font-weight: 200 800; font-style: normal; font-display: swap; }
+@font-face { font-family: "Instrument Sans"; src: url("../fonts/instrument.woff2") format("woff2"); font-weight: 400 700; font-style: normal; font-display: swap; }
 /* Proof
    Layout: one calm column, phone-first; floating glass tab bar with the + in the middle.
    Rule for corners: anything you touch is rounded; anything that is evidence
@@ -35,9 +37,9 @@
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
   --spring: cubic-bezier(.32, .72, 0, 1);
-  /* The phone's own font: SF Pro on iPhone and Mac, Roboto on Android. */
-  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Bricolage Grotesque for headlines and numbers, Instrument Sans for text. Both SIL OFL, hosted here. */
+  --font: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --display: "Bricolage Grotesque", "Instrument Sans", system-ui, -apple-system, sans-serif;
   color-scheme: dark;
   font-family: var(--font);
   -webkit-font-smoothing: antialiased;

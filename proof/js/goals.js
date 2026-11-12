@@ -15,7 +15,7 @@ export function openGoals() {
     <div class="ctiles">${CATALOG.map((c) => `
       <button class="ctile" data-k="${c.key}" aria-pressed="false">
         <span class="ctile-n" aria-hidden="true"></span>
-        ${ic(c.icon, 26)}<b>${c.label}</b><small>${c.hint}</small>
+        ${ic(c.icon, 26)}<b>${c.label}</b>
       </button>`).join('')}</div>
     <p class="fine goal-note" aria-live="polite"></p>
     <div class="stack"><button class="btn btn-primary" data-save>Save goals</button></div>`, {

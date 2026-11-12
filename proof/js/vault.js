@@ -109,7 +109,6 @@ function renderInside(el, animate) {
     </section>`).join('') : `
     <div class="empty">
       <b>Nothing in your vault yet</b>
-      <p>Every proof you post is locked in here, day by day.</p>
       <button class="btn btn-primary" data-capture>${ic('camera', 20)}<span>Post your first proof</span></button>
     </div>`}`;
 

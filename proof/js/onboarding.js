@@ -66,7 +66,6 @@ function draw(root, onDone) {
     </header>
     <div class="ob-head">
       <h1 class="title">${step.title}</h1>
-      <p class="sub">${step.sub}</p>
     </div>
     <div class="ob-body">${body(step)}</div>
   </section>`;
@@ -245,7 +244,7 @@ function body(step) {
       <button class="choice ${isSel(o.v) ? 'sel' : ''}" data-v="${o.v}" ${step.multi ? 'aria-pressed="false"' : ''}>
         ${step.multi ? `<span class="choice-tick" aria-hidden="true">${ic('check', 14, 2.6)}</span>` : ''}
         <span class="choice-ic">${ic(o.icon, 26)}</span>
-        <span class="choice-txt"><b>${o.label}</b><small>${o.hint}</small></span>
+        <span class="choice-txt"><b>${o.label}</b></span>
       </button>`).join('')}</div>
       ${step.multi ? `<div class="ob-foot"><p class="commit-count" aria-live="polite"></p><button class="btn btn-primary" data-next disabled>Continue</button></div>` : ''}`;
   }
@@ -255,7 +254,7 @@ function body(step) {
       <button class="ctile" data-k="${c.key}" aria-pressed="false">
         <span class="ctile-n" aria-hidden="true"></span>
         ${ic(c.icon, 26)}
-        <b>${c.label}</b><small>${c.hint}</small>
+        <b>${c.label}</b>
       </button>`).join('')}</div>
       <div class="proff-note">${proffSVG('talk', 52)}<p>Prove <b>half</b> of your goals in a day and your streak lives. Start with what you can really do. You can change them any time.</p></div>
       <div class="ob-foot">

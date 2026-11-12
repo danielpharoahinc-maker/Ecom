@@ -51,7 +51,7 @@ export function renderClub(el) {
     }).join('')}
     ${club.members.length < 3 ? `<button class="brow add" data-invite>
       <span class="avatar ghost">${ic('plus', 18)}</span>
-      <span class="brow-n"><b>Add your crew</b><small>Clubs work best with 3 to 8 people</small></span>
+      <span class="brow-n"><b>Add your crew</b></span>
     </button>` : ''}
   </section>
 
@@ -93,7 +93,6 @@ function renderEmpty(el) {
   <div class="club-hero">
     <div class="club-stack" aria-hidden="true"><span>D</span><span>${ic('plus', 22)}</span><span>${ic('plus', 22)}</span></div>
     <h2 class="h2">Lock in together</h2>
-    <p class="sub">A club is a small crew that posts proof every day. Everyone sees who showed up.</p>
   </div>
   <div class="club-actions">
     <button class="btn btn-primary" data-create>${ic('plus', 20)}<span>Start a club</span></button>
@@ -107,7 +106,6 @@ function renderEmpty(el) {
 function create() {
   openSheet(`
     <h2 class="h2">Name your club</h2>
-    <p class="sub">Keep it short. Your crew sees it every day.</p>
     <form class="stack">
       <label class="sr" for="cname">Club name</label>
       <input id="cname" class="big-input" maxlength="24" placeholder="5am Club" required>
@@ -138,7 +136,6 @@ export function join(prefill = '') {
   if (LIVE) return joinLive(prefill);
   openSheet(`
     <h2 class="h2">Join a club</h2>
-    <p class="sub">Enter the 6-letter code your friend sent you.</p>
     <form class="stack">
       <label class="sr" for="ccode">Invite code</label>
       <input id="ccode" class="big-input code-input" maxlength="6" autocapitalize="characters" autocomplete="off" placeholder="ABC123" value="${esc(prefill)}" required>
