@@ -879,3 +879,11 @@ img.img-fade.loaded { opacity: 1; }
 .cm.next { box-shadow: inset 3px 0 0 var(--accent); background: rgba(216, 201, 168, .07); }
 @keyframes flashrow { 0% { background: rgba(216, 201, 168, .28); } 100% { background: transparent; } }
 @media (prefers-reduced-motion: reduce) { .bubble { transition: none; } }
+
+/* Proff answers */
+.ask-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 8px 12px; min-height: 36px; border-radius: var(--pill); background: var(--s2); color: var(--ink-2); font-size: 14px; font-weight: 500; box-shadow: var(--hi); transition: transform .15s var(--spring); }
+.chip:active { transform: scale(.96); }
+.ask-personal { padding: 14px; border-radius: var(--r-card); background: var(--accent-deep); box-shadow: var(--hi), inset 3px 0 0 var(--accent); }
+.ask-personal b { display: block; font-size: 17px; color: var(--ink); margin-bottom: 4px; text-wrap: balance; }
+.ask-personal p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--ink-2); }

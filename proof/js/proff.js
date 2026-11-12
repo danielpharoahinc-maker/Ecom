@@ -2,6 +2,7 @@
 // the app on a first-run tour, answers questions, and stamps every post.
 // All drawing is vector (no images), so it's sharp at any size and free to animate.
 import { QA, TOPICS } from './proff-qa.js';
+import { think, suggestions } from './proff-brain.js';
 import { openSheet } from './sheet.js';
 import { S, saveProfile } from './state.js';
 import { WORDMARK } from './icons.js';
@@ -93,35 +94,6 @@ setInterval(() => {
 
 /* ---------- Ask Proff ---------- */
 
-const STOP = new Set('a an and are can do does did how i if in is it me my of on or the to what when where who why will with you your much there this that get so any about im its just like'.split(' '));
-// Everyday words people type, mapped to the words the answers use.
-const SYN = { pic: 'photo', pics: 'photo', picture: 'photo', pictures: 'photo', image: 'photo', images: 'photo', photos: 'photo', selfie: 'photo',
-  sees: 'see', view: 'see', views: 'see', look: 'see', visible: 'see', cost: 'price', costs: 'price', money: 'price', pay: 'price', paying: 'price', expensive: 'price',
-  unsubscribe: 'cancel', stop: 'cancel', mates: 'friends', mate: 'friends', bro: 'friends', squad: 'club', group: 'club', login: 'sign', log: 'sign',
-  install: 'home', homescreen: 'home', notif: 'reminder', notifications: 'reminder', remind: 'reminder', delete: 'delete', remove: 'delete', erase: 'delete',
-  goals: 'commitments', goal: 'commitments', habits: 'commitments', habit: 'commitments', broke: 'breaks', lose: 'breaks', lost: 'breaks' };
-const words = (s) => s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter((w) => w.length > 1 && !STOP.has(w)).map((w) => SYN[w] || w);
-const stem = (w) => w.replace(/(ing|ed|es|s)$/, '');
-
-// No AI: matches the words you type against each question, its keywords and answer.
-function search(text) {
-  const q = [...new Set(words(text).map(stem))];
-  if (!q.length) return [];
-  // An answer must match enough of what was asked: every word for one- or
-  // two-word questions, at least two words for longer ones.
-  const need = Math.min(2, q.length);
-  return QA.map((item) => {
-    const head = new Set(words(`${item.q} ${item.k}`).map(stem));
-    const tail = new Set(words(item.a).map(stem));
-    let score = 0, hits = 0;
-    for (const w of q) {
-      const inHead = head.has(w) || [...head].some((h) => h.length > 4 && w.length > 4 && (h.startsWith(w) || w.startsWith(h)));
-      if (inHead) { score += 3; hits++; } else if (tail.has(w)) { score += 1; hits++; }
-    }
-    return { item, score, hits };
-  }).filter((r) => r.hits >= need && r.score >= 3).sort((a, b) => b.score - a.score).slice(0, 4).map((r) => r.item);
-}
-
 const qaHTML = (items) => items.map((x) => `<details class="qa"><summary>${esc(x.q)}</summary><p>${esc(x.a)}</p></details>`).join('');
 
 export function openAsk() {
@@ -130,6 +102,7 @@ export function openAsk() {
     <div class="ask-head">${proffSVG('talk', 70)}<div><span class="ask-name">${NAME(22)}</span><p>Ask me anything about Proof.</p></div></div>
     <form class="ask-search" role="search"><label class="sr" for="ask-q">Your question</label>
       <input id="ask-q" type="search" autocomplete="off" placeholder="Type a question, like “what breaks my streak?”"></form>
+    <div class="ask-chips" data-chips>${suggestions().map((q) => `<button type="button" class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
     <div class="ask-results" aria-live="polite" hidden></div>
     <div class="ask-browse">
       <div class="ask-topics" role="tablist">${TOPICS.map((t, i) => `<button role="tab" data-t="${i}" class="${i ? '' : 'on'}" aria-selected="${!i}">${t}</button>`).join('')}</div>
@@ -157,15 +130,19 @@ export function openAsk() {
         if (text.length < 2) { results.hidden = true; browse.hidden = false; body.querySelector('.ask-head svg').outerHTML = proffSVG('talk', 70); return; }
         body.querySelector('.ask-head svg').outerHTML = proffSVG('think', 70);
         timer = setTimeout(() => {
-          const found = search(text);
+          const { personal, matches, near } = think(text);
           browse.hidden = true; results.hidden = false;
-          body.querySelector('.ask-head svg').outerHTML = proffSVG(found.length ? 'talk' : 'worried', 70);
-          results.innerHTML = found.length
-            ? qaHTML(found).replace('<details class="qa">', '<details class="qa" open>')
-            : `<p class="ask-none">I don’t know that one yet. Try different words, or browse the topics.</p><button class="btn btn-secondary" data-clear>Browse topics</button>`;
+          const head = body.querySelector('.ask-head svg');
+          head.outerHTML = proffSVG(personal?.pose || (matches.length || near.length ? 'talk' : 'worried'), 70);
+          results.innerHTML = `
+            ${personal ? `<div class="ask-personal"><b>${esc(personal.title)}</b><p>${esc(personal.body)}</p></div>` : ''}
+            ${matches.length ? qaHTML(matches).replace('<details class="qa">', '<details class="qa" open>') : ''}
+            ${!personal && !matches.length ? `<p class="ask-none">${near.length ? 'I’m not sure I got that. Did you mean one of these?' : 'I don’t have that one yet. Try other words, or browse the topics.'}</p>${qaHTML(near)}<button class="btn btn-secondary" data-clear>Browse topics</button>` : ''}`;
           results.querySelector('[data-clear]')?.addEventListener('click', () => { input.value = ''; input.dispatchEvent(new Event('input')); });
-        }, 380);
+        }, 320);
       });
+      body.querySelectorAll('[data-q]').forEach((b) => b.addEventListener('click', () => { input.value = b.dataset.q; input.dispatchEvent(new Event('input')); }));
+      body.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); input.blur(); });
       body.querySelector('[data-tour]').addEventListener('click', () => { close(); setTimeout(() => startTour(), 320); });
     },
   });
