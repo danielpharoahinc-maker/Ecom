@@ -23,9 +23,13 @@ export const MOMENT = { key: 'moment', label: 'Moment', hint: 'Anything from you
 export const BY_KEY = Object.fromEntries([...CATALOG, MOMENT].map((c) => [c.key, c]));
 export const commitment = (key) => BY_KEY[key] || { key, label: key, hint: '', icon: 'sparkle' };
 
-// Onboarding. Ordered easiest first so the progress bar climbs quickly:
-// one-tap questions, then picking commitments, then typing a name, then
-// permissions. The bar starts at 20% because creating the account counts.
+export const MAX_GOALS = 6;
+export const MIN_GOALS = 1;
+// A day keeps your streak when you prove at least half of your goals.
+export const needFor = (n) => Math.max(1, Math.ceil(n / 2));
+
+// Onboarding: short on purpose. Easy taps first so the bar climbs, and it ends
+// with your first proof. The bar starts at 20% because creating the account counts.
 export const STEPS = [
   {
     id: 'goal', type: 'choice', multi: 2,
@@ -39,28 +43,6 @@ export const STEPS = [
     ],
   },
   {
-    id: 'wake', type: 'choice',
-    title: 'When does your day start?',
-    sub: 'Be honest. You can raise the bar later.',
-    options: [
-      { v: 'b5',  label: 'Before 5 am', hint: 'The quiet hours',   icon: 'moon' },
-      { v: '5-6', label: '5 to 6 am',   hint: 'Ahead of everyone', icon: 'sunrise' },
-      { v: '6-7', label: '6 to 7 am',   hint: 'Solid start',       icon: 'sun' },
-      { v: 'a7',  label: 'After 7 am',  hint: 'Room to improve',   icon: 'clock' },
-    ],
-  },
-  {
-    id: 'lockin', type: 'choice', visual: 'bar',
-    title: 'How long will you lock in each day?',
-    sub: 'Time you’ll spend on your commitments.',
-    options: [
-      { v: 30,  label: '30 minutes', hint: 'Start small, never miss', fill: 12 },
-      { v: 60,  label: '1 hour',     hint: 'The sweet spot',          fill: 25 },
-      { v: 120, label: '2 hours',    hint: 'Serious',                 fill: 50 },
-      { v: 240, label: '4+ hours',   hint: 'All in',                  fill: 100 },
-    ],
-  },
-  {
     id: 'proofTime', type: 'choice', multi: 2,
     title: 'When will you post your proof?',
     sub: 'Pick one or two. We’ll remind you then.',
@@ -71,33 +53,10 @@ export const STEPS = [
       { v: 'night',   label: 'Before bed', hint: 'Close the day out',     icon: 'moon',    phrase: 'Proof before bed' },
     ],
   },
-  {
-    id: 'crew', type: 'choice', multi: 2,
-    title: 'Lock in solo or with your crew?',
-    sub: 'Pick one or two. People who post together keep going longer.',
-    options: [
-      { v: 'solo',   label: 'Solo',          hint: 'Just me for now',  icon: 'user' },
-      { v: 'friend', label: 'With a friend', hint: 'One partner',      icon: 'users' },
-      { v: 'club',   label: 'A small club',  hint: '3 to 8 people',    icon: 'club' },
-      { v: 'later',  label: 'Decide later',  hint: 'Start on my own',  icon: 'clock' },
-    ],
-  },
-  {
-    id: 'obstacle', type: 'choice', multi: 2,
-    title: 'What usually stops you?',
-    sub: 'Pick one or two. Proof is built around fixing them.',
-    options: [
-      { v: 'phone',      label: 'My phone',          hint: 'Scrolling eats the day', icon: 'phoneoff' },
-      { v: 'motivation', label: 'Low motivation',    hint: 'Start strong, fade out', icon: 'battery' },
-      { v: 'plan',       label: 'No clear plan',     hint: 'Busy, not productive',   icon: 'list' },
-      { v: 'alone',      label: 'No one checks me',  hint: 'Easy to skip a day',     icon: 'users' },
-    ],
-  },
-  { id: 'commitments', type: 'commit', title: 'Pick your 3 commitments', sub: 'You’ll post proof of these every day.' },
+  { id: 'commitments', type: 'commit', title: 'Pick your goals', sub: 'Choose 1 to 6. You can change them any time.' },
   { id: 'name', type: 'name', title: 'What should your crew call you?', sub: 'This shows on your proof and in clubs.' },
   { id: 'perm', type: 'perm', title: 'Proof needs your camera and mic', sub: 'A photo shows what you did. Your voice says it in 5 seconds.' },
-  { id: 'install', type: 'install', title: 'Put Proof on your home screen', sub: 'One tap to open, full screen, like a real app.' },
-  { id: 'plan', type: 'plan', title: 'Your plan', sub: 'Here’s what you’re signing up for.' },
+  { id: 'trial', type: 'trial', title: 'Start your 30 days free', sub: 'Add a card now. You pay nothing until day 30.' },
 ];
 
 export const LABEL = Object.fromEntries(

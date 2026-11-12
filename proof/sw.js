@@ -1,12 +1,10 @@
 // Offline support: the app shell is cached so Proof opens without signal.
 // Bump VERSION whenever you change any file below, so phones get the update.
-const VERSION = 'proof-v15';
+const VERSION = 'proof-v17';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css',
-  'js/app.js', 'js/auth.js', 'js/billing.js', 'js/coach.js', 'js/install.js', 'js/capture.js', 'js/club.js', 'js/config.js', 'js/data.js', 'js/db.js',
-  'js/icons.js', 'js/onboarding.js', 'js/planner.js', 'js/speech.js', 'js/proff.js', 'js/proff-qa.js', 'js/reminders.js', 'js/proofview.js', 'js/sheet.js', 'js/state.js', 'js/stats.js',
-  'js/statsview.js', 'js/today.js', 'js/util.js', 'js/vault.js', 'js/welcome.js',
-  'vendor/supabase-2.45.4.js', 'icons/icon.svg', 'icons/favicon.svg', 'icons/icon-32.png', 'icons/icon-maskable-512.png', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png',
+  'js/app.js', 'js/auth.js', 'js/billing.js', 'js/capture.js', 'js/club.js', 'js/clublive.js', 'js/clubshare.js', 'js/coach.js', 'js/config.js', 'js/data.js', 'js/db.js', 'js/goals.js', 'js/icons.js', 'js/install.js', 'js/nudges.js', 'js/onboarding.js', 'js/planner.js', 'js/proff-qa.js', 'js/proff.js', 'js/proofview.js', 'js/reminders.js', 'js/review.js', 'js/sheet.js', 'js/speech.js', 'js/state.js', 'js/stats.js', 'js/statsview.js', 'js/sync.js', 'js/today.js', 'js/util.js', 'js/vault.js', 'js/welcome.js',
+  'vendor/supabase-2.45.4.js', 'icons/icon.svg', 'icons/favicon.svg', 'icons/icon-32.png', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
 ];
 
 self.addEventListener('install', (e) => {
@@ -53,6 +51,6 @@ self.addEventListener('notificationclick', (e) => {
   const url = new URL(e.notification.data?.url || './', self.registration.scope).href;
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
     const open = list.find((c) => c.url.startsWith(self.registration.scope));
-    return open ? open.focus() : self.clients.openWindow(url);
+    return open ? open.focus().then(() => (open.navigate ? open.navigate(url) : null)) : self.clients.openWindow(url);
   }));
 });

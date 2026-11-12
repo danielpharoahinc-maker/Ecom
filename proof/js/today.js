@@ -1,15 +1,16 @@
-// Today: four things only. Header, your three commitments, today's plan,
+// Today: four things only. Header, your goals, today's plan,
 // and a box to talk (or type) your plan. Say "gym at 6, then school,
 // work on the business after school and read before bed" and it becomes a list.
 import { S, hydrateMedia, signOut, resetEverything, getPlan, savePlan, saveProfile } from './state.js';
 import { startTour } from './proff.js';
 import { reminderSettings } from './reminders.js';
 import { commitment } from './data.js';
-import { doneToday, streak } from './stats.js';
+import { doneToday, streak, needFor } from './stats.js';
+import { openGoals } from './goals.js';
+import { focusLine } from './review.js';
 import { openCapture } from './capture.js';
 import { openProof } from './proofview.js';
-import { isPro, postsLeft, paywall } from './billing.js';
-import { FREE_POSTS } from './config.js';
+import { paywall, planState, subscriptionSheet, trialBanner, daysLeft } from './billing.js';
 import { openSheet, confirmSheet } from './sheet.js';
 import { signOutLive } from './auth.js';
 import { parsePlan } from './planner.js';
@@ -29,7 +30,10 @@ function greeting() {
 export async function renderToday(el) {
   const P = S.profile;
   const done = doneToday(S.proofs);
-  const st = streak(S.proofs);
+  const st = streak(S.proofs, P);
+  const total = P.commitments.length, need = needFor(total);
+  const have = P.commitments.filter((k) => done.has(k)).length;
+  const banner = trialBanner();
   const plan = await getPlan();
   const todayStr = new Date().toDateString();
   const proofFor = (k) => S.proofs.find((p) => p.cKey === k && new Date(p.ts).toDateString() === todayStr);
@@ -45,11 +49,16 @@ export async function renderToday(el) {
     <button class="avatar" data-settings aria-label="Account">${esc(P.name[0].toUpperCase())}</button>
   </header>
 
-  <section class="cm-sec" aria-label="Your three commitments">
+  <section class="cm-sec" aria-label="Your goals">
     <div class="sec-h">
-      <h2 class="headline">${done.size >= 3 ? 'All three proven' : `${P.commitments.filter((k) => done.has(k)).length} of 3 proven`}</h2>
+      <h2 class="headline">${have} of ${total} proven</h2>
       <span class="streak-line ${st ? 'on' : ''}">${ic('flame', 15)}${st} day streak</span>
     </div>
+    <p class="need-line ${have >= need ? 'met' : ''}">
+      <span>${have >= need ? `Streak kept for today. ${have === total ? 'Every goal done.' : 'Extra goals are a bonus.'}` : `Prove ${need - have} more to keep today’s streak. Half your goals is enough.`}</span>
+      <button class="link-btn" data-goals>Edit goals</button>
+    </p>
+    ${focusLine()}
     <div class="cm-list">
       ${P.commitments.map((k) => {
         const c = commitment(k); const p = proofFor(k);
@@ -62,10 +71,7 @@ export async function renderToday(el) {
     </div>
   </section>
 
-  ${!isPro() && postsLeft() <= 7 ? `<button class="free-bar" data-pro>
-    <span class="free-meter"><i style="width:${(postsLeft() / FREE_POSTS) * 100}%"></i></span>
-    <span>${postsLeft() ? `${postsLeft()} free ${postsLeft() === 1 ? 'post' : 'posts'} left` : 'Free posts used up'}</span><b>Get Pro</b>
-  </button>` : ''}
+  ${banner ? banner.html : ''}
 
   <section class="plan-sec" aria-label="Today's plan">
     ${plan.length ? `
@@ -105,7 +111,8 @@ export async function renderToday(el) {
   hydrateMedia(el);
   el.querySelectorAll('[data-capture]').forEach((b) => b.addEventListener('click', () => openCapture({ cKey: b.dataset.capture })));
   el.querySelector('[data-settings]').addEventListener('click', settings);
-  el.querySelector('[data-pro]')?.addEventListener('click', () => paywall({ reason: postsLeft() ? 'info' : 'limit' }));
+  el.querySelector('[data-sub]')?.addEventListener('click', () => banner.open());
+  el.querySelector('[data-goals]').addEventListener('click', openGoals);
   el.querySelector('[data-moment]').addEventListener('click', () => openCapture({ cKey: 'moment' }));
   el.querySelectorAll('.ds-shot').forEach((b) => b.addEventListener('click', () => openProof(b.dataset.open)));
   bindPlan(el, plan, done);
@@ -204,9 +211,10 @@ function settings() {
     <h2 class="h2">Account</h2>
     <div class="set-row"><span class="avatar">${esc(S.profile.name[0].toUpperCase())}</span>
       <span><b>${esc(S.profile.name)}</b><small>${esc(u?.email || `Signed in with ${u?.provider || 'Proof'}`)}</small></span></div>
-    <button class="set-row set-plan" data-plan-row><span><b>${isPro() ? 'Proof Pro' : 'Free plan'}</b><small>${isPro() ? 'Unlimited posts' : `${postsLeft()} of ${FREE_POSTS} free posts left`}</small></span>${isPro() ? '' : '<span class="btn-pill">Get Pro</span>'}</button>
+    <button class="set-row set-plan" data-plan-row><span><b>${{ trial: 'Free trial', 'trial-free': 'Free trial', active: 'Proof Pro', cancelled: 'Pro (cancelled)', ended: 'Trial over' }[planState().kind]}</b><small>${planState().kind === 'active' ? 'Renews until you cancel' : planState().kind === 'ended' ? 'Pick a plan to keep posting' : `${daysLeft()} ${daysLeft() === 1 ? 'day' : 'days'} left`}</small></span><span class="btn-pill">Manage</span></button>
     <p class="fine">${LIVE ? 'Synced to your Proof account.' : 'Test version: your proof is saved in this browser only.'}</p>
     <div class="stack">
+      <button class="btn btn-secondary" data-edit-goals>${ic('target', 20)}<span>Your goals</span></button>
       <button class="btn btn-secondary" data-rem>${ic('clock', 20)}<span>Reminders</span></button>
       <button class="btn btn-secondary" data-tour>Show me around again</button>
       <button class="btn btn-secondary" data-proff>${S.profile.hideProff ? 'Show Proff' : 'Hide Proff'}</button>
@@ -214,7 +222,8 @@ function settings() {
       <button class="btn btn-quiet danger" data-reset>${ic('trash', 18)}<span>Delete all my data</span></button>
     </div>`, {
     onMount(body, close) {
-      body.querySelector('[data-plan-row]').addEventListener('click', () => { if (!isPro()) { close(); paywall({ reason: 'info' }); } });
+      body.querySelector('[data-plan-row]').addEventListener('click', () => { close(); setTimeout(subscriptionSheet, 320); });
+      body.querySelector('[data-edit-goals]').addEventListener('click', () => { close(); setTimeout(openGoals, 320); });
       body.querySelector('[data-tour]').addEventListener('click', () => { close(); setTimeout(() => startTour(), 320); });
       body.querySelector('[data-rem]').addEventListener('click', () => { close(); setTimeout(() => reminderSettings(), 320); });
       body.querySelector('[data-proff]').addEventListener('click', async () => {

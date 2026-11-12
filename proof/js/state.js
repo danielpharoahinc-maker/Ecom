@@ -22,6 +22,17 @@ export async function setUser(user) {
   await db.put('kv', user, 'user');
 }
 
+// Change your goals. The old set stays in the log so past days keep their score.
+export async function setGoals(keys) {
+  const p = S.profile;
+  const log = (p.goalLog?.length ? p.goalLog : [{ ts: p.createdAt || Date.now(), keys: p.commitments }]).slice();
+  const entry = { ts: Date.now(), keys: [...keys] };
+  // Fiddling with goals minutes after setting them shouldn't spawn history.
+  if (log.length > 1 && entry.ts - log[log.length - 1].ts < 10 * 60 * 1000) log[log.length - 1] = entry; else log.push(entry);
+  await saveProfile({ ...p, commitments: [...keys], goalLog: log.slice(-40) });
+  emit('proof:changed');
+}
+
 export async function saveProfile(profile) {
   S.profile = profile;
   await db.put('kv', profile, 'profile');
@@ -41,10 +52,7 @@ export async function addProof(proof, photo, audio) {
   if (photo) { p.photoId = uid(); await db.put('media', photo, p.photoId); }
   if (audio) { p.audioId = uid(); await db.put('media', audio, p.audioId); }
   await db.put('proofs', p);
-  // Free-plan tally. Deleting a proof doesn't give the post back.
-  const usedBefore = S.profile.postsUsed ?? S.proofs.length;
   S.proofs.unshift(p);
-  await saveProfile({ ...S.profile, postsUsed: usedBefore + 1 });
   // Proof ticks off any plan item linked to the same commitment.
   const plan = await getPlan();
   if (plan.some((it) => it.cKey === p.cKey && !it.done)) {
@@ -57,6 +65,7 @@ export async function addProof(proof, photo, audio) {
 export async function deleteProof(id) {
   const p = S.proofs.find((x) => x.id === id);
   if (!p) return;
+  emit('proof:deleted', { id: p.id, remoteId: p.remoteId, photoPath: p.photoPath, audioPath: p.audioPath });
   if (p.photoId) await db.del('media', p.photoId);
   if (p.audioId) await db.del('media', p.audioId);
   await db.del('proofs', id);

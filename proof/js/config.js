@@ -9,9 +9,16 @@ export const CONFIG = {
   supabaseAnonKey: 'sb_publishable_Gjr7TQ0n71KiE3lf2RbJsQ_abvNlJ2v',
 };
 
-// Free plan: how many posts (proofs and moments) before Proof Pro is needed.
-// 21 is about one full week of three commitments a day.
-export const FREE_POSTS = 21;
+// Free trial: everyone gets this many days free.
+export const TRIAL_DAYS = 30;
+
+// Payments. Keep PAYMENTS_LIVE false until Paystack and the server functions are
+// set up (docs/BACKEND.md section 2c); until then nobody is asked for a card and
+// everyone simply gets the 30 free days.
+export const PAYMENTS_LIVE = false;
+// With payments live: true = a card is needed before the free 30 days start and
+// is charged on day 30 unless cancelled; false = 30 days free, then pay.
+export const REQUIRE_CARD = true;
 
 export const PRICES = { monthly: 'R49', yearly: 'R399', yearlySaving: '32%' };
 

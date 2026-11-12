@@ -56,6 +56,8 @@ const P = {
   image: 'M3 4h18v16H3zM3 16l5-5 4 4 3-3 6 6M15.5 7.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z',
   logout: 'M10 4H4v16h6M15 8l4 4-4 4M9 12h10',
   wave: 'M3 12h2M7 8v8M11 5v14M15 8v8M19 10v4',
+  thumb: 'M3 10h4v11H3zM7 11l4-8c1.5 0 2.5 1.2 2.5 2.5V9H20a1.5 1.5 0 011.5 1.7l-1.3 8A2 2 0 0118.2 21H7',
+  bell: 'M6 16V11a6 6 0 0112 0v5l2 2H4zM10 21h4',
   addhome: 'M4 4h16v16H4zM12 8v8M8 12h8',
   dotsv: 'M11 4h2v2h-2zM11 11h2v2h-2zM11 18h2v2h-2z',
   dotsh: 'M4 11h2v2H4zM11 11h2v2h-2zM18 11h2v2h-2z',

@@ -11,9 +11,11 @@ import { renderClub, join } from './club.js';
 import { openCapture } from './capture.js';
 import { ic } from './icons.js';
 import { haptic } from './util.js';
-import { refreshPro, afterCheckout } from './billing.js';
+import { refreshAccess, afterCheckout } from './billing.js';
 import { mountProff, unmountProff, startTour, tourNeeded } from './proff.js';
-import { askReminders, syncSoon } from './reminders.js';
+import { syncSoon } from './reminders.js';
+import { startSync, restoreProfile } from './sync.js';
+import { afterFirstProof, runNudges } from './nudges.js';
 
 const app = document.getElementById('app');
 
@@ -43,11 +45,8 @@ function route(opts = {}) {
     return renderOnboarding(app, (o) => {
       S.tab = 'today';
       route();
-      // Proff explains the app first, then (if they chose it) the first proof.
-      // Proff explains the app, asks about reminders, then the first proof.
-      setTimeout(() => startTour(() => askReminders({
-        onDone: () => { if (o?.firstProof) setTimeout(() => openCapture(), 300); },
-      })), 450);
+      // Proff explains the app, then you post your first proof.
+      setTimeout(() => startTour(() => { if (o?.firstProof) setTimeout(() => openCapture(), 300); }), 450);
     });
   }
   shell();
@@ -95,6 +94,10 @@ function draw(scrollTop = false) {
 window.addEventListener('proof:changed', () => { if (S.profile?.onboarded && S.user) { draw(); mountProff(); } });
 window.addEventListener('proof:tab', (e) => { S.tab = e.detail; draw(true); });
 window.addEventListener('proof:route', () => route());
+window.addEventListener('proof:first', () => setTimeout(afterFirstProof, 900));
+// Tapping a notification can ask for the club tab.
+const fromHash = () => { if (location.hash === '#club' && S.profile?.onboarded) { S.tab = 'club'; draw(true); history.replaceState(null, '', location.pathname); } };
+window.addEventListener('hashchange', fromHash);
 
 async function boot() {
   await load();
@@ -103,14 +106,25 @@ async function boot() {
     const live = await currentLiveUser().catch(() => null);
     if (live) await setUser(live);
   }
+  // A new phone: bring your goals and proof back from your account.
+  if (S.user && !S.profile?.onboarded) await restoreProfile().then((ok) => ok && load()).catch(() => {});
   // Home-screen shortcuts: ?action=snap or ?action=talk
   const action = params.get('action');
+  // Back from the payment page in the middle of onboarding: tell the card step.
+  if (params.has('paid') && !S.profile?.onboarded) { try { sessionStorage.setItem('proof:paid', '1'); } catch { /* ignore */ } }
   route();
   // Back from Paystack checkout, or a normal open: ask the server about Pro.
+  if (params.has('paid')) {
+    history.replaceState(null, '', location.pathname);
+    // Mid-onboarding the card step finishes the job; otherwise confirm here.
+    if (S.profile?.onboarded) afterCheckout();
+  }
   if (S.profile?.onboarded) {
-    if (params.has('paid')) { history.replaceState(null, '', location.pathname); afterCheckout(); }
-    else refreshPro().catch(() => {});
+    if (!params.has('paid')) refreshAccess().catch(() => {});
     syncSoon(); // keep the reminder server up to date with today
+    startSync(); // save proof to your account, pull it back on a new phone
+    fromHash();
+    setTimeout(runNudges, 2200);
   }
   if (S.profile?.onboarded && action === 'snap') openCapture();
   if (S.profile?.onboarded && action === 'talk') openCapture({ mode: 'voice' });

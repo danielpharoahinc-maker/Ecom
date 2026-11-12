@@ -175,13 +175,14 @@ export function openAsk() {
 
 const TOUR = [
   { sel: null, pose: 'talk', t: 'Hi, I’m Proff.', b: 'I approve your proof. Let me show you around. It takes 30 seconds.' },
-  { sel: '.cm-list', pose: 'point', t: 'Your three commitments', b: 'Tap one to post proof for it. Every one you prove counts toward your streak.' },
+  { sel: '.cm-list', pose: 'point', t: 'Your goals', b: 'Tap one to post proof for it. You can have 1 to 6, and change them any time.' },
+  { sel: '.need-line', pose: 'cheer', t: 'Half is enough', b: 'Prove at least half your goals in a day and your streak lives. Miss one? You’re still good. Showing up most days beats perfect days.' },
   { sel: '.talkbox', pose: 'point', t: 'Plan your day', b: 'Tap the mic and say your plan like you’d tell a friend. I turn it into a list.' },
   { sel: '[data-add]', pose: 'point', t: 'The + button', b: 'The fastest way to post proof: take a photo, say what you did, post. I’ll stamp it.' },
   { sel: '.day-sec', pose: 'point', t: 'Your day', b: 'Snap moments from your day here. They tell the story but don’t count toward your streak.' },
   { sel: '[data-tab="vault"]', pose: 'point', t: 'Vault', b: 'Every proof is locked in here. Hold the door to open it, and I’ll score your week out of 10.' },
-  { sel: '[data-tab="stats"]', pose: 'point', t: 'Stats', b: 'Your streak, your consistency, and every day stacked up.' },
-  { sel: '[data-tab="club"]', pose: 'point', t: 'Club', b: 'Lock in with friends. Invite them with a code and see who’s posted today.' },
+  { sel: '[data-tab="stats"]', pose: 'point', t: 'Stats', b: 'Your streak, your best, the days you kept, and every day stacked up.' },
+  { sel: '[data-tab="club"]', pose: 'point', t: 'Club', b: 'Lock in with friends. Invite them with a code, see who’s posted today, and give respect.' },
   { sel: '.proff-fab', pose: 'cheer', t: 'Stuck? Tap me.', b: 'I live down here. Tap me any time and ask me anything.' },
 ];
 

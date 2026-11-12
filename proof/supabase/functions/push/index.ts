@@ -2,12 +2,15 @@
 //   POST {action:'key'}   -> the public push key (made on first use)
 //   POST {action:'test'}  -> sends the signed-in person a test notification
 //   POST {action:'send'}  -> (cron only) sends every reminder that is due
+//   POST {action:'club_ping', proof_id} -> (database trigger) tells club mates a goal was proven
 // Deploy: supabase functions deploy push --no-verify-jwt
 // The cron job proves itself with x-cron-key; people prove themselves with
 // their normal sign-in token. Private keys never leave the database.
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 import webpush from 'npm:web-push@3.6.7';
-import { dueReminders, keepToday, type Row } from '../_shared/reminders.ts';
+import { dueReminders, clubPing, keepToday, localNow, type Row, type Trial } from '../_shared/reminders.ts';
+import { label } from '../_shared/labels.ts';
+import { PLANS, type PlanName } from '../_shared/plans.ts';
 
 const URL_ = Deno.env.get('SUPABASE_URL')!;
 const admin = createClient(URL_, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
@@ -48,9 +51,13 @@ Deno.serve(async (req) => {
   if (action === 'send') {
     if (req.headers.get('x-cron-key') !== k.cron_key) return json({ error: 'forbidden' }, 403);
     const { data: rows } = await admin.from('reminders').select('*').not('subscription', 'is', null);
+    const { data: bills } = await admin.from('billing').select('user_id, plan, status, charge_on').eq('status', 'trial').not('charge_on', 'is', null);
+    const billOf = new Map((bills ?? []).map((b) => [b.user_id, b]));
     let sent = 0;
     for (const row of rows ?? []) {
-      const { day, due } = dueReminders(row as Row);
+      const b = billOf.get(row.user_id);
+      const trial: Trial = b ? { chargeDay: localNow(row.tz, new Date(b.charge_on)).day, amount: `R${(PLANS[b.plan as PlanName]?.amount ?? 0) / 100}` } : null;
+      const { day, due } = dueReminders(row as Row, new Date(), trial);
       if (!due.length) continue;
       const log = keepToday(row.sent, day);
       for (const p of due) {
@@ -59,6 +66,33 @@ Deno.serve(async (req) => {
         log[p.key] = true; sent++;
       }
       await admin.from('reminders').update({ sent: log }).eq('user_id', row.user_id);
+    }
+    return json({ sent });
+  }
+  if (action === 'club_ping') {
+    if (req.headers.get('x-cron-key') !== k.cron_key) return json({ error: 'forbidden' }, 403);
+    const { proof_id } = await req.json().catch(() => ({}));
+    const { data: p } = await admin.from('proofs').select('id, user_id, c_key, created_at').eq('id', proof_id).maybeSingle();
+    if (!p || p.c_key === 'moment') return json({ sent: 0 });
+    const { data: poster } = await admin.from('profiles').select('name, tz').eq('id', p.user_id).maybeSingle();
+    if (!poster) return json({ sent: 0 });
+    // Only the first proof of this goal today makes a notification.
+    const day = localNow(poster.tz, new Date(p.created_at)).day;
+    const { data: same } = await admin.from('proofs').select('id, created_at').eq('user_id', p.user_id).eq('c_key', p.c_key).gte('created_at', new Date(Date.now() - 36 * 3600e3).toISOString());
+    if ((same ?? []).some((x) => x.id !== p.id && localNow(poster.tz, new Date(x.created_at)).day === day && x.created_at < p.created_at)) return json({ sent: 0 });
+    const { data: mine } = await admin.from('club_members').select('club_id').eq('user_id', p.user_id);
+    const { data: mates } = await admin.from('club_members').select('user_id').in('club_id', (mine ?? []).map((m) => m.club_id)).neq('user_id', p.user_id);
+    const ids = [...new Set((mates ?? []).map((m) => m.user_id))];
+    if (!ids.length) return json({ sent: 0 });
+    const { data: rows } = await admin.from('reminders').select('*').in('user_id', ids).not('subscription', 'is', null);
+    let sent = 0;
+    for (const row of rows ?? []) {
+      const ping = clubPing(row as Row, poster.name, label(p.c_key), p.id);
+      if (!ping) continue;
+      const r = await deliver(row.subscription, k, { title: ping.title, body: ping.body, tag: ping.tag, url: './#club' });
+      if (r === 'gone') { await admin.from('reminders').update({ subscription: null }).eq('user_id', row.user_id); continue; }
+      await admin.from('reminders').update({ sent: { ...keepToday(row.sent, localNow(row.tz).day), [ping.key]: true } }).eq('user_id', row.user_id);
+      sent++;
     }
     return json({ sent });
   }

@@ -12,12 +12,14 @@ import { openProof } from './proofview.js';
 import { ic } from './icons.js';
 import { esc, uid, toast, haptic, timeAgo } from './util.js';
 import { LIVE } from './config.js';
+import { inviteSheet } from './clubshare.js';
+import { renderClubLive, createLive, joinLive } from './clublive.js';
 
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O or 1/I mix-ups
 const makeCode = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => ALPHABET[b % ALPHABET.length]).join('');
-const inviteLink = (code) => `${location.origin}${location.pathname}?join=${code}`;
 
 export function renderClub(el) {
+  if (LIVE) return renderClubLive(el);
   const club = S.clubs[0];
   if (!club) return renderEmpty(el);
 
@@ -63,7 +65,7 @@ export function renderClub(el) {
   </section>` : ''}`;
 
   hydrateMedia(el);
-  el.querySelectorAll('[data-invite]').forEach((b) => b.addEventListener('click', () => invite(club)));
+  el.querySelectorAll('[data-invite]').forEach((b) => b.addEventListener('click', () => inviteSheet(club)));
   el.querySelector('[data-manage]').addEventListener('click', () => manage(club));
   el.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => openProof(b.dataset.open)));
 }
@@ -123,14 +125,17 @@ function create() {
         await saveClub(club);
         close();
         haptic(20);
-        setTimeout(() => invite(club), 320);
+        setTimeout(() => inviteSheet(club), 320);
       });
       setTimeout(() => input.focus(), 300);
     },
   });
 }
 
+export function newClub() { return LIVE ? createLive() : create(); }
+
 export function join(prefill = '') {
+  if (LIVE) return joinLive(prefill);
   openSheet(`
     <h2 class="h2">Join a club</h2>
     <p class="sub">Enter the 6-letter code your friend sent you.</p>
@@ -154,31 +159,6 @@ export function join(prefill = '') {
         toast('You’re in. Post today to show up on the board.');
       });
       setTimeout(() => input.focus(), 300);
-    },
-  });
-}
-
-function invite(club) {
-  const url = inviteLink(club.code);
-  const text = `Lock in with me on Proof. Join ${club.name} with code ${club.code}`;
-  openSheet(`
-    <h2 class="h2">Invite your crew</h2>
-    <p class="sub">Send them this code. They enter it under Club, then Join with a code.</p>
-    <div class="code-box"><b class="code">${club.code}</b></div>
-    <div class="stack">
-      <button class="btn btn-primary" data-share>${ic('share', 20)}<span>Share invite</span></button>
-      <button class="btn btn-secondary" data-copy>${ic('copy', 20)}<span>Copy code</span></button>
-    </div>`, {
-    onMount(body) {
-      const share = body.querySelector('[data-share]');
-      if (!navigator.share) share.hidden = true;
-      share.addEventListener('click', async () => {
-        try { await navigator.share({ title: 'Join my club on Proof', text, url }); } catch { /* cancelled or blocked */ }
-      });
-      body.querySelector('[data-copy]').addEventListener('click', async () => {
-        try { await navigator.clipboard.writeText(club.code); toast('Code copied'); }
-        catch { const r = document.createRange(); r.selectNodeContents(body.querySelector('.code')); getSelection().removeAllRanges(); getSelection().addRange(r); toast('Code selected. Copy it.'); }
-      });
     },
   });
 }

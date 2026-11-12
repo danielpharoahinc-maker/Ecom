@@ -4,6 +4,7 @@ import { S, hydrateMedia, mediaURL } from './state.js';
 import { commitment } from './data.js';
 import { byDay } from './stats.js';
 import { coachReport } from './coach.js';
+import { openReview, sundayOffset } from './review.js';
 import { openProof } from './proofview.js';
 import { openCapture } from './capture.js';
 import { ic } from './icons.js';
@@ -94,6 +95,7 @@ function renderInside(el, animate) {
     <p class="coach-thinking" ${animate ? '' : 'hidden'}>Reading your week…</p>
     <ul class="coach-lines" ${animate ? 'hidden' : ''}>${r.lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>
     <p class="coach-focus" ${animate ? 'hidden' : ''}><b>Focus:</b> ${esc(r.focus)}</p>
+    <button class="link-btn" data-review>See last week’s Sunday Review</button>
   </section>` : ''}
 
   ${days.length ? days.map(([k, ps]) => `
@@ -115,6 +117,7 @@ function renderInside(el, animate) {
   el.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => openProof(b.dataset.open)));
   el.querySelector('[data-capture]')?.addEventListener('click', () => openCapture());
   el.querySelector('[data-recap]')?.addEventListener('click', recap);
+  el.querySelector('[data-review]')?.addEventListener('click', () => openReview(sundayOffset()));
   if (animate && r) typeOut(el);
 }
 

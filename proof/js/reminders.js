@@ -112,6 +112,8 @@ export function askReminders({ onDone } = {}) {
       <li>${ic('camera', 20)}<span><b>Proof time</b><small>${times.join(' and ')}, only if you haven’t posted yet</small></span></li>
       <li>${ic('flame', 20)}<span><b>Streak saver</b><small>8 pm, only if your streak is at risk</small></span></li>
       <li>${ic('list', 20)}<span><b>Your plan</b><small>10 minutes before anything with a time, like “Gym at 6:30”</small></span></li>
+      <li>${ic('club', 20)}<span><b>Your club</b><small>“Sipho proved Train”. At most 2 a day.</small></span></li>
+      <li>${ic('stats', 20)}<span><b>Sunday Review</b><small>Sunday evening, once a week</small></span></li>
     </ul>
     <p class="fine">Nothing between 10 pm and 6 am except the streak saver. Change or switch off any time in Account.</p>
     <div class="stack">
@@ -137,6 +139,8 @@ export function reminderSettings() {
         ${r.times.length < 3 ? '<button class="btn-pill" data-add-time>+ Add time</button>' : ''}</div>
       <label class="rem-toggle"><span><b>Streak saver</b><small>8 pm if nothing’s posted</small></span><input type="checkbox" data-streak ${r.streakSaver ? 'checked' : ''}></label>
       <label class="rem-toggle"><span><b>Plan reminders</b><small>10 minutes before timed plan items</small></span><input type="checkbox" data-plan ${r.plan ? 'checked' : ''}></label>
+      <label class="rem-toggle"><span><b>Club activity</b><small>When a friend proves a goal</small></span><input type="checkbox" data-club ${r.clubPings !== false ? 'checked' : ''}></label>
+      <label class="rem-toggle"><span><b>Sunday Review</b><small>Sunday evening</small></span><input type="checkbox" data-sunday ${r.sunday !== false ? 'checked' : ''}></label>
     </div>
     <div class="stack">
       <button class="btn btn-primary" data-save>Save</button>
@@ -150,7 +154,7 @@ export function reminderSettings() {
       });
       body.querySelector('[data-save]').addEventListener('click', async () => {
         const times = [...new Set([...body.querySelectorAll('[data-time]')].map((i) => i.value).filter(Boolean))].sort();
-        await saveProfile({ ...S.profile, reminders: { ...r, on: true, times, streakSaver: body.querySelector('[data-streak]').checked, plan: body.querySelector('[data-plan]').checked } });
+        await saveProfile({ ...S.profile, reminders: { ...r, on: true, times, streakSaver: body.querySelector('[data-streak]').checked, plan: body.querySelector('[data-plan]').checked, clubPings: body.querySelector('[data-club]').checked, sunday: body.querySelector('[data-sunday]').checked } });
         const c = await getClient().catch(() => null);
         if (c) await c.from('reminders').upsert(await serverRow());
         close(); toast('Reminders saved');

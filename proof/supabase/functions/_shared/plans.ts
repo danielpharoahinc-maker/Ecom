@@ -8,3 +8,7 @@ export type PlanName = keyof typeof PLANS;
 
 export const planByCode = (code: string | undefined): PlanName | null =>
   (Object.keys(PLANS) as PlanName[]).find((k) => PLANS[k].code && PLANS[k].code === code) ?? null;
+
+// The card check at the start of the free trial: R1, refunded straight away.
+export const TRIAL_AUTH = 100;
+export const TRIAL_DAYS = 30;

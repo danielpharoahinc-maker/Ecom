@@ -1,29 +1,59 @@
-// Onboarding: one question per screen, four big visual options, tap to go on.
-// The progress bar starts at 20% (the account already counts as a step), and
-// the easiest questions come first so it climbs fast.
-import { STEPS, CATALOG, LABEL, commitment } from './data.js';
+// Onboarding: one question per screen, easy taps first. Short on purpose:
+//   goal -> proof time -> goals (1 to 6) -> name -> camera & mic -> [free trial]
+// and it ends with your first proof. The bar starts at 20% because creating the
+// account counts. A draft is kept so leaving for the payment page and coming
+// back picks up exactly where you were.
+import { STEPS, CATALOG, MAX_GOALS, MIN_GOALS, needFor } from './data.js';
 import { S, saveProfile } from './state.js';
-import { pushProfile } from './billing.js';
-import { installBody, bindInstall, isInstalled } from './install.js';
+import { pushProfile, startCheckout, waitForAccess } from './billing.js';
+import { proffSVG } from './proff.js';
+import { PRICES, TRIAL_DAYS, PAYMENTS_LIVE, REQUIRE_CARD } from './config.js';
 import { ic } from './icons.js';
 import { esc, haptic, toast } from './util.js';
 
 const HEAD_START = 20;
+const DRAFT = 'proof:ob';
 let i = 0;
 let ans = {};
+let steps = [];
+
+const store = {
+  get: (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; } },
+  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private mode */ } },
+  del: (k) => { try { localStorage.removeItem(k); } catch { /* ignore */ } },
+};
+const paidReturn = () => { try { return sessionStorage.getItem('proof:paid') === '1'; } catch { return false; } };
+
+export const trialStepOn = () => PAYMENTS_LIVE && REQUIRE_CARD;
 
 export function renderOnboarding(root, onDone) {
-  i = 0;
+  steps = STEPS.filter((s) => s.type !== 'trial' || trialStepOn());
   ans = { commitments: [], name: (S.user?.name || '').split(' ')[0] || '' };
+  i = 0;
+  const d = store.get(DRAFT);
+  if (d && Date.now() - d.t < 3600e3) { ans = { ...ans, ...d.ans }; i = Math.min(d.i, steps.length - 1); }
   draw(root, onDone);
 }
 
-const pct = (step) => Math.round(HEAD_START + ((100 - HEAD_START) * step) / (STEPS.length - 1));
+const pct = (n) => Math.round(HEAD_START + ((100 - HEAD_START) * n) / Math.max(1, steps.length - 1));
+const draftProfile = () => ({ name: ans.name, goal: ans.goal, proofTime: ans.proofTime, commitments: ans.commitments, goalLog: [{ ts: Date.now(), keys: ans.commitments }] });
 
-function draw(root, onDone, dir = 1) {
-  if (STEPS[i].type === 'install' && isInstalled()) { i += dir; return draw(root, onDone, dir); }
-  const step = STEPS[i];
+async function finish(onDone) {
+  const now = Date.now();
+  await saveProfile({
+    name: ans.name, goal: ans.goal, proofTime: ans.proofTime, commitments: ans.commitments,
+    goalLog: [{ ts: now, keys: ans.commitments }], createdAt: now, onboarded: true, tourDone: false,
+  });
+  store.del(DRAFT);
+  try { sessionStorage.removeItem('proof:paid'); } catch { /* ignore */ }
+  pushProfile().catch(() => {});
+  onDone({ firstProof: true });
+}
+
+function draw(root, onDone) {
+  const step = steps[i];
   const p = pct(i);
+  store.set(DRAFT, { t: Date.now(), i, ans });
   root.innerHTML = `
   <section class="ob">
     <header class="ob-top">
@@ -41,146 +71,172 @@ function draw(root, onDone, dir = 1) {
     <div class="ob-body">${body(step)}</div>
   </section>`;
 
-  // Animate the bar from the previous value to the new one.
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const bar = root.querySelector('.ob-bar i');
     if (bar) bar.style.width = `${p}%`;
   }));
 
-  const next = () => { i++; draw(root, onDone); };
-  root.querySelector('[data-back]').addEventListener('click', () => { if (i > 0) { i--; draw(root, onDone, -1); } });
+  const next = () => { if (i + 1 >= steps.length) return finish(onDone); i++; draw(root, onDone); };
+  root.querySelector('[data-back]').addEventListener('click', () => { if (i > 0) { i--; draw(root, onDone); } });
 
-  if (step.type === 'choice' && step.multi) {
-    // Pick up to `multi` answers, then Continue.
-    if (!Array.isArray(ans[step.id])) ans[step.id] = [];
-    const cta = root.querySelector('[data-next]');
-    const sync = () => {
-      const picked = ans[step.id];
-      root.querySelectorAll('.choice').forEach((b) => {
-        const on = picked.includes(b.dataset.v);
-        b.classList.toggle('sel', on);
-        b.setAttribute('aria-pressed', on);
-      });
-      cta.disabled = picked.length === 0;
-      root.querySelector('.commit-count').textContent = picked.length === step.multi ? 'Two is the limit. Tap one to swap it.' : picked.length ? 'Add one more, or continue.' : '';
-    };
-    root.querySelectorAll('.choice').forEach((b) => b.addEventListener('click', () => {
-      haptic();
-      const picked = ans[step.id];
-      const v = b.dataset.v;
-      if (picked.includes(v)) ans[step.id] = picked.filter((x) => x !== v);
-      else if (picked.length < step.multi) picked.push(v);
-      else toast('Pick up to two. Tap one to remove it first.');
-      sync();
-    }));
-    cta.addEventListener('click', next);
-    sync();
-  } else if (step.type === 'choice') {
+  if (step.type === 'choice') bindChoice(root, step, next);
+  if (step.type === 'commit') bindCommit(root, next);
+  if (step.type === 'name') bindName(root, next);
+  if (step.type === 'perm') bindPerm(root, next);
+  if (step.type === 'trial') bindTrial(root, next);
+}
+
+/* ---------- choice (one or two answers) ---------- */
+
+function bindChoice(root, step, next) {
+  const cta = root.querySelector('[data-next]');
+  if (!step.multi) {
     root.querySelectorAll('.choice').forEach((b) => b.addEventListener('click', () => {
       haptic();
       root.querySelectorAll('.choice').forEach((x) => x.classList.remove('sel'));
       b.classList.add('sel');
-      const v = b.dataset.v;
-      ans[step.id] = isNaN(+v) ? v : +v;
+      ans[step.id] = b.dataset.v;
       setTimeout(next, 260);
     }));
+    return;
   }
-
-  if (step.type === 'commit') {
-    const count = root.querySelector('.commit-count');
-    const cta = root.querySelector('[data-next]');
-    const sync = () => {
-      const n = ans.commitments.length;
-      count.textContent = n === 3 ? 'Locked. These are your three.' : `${n} of 3 picked`;
-      cta.disabled = n !== 3;
-      root.querySelectorAll('.ctile').forEach((t) => {
-        const on = ans.commitments.includes(t.dataset.k);
-        t.classList.toggle('sel', on);
-        t.setAttribute('aria-pressed', on);
-        const n2 = ans.commitments.indexOf(t.dataset.k);
-        t.querySelector('.ctile-n').textContent = on ? n2 + 1 : '';
-      });
-    };
-    root.querySelectorAll('.ctile').forEach((t) => t.addEventListener('click', () => {
-      haptic();
-      const k = t.dataset.k;
-      if (ans.commitments.includes(k)) ans.commitments = ans.commitments.filter((x) => x !== k);
-      else if (ans.commitments.length < 3) ans.commitments.push(k);
-      else toast('Three is the limit. Tap one to swap it out.');
-      sync();
-    }));
-    cta.addEventListener('click', next);
-    sync();
-  }
-
-  if (step.type === 'name') {
-    const input = root.querySelector('#name');
-    const cta = root.querySelector('[data-next]');
-    const sync = () => { cta.disabled = input.value.trim().length < 2; };
-    input.addEventListener('input', sync);
-    root.querySelector('form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (input.value.trim().length < 2) return;
-      ans.name = input.value.trim().slice(0, 24);
-      next();
+  if (!Array.isArray(ans[step.id])) ans[step.id] = [];
+  const sync = () => {
+    const picked = ans[step.id];
+    root.querySelectorAll('.choice').forEach((b) => {
+      const on = picked.includes(b.dataset.v);
+      b.classList.toggle('sel', on);
+      b.setAttribute('aria-pressed', on);
     });
+    cta.disabled = picked.length === 0;
+    root.querySelector('.commit-count').textContent = picked.length === step.multi ? 'Two is the limit. Tap one to swap it.' : picked.length ? 'Add one more, or continue.' : '';
+  };
+  root.querySelectorAll('.choice').forEach((b) => b.addEventListener('click', () => {
+    haptic();
+    const picked = ans[step.id];
+    const v = b.dataset.v;
+    if (picked.includes(v)) ans[step.id] = picked.filter((x) => x !== v);
+    else if (picked.length < step.multi) picked.push(v);
+    else toast('Pick up to two. Tap one to remove it first.');
     sync();
-    setTimeout(() => input.focus(), 300);
+  }));
+  cta.addEventListener('click', next);
+  sync();
+}
+
+/* ---------- goals: 1 to 6 ---------- */
+
+function bindCommit(root, next) {
+  const count = root.querySelector('.commit-count');
+  const cta = root.querySelector('[data-next]');
+  const sync = () => {
+    const n = ans.commitments.length;
+    count.textContent = n === 0 ? '' : `${n} ${n === 1 ? 'goal' : 'goals'}. You keep your streak by proving ${needFor(n)} a day.`;
+    cta.disabled = n < MIN_GOALS;
+    root.querySelectorAll('.ctile').forEach((t) => {
+      const idx = ans.commitments.indexOf(t.dataset.k);
+      t.classList.toggle('sel', idx >= 0);
+      t.setAttribute('aria-pressed', idx >= 0);
+      t.querySelector('.ctile-n').textContent = idx >= 0 ? idx + 1 : '';
+    });
+  };
+  root.querySelectorAll('.ctile').forEach((t) => t.addEventListener('click', () => {
+    haptic();
+    const k = t.dataset.k;
+    if (ans.commitments.includes(k)) ans.commitments = ans.commitments.filter((x) => x !== k);
+    else if (ans.commitments.length < MAX_GOALS) ans.commitments.push(k);
+    else toast(`${MAX_GOALS} is the limit. Tap one to swap it out.`);
+    sync();
+  }));
+  cta.addEventListener('click', next);
+  sync();
+}
+
+/* ---------- name ---------- */
+
+function bindName(root, next) {
+  const input = root.querySelector('#name');
+  const cta = root.querySelector('[data-next]');
+  const sync = () => { cta.disabled = input.value.trim().length < 2; };
+  input.addEventListener('input', sync);
+  root.querySelector('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (input.value.trim().length < 2) return;
+    ans.name = input.value.trim().slice(0, 24);
+    next();
+  });
+  sync();
+  setTimeout(() => input.focus(), 300);
+}
+
+/* ---------- camera and microphone ---------- */
+
+function bindPerm(root, next) {
+  // One prompt per permission, like a native app: the phone shows its own
+  // "Allow camera?" / "Allow microphone?" when the button is tapped.
+  const cont = root.querySelector('[data-next]');
+  const show = (kind, state) => {
+    const row = root.querySelector(`[data-perm="${kind}"]`);
+    const btn = row.querySelector('button');
+    row.dataset.state = state;
+    btn.disabled = state === 'granted';
+    btn.textContent = state === 'granted' ? 'Allowed' : state === 'denied' ? 'Try again' : 'Allow';
+    row.querySelector('.perm-note').hidden = state !== 'denied';
+    const both = ['camera', 'microphone'].every((k) => root.querySelector(`[data-perm="${k}"]`).dataset.state === 'granted');
+    cont.textContent = both ? 'Continue' : 'Skip for now';
+    cont.classList.toggle('btn-primary', both);
+    cont.classList.toggle('btn-quiet', !both);
+  };
+  for (const kind of ['camera', 'microphone']) {
+    show(kind, 'prompt');
+    navigator.permissions?.query({ name: kind }).then((r) => { if (r.state !== 'prompt') show(kind, r.state); }).catch(() => {});
+    root.querySelector(`[data-perm="${kind}"] button`).addEventListener('click', async () => {
+      haptic();
+      try {
+        const s = await navigator.mediaDevices.getUserMedia(kind === 'camera' ? { video: true } : { audio: true });
+        s.getTracks().forEach((t) => t.stop());
+        show(kind, 'granted');
+      } catch { show(kind, 'denied'); }
+    });
   }
+  cont.addEventListener('click', next);
+}
 
-  if (step.type === 'perm') {
-    // Ask for each one separately, like a native app: the phone shows its own
-    // "Allow camera?" / "Allow microphone?" prompt when the button is tapped.
-    const cont = root.querySelector('[data-next]');
-    const show = (kind, state) => {
-      const row = root.querySelector(`[data-perm="${kind}"]`);
-      const btn = row.querySelector('button');
-      row.dataset.state = state;
-      btn.disabled = state === 'granted';
-      btn.textContent = state === 'granted' ? 'Allowed' : state === 'denied' ? 'Try again' : 'Allow';
-      row.querySelector('.perm-note').hidden = state !== 'denied';
-      const both = ['camera', 'microphone'].every((k) => root.querySelector(`[data-perm="${k}"]`).dataset.state === 'granted');
-      cont.textContent = both ? 'Continue' : 'Skip for now';
-      cont.classList.toggle('btn-primary', both);
-      cont.classList.toggle('btn-quiet', !both);
-    };
-    for (const kind of ['camera', 'microphone']) {
-      show(kind, 'prompt');
-      // If the browser already knows the answer, show it without asking.
-      navigator.permissions?.query({ name: kind }).then((r) => { if (r.state !== 'prompt') show(kind, r.state); }).catch(() => {});
-      root.querySelector(`[data-perm="${kind}"] button`).addEventListener('click', async () => {
-        haptic();
-        try {
-          const s = await navigator.mediaDevices.getUserMedia(kind === 'camera' ? { video: true } : { audio: true });
-          s.getTracks().forEach((t) => t.stop());
-          show(kind, 'granted');
-        } catch {
-          show(kind, 'denied');
-        }
-      });
-    }
-    cont.addEventListener('click', next);
-  }
+/* ---------- free trial (card now, charged on day 30) ---------- */
 
-  if (step.type === 'install') bindInstall(root, next);
+function bindTrial(root, next) {
+  let plan = ans.plan || 'monthly';
+  const btn = root.querySelector('[data-card]');
+  const note = root.querySelector('.trial-state');
+  const money = () => (plan === 'yearly' ? `${PRICES.yearly} for the year` : `${PRICES.monthly} for the month`);
+  const paint = () => {
+    root.querySelectorAll('[data-plan]').forEach((b) => { b.classList.toggle('on', b.dataset.plan === plan); b.setAttribute('aria-checked', b.dataset.plan === plan); });
+    root.querySelector('[data-charge]').textContent = money();
+  };
+  root.querySelectorAll('[data-plan]').forEach((b) => b.addEventListener('click', () => { haptic(); plan = b.dataset.plan; ans.plan = plan; paint(); }));
+  paint();
 
-  if (step.type === 'plan') {
-    const finish = async (first) => {
-      await saveProfile({
-        name: ans.name,
-        goal: ans.goal, wake: ans.wake, lockin: ans.lockin,
-        proofTime: ans.proofTime, crew: ans.crew, obstacle: ans.obstacle,
-        commitments: ans.commitments,
-        createdAt: Date.now(),
-        onboarded: true,
-      });
-      pushProfile().catch(() => {}); // live mode: save to the server too
-      onDone({ firstProof: first });
-    };
-    root.querySelector('[data-first]').addEventListener('click', () => finish(true));
-    root.querySelector('[data-skip]').addEventListener('click', () => finish(false));
+  btn.addEventListener('click', async () => {
+    btn.disabled = true; btn.textContent = 'Opening secure checkout…';
+    store.set(DRAFT, { t: Date.now(), i, ans: { ...ans, plan } });
+    const err = await startCheckout({ plan, trial: true }, draftProfile());
+    if (err) { btn.disabled = false; btn.textContent = 'Add card and start free'; note.textContent = err; note.hidden = false; }
+  });
+
+  // Back from the payment page: wait for the bank, then carry on.
+  if (paidReturn()) {
+    btn.disabled = true; btn.textContent = 'Confirming your card…';
+    (async function confirm() {
+      if (await waitForAccess()) { toast('Your 30 days have started'); return next(); }
+      btn.disabled = false; btn.textContent = 'Check again';
+      note.textContent = 'Still waiting for the bank to confirm. Give it a minute, then tap Check again.';
+      note.hidden = false;
+      btn.onclick = () => { btn.disabled = true; btn.textContent = 'Confirming your card…'; confirm(); };
+    })();
   }
 }
+
+/* ---------- markup ---------- */
 
 function body(step) {
   if (step.type === 'choice') {
@@ -188,9 +244,7 @@ function body(step) {
     return `<div class="choices">${step.options.map((o) => `
       <button class="choice ${isSel(o.v) ? 'sel' : ''}" data-v="${o.v}" ${step.multi ? 'aria-pressed="false"' : ''}>
         ${step.multi ? `<span class="choice-tick" aria-hidden="true">${ic('check', 14, 2.6)}</span>` : ''}
-        ${step.visual === 'bar'
-          ? `<span class="choice-bar" aria-hidden="true"><i style="height:${o.fill}%"></i></span>`
-          : `<span class="choice-ic">${ic(o.icon, 26)}</span>`}
+        <span class="choice-ic">${ic(o.icon, 26)}</span>
         <span class="choice-txt"><b>${o.label}</b><small>${o.hint}</small></span>
       </button>`).join('')}</div>
       ${step.multi ? `<div class="ob-foot"><p class="commit-count" aria-live="polite"></p><button class="btn btn-primary" data-next disabled>Continue</button></div>` : ''}`;
@@ -203,6 +257,7 @@ function body(step) {
         ${ic(c.icon, 26)}
         <b>${c.label}</b><small>${c.hint}</small>
       </button>`).join('')}</div>
+      <div class="proff-note">${proffSVG('talk', 52)}<p>Prove <b>half</b> of your goals in a day and your streak lives. Start with what you can really do. You can change them any time.</p></div>
       <div class="ob-foot">
         <p class="commit-count" aria-live="polite"></p>
         <button class="btn btn-primary" data-next disabled>Continue</button>
@@ -232,36 +287,23 @@ function body(step) {
     </div>`;
   }
 
-  if (step.type === 'install') return installBody();
-
-  if (step.type === 'plan') {
-    const goals = [].concat(ans.goal || []).map((g) => LABEL.goal[g]?.label.toLowerCase()).filter(Boolean); const wake = LABEL.wake[ans.wake];
-    const lock = LABEL.lockin[ans.lockin]; const pts = [].concat(ans.proofTime || []).map((v) => LABEL.proofTime[v]).filter(Boolean);
-    return `<div class="plan">
-      <div class="plan-card">
-        <div class="plan-name"><span class="avatar lg">${esc((ans.name || '?')[0].toUpperCase())}</span>
-          <div><b>${esc(ans.name)}</b><small>Building ${goals.length ? goals.join(' and ') : 'discipline'}</small></div></div>
-        <div class="plan-lock">
-          <span class="lab">Daily lock-in</span>
-          <div class="lock-bar"><i style="width:${lock?.fill ?? 25}%"></i></div>
-          <span class="lock-v">${lock?.label ?? '1 hour'}</span>
-        </div>
-        <div class="plan-commits">${ans.commitments.map((k) => {
-          const c = commitment(k);
-          return `<div class="pc">${ic(c.icon, 24)}<b>${c.label}</b></div>`;
-        }).join('')}</div>
-        <div class="plan-meta">
-          <div>${ic(wake?.icon || 'sun', 20)}<span>Up ${wake ? wake.label.toLowerCase() : ''}</span></div>
-          <div>${ic(pts[0]?.icon || 'clock', 20)}<span>${pts.length ? `${pts[0].phrase}${pts[1] ? ` and ${pts[1].label.toLowerCase()}` : ''}` : 'Proof every day'}</span></div>
-        </div>
-        <div class="plan-week">
-          <span class="lab">Week 1 target: 21 proofs</span>
-          <div class="week-row">${Array.from({ length: 7 }, (_, d) => `<i class="${d === 0 ? 'now' : ''}"></i>`).join('')}</div>
-        </div>
+  if (step.type === 'trial') {
+    const ends = new Date(Date.now() + TRIAL_DAYS * 864e5).toLocaleDateString([], { day: 'numeric', month: 'long' });
+    return `<div class="trial">
+      <div class="pw-plans" role="radiogroup" aria-label="Plan after your free month">
+        <button class="pw-plan" data-plan="monthly" role="radio"><span><b>Monthly</b><small>${PRICES.monthly} a month</small></span></button>
+        <button class="pw-plan" data-plan="yearly" role="radio"><span><b>Yearly</b><small>${PRICES.yearly} a year</small></span><em>Save ${PRICES.yearlySaving}</em></button>
       </div>
+      <ul class="trial-facts">
+        <li>${ic('check', 18, 2.4)}<span><b>Today you pay nothing.</b> We check your card with R1 and refund it straight away.</span></li>
+        <li>${ic('calendar', 18)}<span><b>${ends}:</b> your card is charged <b data-charge></b>, then renews until you cancel.</span></li>
+        <li>${ic('clock', 18)}<span>We remind you 3 days before, in the app and by notification.</span></li>
+        <li>${ic('close', 18, 2.2)}<span><b>Cancel any time</b> in Account. Cancel before ${ends} and you pay nothing.</span></li>
+      </ul>
+      <p class="form-err trial-state" role="alert" hidden></p>
       <div class="ob-foot">
-        <button class="btn btn-primary" data-first>${ic('camera', 20)}<span>Post my first proof</span></button>
-        <button class="btn btn-quiet" data-skip>Go to the app</button>
+        <button class="btn btn-primary" data-card>Add card and start free</button>
+        <p class="fine">Secure payment by Paystack. Proof never sees your card details.</p>
       </div>
     </div>`;
   }

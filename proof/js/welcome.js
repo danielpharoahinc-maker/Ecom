@@ -13,7 +13,7 @@ export function renderWelcome(root, onDone) {
     </div>
     <div class="welcome-copy">
       <h1 class="display">Lock in.<br>Post proof.<br>Every day.</h1>
-      <p class="lede">Three commitments. One photo and a few words each. Your crew sees it.</p>
+      <p class="lede">Your goals. One photo and a few words each. Your crew sees it.</p>
     </div>
     <div class="auth">
       <button class="btn btn-primary" data-p="apple">${LOGO.apple}<span>Continue with Apple</span></button>

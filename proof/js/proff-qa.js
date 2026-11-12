@@ -6,7 +6,7 @@ export const TOPICS = ['Getting started', 'Posting proof', 'Streaks & score', 'P
 export const QA = [
   // Getting started
   { t: 0, q: 'What is Proof?', k: 'about app what does it do',
-    a: 'Proof helps you keep three daily commitments. You post a photo and a few words as proof each time you do one. Your streak, stats and club keep you honest.' },
+    a: 'Proof helps you keep your daily goals. You post a photo and a few words as proof each time you do one. Your streak, stats and club keep you honest.' },
   { t: 0, q: 'Who are you?', k: 'proff mascot who name',
     a: 'I’m Proff, the stamp that approves your proof. I explain things and answer questions. Tap me any time.' },
   { t: 0, q: 'How do I start?', k: 'begin first steps new',
@@ -26,7 +26,7 @@ export const QA = [
   { t: 1, q: 'What’s the difference between Photo and Voice?', k: 'voice mode audio record',
     a: 'Photo is a picture plus a few words. Voice is just you saying what you did, for things you can’t photograph.' },
   { t: 1, q: 'What is a Moment?', k: 'moment extra photo day',
-    a: 'A photo from your day that isn’t one of your three commitments. Moments tell your story, but they don’t count toward your streak or score.' },
+    a: 'A photo from your day that isn’t one of your goals. Moments tell your story, but they don’t count toward your streak or score.' },
   { t: 1, q: 'Can I upload a photo I already took?', k: 'gallery library camera roll',
     a: 'Yes. On the camera screen, tap the picture icon on the left to choose from your photos.' },
   { t: 1, q: 'How do I delete a proof?', k: 'remove mistake wrong',
@@ -36,15 +36,15 @@ export const QA = [
 
   // Streaks & score
   { t: 2, q: 'How does my streak work?', k: 'streak days in a row',
-    a: 'Every day you post proof for at least one of your commitments, your streak grows. Today only breaks it once the day is over, so you always have until midnight.' },
+    a: 'Each day you prove at least half of your goals, your streak grows. With 3 goals that’s 2, with 4 it’s 2, with 5 it’s 3. Today only counts once it’s over, so you always have until midnight.' },
   { t: 2, q: 'What breaks my streak?', k: 'lose reset miss day',
-    a: 'A full day with no commitment proof. Moments don’t keep it alive.' },
+    a: 'A day where you prove fewer than half of your goals. Moments don’t count. One quiet day is fine: your best streak and total days kept never disappear.' },
   { t: 2, q: 'How is my score out of 10 worked out?', k: 'score rating 10 week coach elite',
-    a: 'I count how many of your three commitments you proved each day over the last 7 days. All 21 done is 10/10. Each missed one costs a little.' },
+    a: 'I count how many of your goals you proved each day over the last 7 days. Every goal every day is 10/10. Each missed one costs a little.' },
   { t: 2, q: 'What do the ratings mean?', k: 'elite locked in perfect strong solid',
     a: '10 is a Perfect week, 9 Elite, 8 Locked in, 7 Strong, 6 Solid, 5 Halfway there. Below that you’re building or restarting, and that’s fine. Just post today.' },
   { t: 2, q: 'What is a perfect day?', k: 'all three',
-    a: 'A day where you proved all three commitments.' },
+    a: 'A day where you proved every one of your goals. You only need half to keep your streak, so perfect is a bonus.' },
 
   // Planning
   { t: 3, q: 'How do I plan my day?', k: 'plan today list talk',
@@ -80,13 +80,13 @@ export const QA = [
 
   // Free & Pro
   { t: 6, q: 'Is Proof free?', k: 'free cost price',
-    a: 'You get 21 free posts, about a full week. After that, Proof Pro keeps you posting.' },
+    a: 'You get 30 days free. After that, Proof Pro keeps you posting. If you added a card at the start, nothing is charged until day 30, and you can cancel before then and pay nothing.' },
   { t: 6, q: 'How much is Pro?', k: 'pro price cost rand',
     a: 'R49 a month or R399 a year. Yearly saves about a third.' },
-  { t: 6, q: 'What happens after my free posts?', k: 'limit run out 21',
-    a: 'You can still open your Vault, Stats, plans and Club. Posting new proof needs Pro.' },
+  { t: 6, q: 'What happens after my 30 days?', k: 'limit run out 30 trial ends after free',
+    a: 'After your 30 days you can still open your Vault, Stats, plans and Club. Posting new proof needs Pro.' },
   { t: 6, q: 'How do I cancel Pro?', k: 'cancel subscription stop',
-    a: 'Cancel any time through the email receipt from Paystack. You keep Pro until the end of what you’ve paid for.' },
+    a: 'Tap your initial on Today, then Subscription, then Manage or cancel. Cancel before day 30 and you pay nothing. After that you keep Pro until the end of what you’ve paid for.' },
   { t: 6, q: 'Is paying safe?', k: 'payment card secure paystack',
     a: 'Payments go through Paystack’s secure page. Proof never sees your card details.' },
 
@@ -97,12 +97,20 @@ export const QA = [
     a: 'Not yet. Right now your photos are saved on the phone you posted them from. Backing up to your account is coming.' },
   { t: 7, q: 'How do I sign in?', k: 'login sign in email link code password',
     a: 'Type your email and tap the link we send you. No password needed. Check spam if it doesn’t arrive.' },
-  { t: 7, q: 'Can I change my commitments?', k: 'change edit commitments swap',
-    a: 'Not yet. That’s coming soon. Pick the three that matter most for now.' },
+  { t: 7, q: 'Can I change my goals?', k: 'change edit goals commitments swap add remove',
+    a: 'Yes, any time. On Today tap Edit goals, pick 1 to 6, and save. Your past days keep the goals you had then, so your history is never rewritten.' },
   { t: 7, q: 'Will Proof remind me to post?', k: 'reminder notification alert remind ping',
     a: 'Yes, if you let me. Tap your initial on Today, then Reminders. I nudge you at your proof time, at 8 pm if your streak is at risk, and 10 minutes before anything timed in your plan. On iPhone, add Proof to your home screen first.' },
   { t: 7, q: 'Why am I not getting reminders?', k: 'not getting notifications reminders no ping silent',
     a: 'Check three things: Proof is on your home screen (iPhone needs this), notifications for Proof are allowed in your phone’s Settings, and Reminders are on in Account. Then tap “Send me a test”.' },
   { t: 7, q: 'How do I delete my data?', k: 'delete account data remove',
     a: 'Tap your initial at the top of Today, then Delete all my data. It can’t be undone.' },
+  { t: 2, q: 'How many goals can I have?', k: 'goals how many limit number six max',
+    a: 'From 1 to 6. Start with what you can really do. A few goals you keep beat a long list you drop.' },
+  { t: 2, q: 'Why do I only need half my goals?', k: 'half why need streak goals forgive miss',
+    a: 'Because real life has bad days. Showing up on most goals, most days, is how habits stick. One missed goal never ends your streak.' },
+  { t: 4, q: 'What is the Sunday Review?', k: 'sunday review weekly week summary focus',
+    a: 'Every Sunday evening I score your week out of 10, show your best photos, and point at the goal that needs the most love. Pick it as next week’s focus and I’ll check in on it.' },
+  { t: 6, q: 'When am I charged?', k: 'charged charge billing when day 30 card trial',
+    a: 'Never before day 30. We check your card with R1 on day one and refund it straight away. On day 30 your plan starts, unless you cancelled first. I remind you 3 days before.' },
 ];

@@ -3,9 +3,9 @@
 //   shutter -> photo, with a big mic right under it ("say what you did")
 //   Post.
 // Voice mode skips the photo for times a picture doesn't fit (prayer, a call).
-import { S, addProof } from './state.js';
+import { S, addProof, saveProfile } from './state.js';
 import { commitment } from './data.js';
-import { doneToday, streak } from './stats.js';
+import { doneToday, streak, needFor } from './stats.js';
 import { ic } from './icons.js';
 import { esc, haptic, toast, fmtDur, emit } from './util.js';
 import { getDictation } from './speech.js';
@@ -22,7 +22,7 @@ export function openCapture(opts = {}) {
   if (document.querySelector('.cap')) return;
   if (!canPost()) return paywall();
   const done = doneToday(S.proofs);
-  // Next unproven commitment; once all three are done, default to a moment.
+  // Next unproven goal; once they're all done, default to a moment.
   cKey = opts.cKey || S.profile.commitments.find((k) => !done.has(k)) || 'moment';
   mode = opts.mode || 'photo';
   photo = null; audio = null; audioSecs = 0; transcript = '';
@@ -367,18 +367,26 @@ async function post() {
 
 function success() {
   const done = doneToday(S.proofs);
+  const total = S.profile.commitments.length;
   const n = S.profile.commitments.filter((k) => done.has(k)).length;
-  const st = streak(S.proofs);
+  const need = needFor(total);
+  const st = streak(S.proofs, S.profile);
+  const first = !S.profile.firstProofDone && cKey !== 'moment';
   root.innerHTML = `
   <div class="done-screen">
     <div class="done-stamp">${proffSVG('cheer', 132)}${inkMark()}</div>
     <h2 class="title">${cKey === 'moment' ? 'Moment saved' : 'Proof posted'}</h2>
-    <p class="sub">${cKey === 'moment' ? 'Added to your day. Your club sees it too.' : n === 3 ? 'All three done. That’s a perfect day.' : `${n} of 3 locked in today.`}</p>
+    <p class="sub">${cKey === 'moment' ? 'Added to your day. Your club sees it too.' : first ? 'Your first proof. This is how it starts.' : n >= total ? 'Every goal done. That’s a perfect day.' : n >= need ? `Streak kept for today. ${n} of ${total} proven.` : `${n} of ${total} proven. ${need - n} more keeps today’s streak.`}</p>
     <div class="done-seg">${S.profile.commitments.map((k) => `<i class="${done.has(k) ? 'on' : ''}"></i>`).join('')}</div>
     <p class="done-streak">${ic('flame', 20)} ${st} day streak</p>
     <button class="btn btn-primary" data-close>Done</button>
   </div>`;
   root.querySelector('[data-close]').addEventListener('click', finish);
   const t = setTimeout(finish, 2600);
-  function finish() { clearTimeout(t); if (root) { close(); emit('proof:tab', 'today'); } }
+  function finish() {
+    clearTimeout(t);
+    if (!root) return;
+    close(); emit('proof:tab', 'today');
+    if (first) { saveProfile({ ...S.profile, firstProofDone: true }); emit('proof:first'); }
+  }
 }

@@ -9,6 +9,7 @@ const isChromeIOS = /CriOS/.test(ua);
 const isAndroid = /Android/.test(ua);
 const isSafari = isIOS && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
 
+export const isIOSDevice = isIOS;
 export const isInstalled = () =>
   window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true;
 
