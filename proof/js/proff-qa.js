@@ -94,7 +94,7 @@ export const QA = [
   { t: 7, q: 'Is my data private?', k: 'privacy safe data secure',
     a: 'Yes. Your profile, answers and plans are only yours. Your proof is visible only to your clubs. Strangers can’t see anything.' },
   { t: 7, q: 'Are my photos backed up?', k: 'backup sync new phone lost',
-    a: 'Not yet. Right now your photos are saved on the phone you posted them from. Backing up to your account is coming.' },
+    a: 'Yes. Every proof is saved privately to your account, so a new phone gets it all back when you sign in. Only you and your club can see it.' },
   { t: 7, q: 'How do I sign in?', k: 'login sign in email link code password',
     a: 'Type your email and tap the link we send you. No password needed. Check spam if it doesn’t arrive.' },
   { t: 7, q: 'Can I change my goals?', k: 'change edit goals commitments swap add remove',

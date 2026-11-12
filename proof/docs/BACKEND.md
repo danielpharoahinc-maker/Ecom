@@ -152,3 +152,19 @@ is a sync module that:
 
 That's about one focused session of work. Build it once 10+ people are
 actually using local mode.
+
+
+## 4. Status and going live (latest)
+
+Applied to the project: `supabase/reminders.sql`, then `supabase/migration-2.sql` (both safe to re-run).
+Functions deployed: `create-checkout`, `manage-subscription` (JWT on), `paystack-webhook`, `push` (JWT off, they check their own keys/signatures).
+
+To start charging (do with a parent, Paystack business account):
+1. Paystack: create two plans in ZAR, R49 monthly and R399 yearly.
+2. Supabase > Edge Functions > Secrets: `PAYSTACK_SECRET_KEY`, `PAYSTACK_PLAN_MONTHLY`, `PAYSTACK_PLAN_YEARLY`, `APP_URL` (your site address). Never paste these in chat.
+3. Paystack > Settings > Webhooks: `https://kfnetfsyvhyysjjhpwue.supabase.co/functions/v1/paystack-webhook`.
+4. SQL editor: `update app_settings set require_card = true;`
+5. In `js/config.js` set `PAYMENTS_LIVE = true`, bump `VERSION` in `sw.js`, redeploy.
+6. Publish Terms and Privacy pages before the first real charge.
+
+Sign-in on iPhone home-screen apps: add custom SMTP (Authentication > Emails) so the email carries the 6-digit code.

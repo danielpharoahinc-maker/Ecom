@@ -1,6 +1,6 @@
 // Offline support: the app shell is cached so Proof opens without signal.
 // Bump VERSION whenever you change any file below, so phones get the update.
-const VERSION = 'proof-v17';
+const VERSION = 'proof-v18';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css',
   'js/app.js', 'js/auth.js', 'js/billing.js', 'js/capture.js', 'js/club.js', 'js/clublive.js', 'js/clubshare.js', 'js/coach.js', 'js/config.js', 'js/data.js', 'js/db.js', 'js/goals.js', 'js/icons.js', 'js/install.js', 'js/nudges.js', 'js/onboarding.js', 'js/planner.js', 'js/proff-qa.js', 'js/proff.js', 'js/proofview.js', 'js/reminders.js', 'js/review.js', 'js/sheet.js', 'js/speech.js', 'js/state.js', 'js/stats.js', 'js/statsview.js', 'js/sync.js', 'js/today.js', 'js/util.js', 'js/vault.js', 'js/welcome.js',
