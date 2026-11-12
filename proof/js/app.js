@@ -66,16 +66,31 @@ function shell() {
   app.innerHTML = `
     <main id="view" class="view" tabindex="-1"></main>
     <nav class="tabbar glass" aria-label="Main">
+      <span class="bubble" aria-hidden="true"></span>
       ${TABS.map((t) => t.id === 'add'
-        ? `<button class="tab-add" data-add aria-label="Post proof">${ic('plus', 26, 2.4)}</button>`
+        ? `<button class="tab tab-add" data-add aria-label="Post proof">${ic('plus', 26, 2.2)}<span>Post</span></button>`
         : `<button class="tab" data-tab="${t.id}" aria-label="${t.label}">${ic(t.icon, 24)}<span>${t.label}</span></button>`).join('')}
     </nav>`;
   app.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => {
     if (S.tab === b.dataset.tab) return window.scrollTo({ top: 0, behavior: 'smooth' });
     haptic(); S.tab = b.dataset.tab; draw(true);
   }));
-  app.querySelector('[data-add]').addEventListener('click', () => openCapture());
+  app.querySelector('[data-add]').addEventListener('click', () => { haptic(); bubbleTo(app.querySelector('[data-add]')); openCapture(); });
+  window.addEventListener('capture:closed', () => bubbleTo(null));
+  window.addEventListener('resize', () => bubbleTo(null, true));
   draw();
+}
+
+// The glass bubble sits over whichever tab you are on. Tapping + moves it to +.
+function bubbleTo(el, instant = false) {
+  const nav = app.querySelector('.tabbar'), bub = nav?.querySelector('.bubble');
+  if (!bub) return;
+  const target = el || nav.querySelector(`[data-tab="${S.tab}"]`);
+  if (!target) return;
+  if (instant) bub.style.transition = 'none';
+  bub.style.width = target.offsetWidth + 'px';
+  bub.style.transform = `translateX(${target.offsetLeft}px)`;
+  if (instant) requestAnimationFrame(() => { bub.style.transition = ''; });
 }
 
 function draw(scrollTop = false) {
@@ -87,6 +102,7 @@ function draw(scrollTop = false) {
     b.classList.toggle('on', on);
     if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
   });
+  bubbleTo(null, !app.querySelector('.bubble')?.style.width);
   const paint = () => { tab.render(view); if (scrollTop) window.scrollTo(0, 0); };
   if (scrollTop && document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(paint);
   else paint();

@@ -40,6 +40,7 @@ export function openCapture(opts = {}) {
 }
 
 function close() {
+  window.dispatchEvent(new Event('capture:closed'));
   stopCamera();
   stopTalk(true);
   root?.classList.remove('open');
