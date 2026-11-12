@@ -54,6 +54,8 @@ alter table public.billing add column if not exists charge_on timestamptz; -- fi
 alter table public.billing add column if not exists sub_code text;
 alter table public.billing add column if not exists trial_ref text;
 alter table public.billing add column if not exists trial_used_at timestamptz;
+alter table public.billing add column if not exists card_sig text;
+create unique index if not exists billing_card_sig on public.billing (card_sig) where card_sig is not null;
 alter table public.billing add column if not exists granted boolean not null default false;
 alter table public.billing add column if not exists refunded boolean not null default false;
 

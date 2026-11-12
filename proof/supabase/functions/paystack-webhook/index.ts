@@ -46,6 +46,14 @@ async function trialStart(d: any) {
   if (!userId || !plan || !(plan in PLANS) || d.currency !== 'ZAR' || d.amount !== TRIAL_AUTH || d.status !== 'success') return reply('ignored');
   if (!customer || !auth || d.authorization?.reusable === false) { await paystack('/refund', 'POST', { transaction: d.reference }); return reply('card not reusable, refunded'); }
 
+  // One free trial per CARD, not just per account: a second account with the same
+  // card (a new guest account, a new email) gets its R1 back and no free month.
+  const sig = d.authorization?.signature as string | undefined;
+  if (sig) {
+    const { data: other } = await admin.from('billing').select('user_id').eq('card_sig', sig).neq('user_id', userId).maybeSingle();
+    if (other) { await paystack('/refund', 'POST', { transaction: d.reference }); return reply('card already used for a trial, refunded'); }
+  }
+
   const { data: found } = await admin.from('billing').select('*').eq('user_id', userId).maybeSingle();
   let bill = found;
   // One free trial per person: a second card check is just given back.
@@ -55,7 +63,7 @@ async function trialStart(d: any) {
   }
   const trialEnd = bill?.charge_on ? new Date(bill.charge_on) : new Date(Date.now() + TRIAL_DAYS * 864e5);
   if (!bill?.trial_ref) {
-    bill = { user_id: userId, customer_code: customer, plan, status: 'trial', charge_on: trialEnd.toISOString(), trial_ref: d.reference, trial_used_at: new Date().toISOString(), granted: false, refunded: false, sub_code: null };
+    bill = { user_id: userId, customer_code: customer, plan, status: 'trial', charge_on: trialEnd.toISOString(), trial_ref: d.reference, card_sig: sig ?? null, trial_used_at: new Date().toISOString(), granted: false, refunded: false, sub_code: null };
     await admin.from('billing').upsert({ ...bill, updated_at: new Date().toISOString() });
   }
 

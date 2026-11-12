@@ -34,7 +34,7 @@ const daysAhead = () => (DB.profiles[U].pro_until ? Math.round((new Date(DB.prof
 const n = (path) => calls.filter((c) => c.path === path).length;
 let fails = 0;
 const ok = (label, cond, info = '') => { if (!cond) fails++; console.log(`${cond ? 'PASS' : 'FAIL'} ${label}${info ? '  -> ' + info : ''}`); };
-const trial = (over = {}) => ({ event: 'charge.success', data: { status: 'success', currency: 'ZAR', amount: 100, reference: 'tr1', customer: { customer_code: 'CUS_1' }, authorization: { authorization_code: 'AUTH_1', reusable: true }, metadata: { user_id: U, plan: 'monthly', trial: true }, ...over } });
+const trial = (over = {}) => ({ event: 'charge.success', data: { status: 'success', currency: 'ZAR', amount: 100, reference: 'tr1', customer: { customer_code: 'CUS_1' }, authorization: { authorization_code: 'AUTH_1', reusable: true, signature: 'SIG_card1' }, metadata: { user_id: U, plan: 'monthly', trial: true }, ...over } });
 const charge = (over = {}) => ({ event: 'charge.success', data: { status: 'success', currency: 'ZAR', amount: 4900, reference: 'pay1', customer: { customer_code: 'CUS_1' }, metadata: {}, plan: { plan_code: 'PLN_month' }, ...over } });
 
 reset();
@@ -73,6 +73,13 @@ ok('Retry once the profile exists: everything completes', r === '200 ok' && days
 reset(); await send(trial()); calls.length = 0; const before = DB.profiles[U].pro_until;
 r = await send(trial({ reference: 'tr2' }));
 ok('A second free trial for the same person: refunded, no extra time', n('/refund') === 1 && n('/subscription') === 0 && DB.profiles[U].pro_until === before, r);
+
+reset(); await send(trial()); calls.length = 0;
+DB.profiles['user-2'] = { id: 'user-2', pro_until: null };
+r = await send(trial({ reference: 'tr9', customer: { customer_code: 'CUS_2' }, metadata: { user_id: 'user-2', plan: 'monthly', trial: true } }));
+ok('Same card on a second account: refunded, no free month', r.endsWith('refunded') && n('/refund') === 1 && n('/subscription') === 0 && !DB.profiles['user-2'].pro_until, r);
+r = await send(trial({ reference: 'tr10', customer: { customer_code: 'CUS_3' }, authorization: { authorization_code: 'AUTH_9', reusable: true, signature: 'SIG_other' }, metadata: { user_id: 'user-2', plan: 'monthly', trial: true } }));
+ok('A different card on that account: gets its trial', r === '200 ok' && !!DB.profiles['user-2'].pro_until, r);
 
 reset(); r = await send(trial({ authorization: { authorization_code: 'AUTH_x', reusable: false } }));
 ok('Card that cannot be charged again: refunded, no access', n('/refund') === 1 && daysAhead() === 0, r);

@@ -1,6 +1,6 @@
 // A tiny stand-in for supabase-js, backed by plain objects, for the webhook test.
 export const DB = (globalThis.__DB ||= { profiles: {}, billing: {} });
-const matches = (r, filters) => filters.every(([op, c, v]) => (op === 'eq' ? r[c] === v : (r[c] ?? null) === null));
+const matches = (r, filters) => filters.every(([op, c, v]) => (op === 'eq' ? r[c] === v : op === 'neq' ? r[c] !== v : (r[c] ?? null) === null));
 export function createClient() {
   return {
     from(table) {
@@ -8,6 +8,7 @@ export function createClient() {
       const api = {
         select() { return api; },
         eq(c, v) { filters.push(['eq', c, v]); return api; },
+        neq(c, v) { filters.push(['neq', c, v]); return api; },
         is(c, v) { filters.push(['is', c, v]); return api; },
         async maybeSingle() { const r = Object.values(rows).find((x) => matches(x, filters)); return { data: r ? { ...r } : null }; },
         update(patch) {
