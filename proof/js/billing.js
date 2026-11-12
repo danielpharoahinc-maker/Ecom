@@ -91,7 +91,10 @@ export async function pushProfile(profile = S.profile, strict = false) {
   const c = await getClient().catch(() => null);
   if (!c || !S.user || !profile) return strict ? 'Not connected.' : null;
   const arr = (v) => (v == null ? null : [].concat(v).map(String));
-  const base = { id: S.user.id, name: profile.name, goal: arr(profile.goal), proof_time: arr(profile.proofTime), commitments: profile.commitments };
+  // The server only accepts your own row, so use the id of the real login, never a stored copy.
+  const { data: sess } = await c.auth.getSession();
+  if (!sess.session) return strict ? 'You’re signed out.' : null;
+  const base = { id: sess.session.user.id, name: profile.name, goal: arr(profile.goal), proof_time: arr(profile.proofTime), commitments: profile.commitments };
   let { error } = await c.from('profiles').upsert({ ...base, goal_log: profile.goalLog || null, tz: tz() });
   if (error && /column|schema cache/i.test(error.message)) ({ error } = await c.from('profiles').upsert(base));
   return error ? error.message : null;

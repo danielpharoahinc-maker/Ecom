@@ -7,6 +7,7 @@ import { S, saveProfile } from './state.js';
 import * as db from './db.js';
 import { getClient } from './auth.js';
 import { emit, uid } from './util.js';
+import { pushProfile } from './billing.js';
 
 const BUCKET = 'proof-media';
 const EXT = { 'audio/webm': 'webm', 'audio/mp4': 'm4a', 'audio/mpeg': 'mp3', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
@@ -24,6 +25,7 @@ export async function syncProofs() {
   if (!LIVE || !S.user || !S.profile?.onboarded || busy) return;
   const c = await getClient().catch(() => null);
   if (!c) return;
+  if (!(await ensureProfile()).ok) return; // proofs need your profile on the server first
   busy = true;
   try {
     const todo = S.proofs.filter((p) => !p.remoteId && p.cKey).sort((a, b) => a.ts - b.ts);
@@ -108,6 +110,27 @@ async function removeRemote(d) {
   } catch { /* the proof is gone on this phone either way */ }
 }
 
+// Make sure you exist on the server. Club boards are built from profiles, so without
+// one you are invisible to your friends. Retried every time it matters.
+let profileOk = false;
+export async function ensureProfile() {
+  if (!LIVE) return { ok: true };
+  if (!S.user || !S.profile?.onboarded) return { ok: false, reason: 'profile', message: 'Finish setup first.' };
+  const c = await getClient().catch(() => null);
+  if (!c) return { ok: false, reason: 'offline', message: 'Couldn’t reach Proof’s server.' };
+  const { data: sess } = await c.auth.getSession();
+  if (!sess.session) return { ok: false, reason: 'session', message: 'You’re signed out. Sign in again to use clubs.' };
+  if (profileOk) return { ok: true };
+  const { data: have, error: e1 } = await c.from('profiles').select('id').eq('id', sess.session.user.id).maybeSingle();
+  if (e1) return { ok: false, reason: 'offline', message: 'Couldn’t reach Proof’s server.' };
+  if (!have) {
+    const err = await pushProfile(S.profile, true);
+    if (err) return { ok: false, reason: 'profile', message: `Couldn’t save your profile: ${err}` };
+  }
+  profileOk = true;
+  return { ok: true };
+}
+
 export function startSync() {
   if (!LIVE) return;
   const soon = () => { clearTimeout(timer); timer = setTimeout(syncProofs, 900); };
@@ -115,6 +138,7 @@ export function startSync() {
   window.addEventListener('online', soon);
   window.addEventListener('proof:deleted', (e) => removeRemote(e.detail));
   document.addEventListener('visibilitychange', () => { if (!document.hidden) soon(); });
-  syncProofs();
-  pullMine();
+  ensureProfile().then(() => { syncProofs(); pullMine(); });
+  window.addEventListener('online', () => ensureProfile().then(() => syncProofs()));
+  window.addEventListener('proof:profile', () => { profileOk = false; ensureProfile(); });
 }

@@ -3,6 +3,8 @@
 // shows you is already limited to your clubs by its own rules.
 import { S } from './state.js';
 import { getClient } from './auth.js';
+import { ensureProfile } from './sync.js';
+import { signOut } from './state.js';
 import { commitment } from './data.js';
 import { doneToday, streak, needFor } from './stats.js';
 import { openSheet, confirmSheet } from './sheet.js';
@@ -48,6 +50,8 @@ async function refresh() {
   try {
     const c = await getClient();
     if (!c) throw new Error('offline');
+    const ens = await ensureProfile();
+    if (!ens.ok) { const err = new Error(ens.message); err.reason = ens.reason; throw err; }
     const { data: clubs, error } = await c.from('clubs').select('id, name, code, owner').order('created_at', { ascending: false });
     if (error) throw error;
     st.clubs = clubs || [];
@@ -82,7 +86,7 @@ async function refresh() {
     st.phase = 'ready';
     writeCache();
   } catch (e) {
-    if (st.phase !== 'ready') { st.phase = 'error'; st.error = 'Couldn’t reach your club. Check your connection.'; }
+    if (st.phase !== 'ready') { st.phase = 'error'; st.reason = e.reason || ''; st.error = e.reason ? e.message : (e.message && e.message !== 'offline' ? `Couldn’t load your club: ${e.message}` : 'Couldn’t reach your club. Check your connection.'); }
   } finally {
     busy = false;
     paint();
@@ -99,8 +103,10 @@ function paint() {
   }
   if (st.phase === 'error') {
     host.innerHTML = `<header class="page-top"><div><p class="date">Multiplayer</p><h1 class="title">Club</h1></div></header>
-      <div class="empty"><b>Club is offline</b><p>${esc(st.error)}</p><button class="btn btn-primary" data-retry>Try again</button></div>`;
-    host.querySelector('[data-retry]').addEventListener('click', () => { st.phase = 'loading'; paint(); refresh(); });
+      <div class="empty"><b>${st.reason === 'session' ? 'Sign in to use clubs' : 'Club isn’t loading'}</b><p>${esc(st.error)}</p>
+        ${st.reason === 'session' ? '<button class="btn btn-primary" data-signin>Sign in</button>' : '<button class="btn btn-primary" data-retry>Try again</button>'}</div>`;
+    host.querySelector('[data-retry]')?.addEventListener('click', () => { st.phase = 'loading'; paint(); refresh(); });
+    host.querySelector('[data-signin]')?.addEventListener('click', async () => { await signOut(); window.dispatchEvent(new Event('proof:route')); });
     return;
   }
   if (st.phase === 'empty') return paintEmpty();
@@ -233,9 +239,11 @@ export function createLive() {
         if (!name) return;
         const btn = body.querySelector('[type=submit]'); btn.disabled = true; btn.textContent = 'Creating…';
         const c = await getClient().catch(() => null);
+        const ens = await ensureProfile();
+        if (!ens.ok) { err.textContent = ens.message; err.hidden = false; btn.disabled = false; btn.textContent = 'Create club'; return; }
         const { data, error } = c ? await c.rpc('create_club', { club_name: name }) : { error: { message: 'offline' } };
         if (error || !data?.[0]) {
-          err.textContent = /5 clubs/.test(error?.message || '') ? 'You can own up to 5 clubs.' : 'Couldn’t create the club. Check your connection and try again.';
+          err.textContent = /5 clubs/.test(error?.message || '') ? 'You can own up to 5 clubs.' : `Couldn’t create the club${error?.message && error.message !== 'offline' ? `: ${error.message}` : '. Check your connection and try again.'}`;
           err.hidden = false; btn.disabled = false; btn.textContent = 'Create club';
           return;
         }
@@ -272,10 +280,12 @@ export function joinLive(prefill = '') {
         if (code.length !== 6) { err.textContent = 'Codes are 6 characters.'; err.hidden = false; return; }
         const btn = body.querySelector('[type=submit]'); btn.disabled = true; btn.textContent = 'Joining…';
         const c = await getClient().catch(() => null);
+        const ens = await ensureProfile();
+        if (!ens.ok) { err.textContent = ens.message; err.hidden = false; btn.disabled = false; btn.textContent = 'Join club'; return; }
         const { data, error } = c ? await c.rpc('join_club', { invite: code }) : { error: { message: 'offline' } };
         if (error) {
           const m = error.message || '';
-          err.textContent = /No club/.test(m) ? 'No club has that code. Check it and try again.' : /full/i.test(m) ? 'That club is full.' : 'Couldn’t join. Check your connection and try again.';
+          err.textContent = /No club/.test(m) ? 'No club has that code. Check it and try again.' : /full/i.test(m) ? 'That club is full.' : `Couldn’t join${m && m !== 'offline' ? `: ${m}` : '. Check your connection and try again.'}`;
           err.hidden = false; btn.disabled = false; btn.textContent = 'Join club';
           return;
         }

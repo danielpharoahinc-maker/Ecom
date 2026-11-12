@@ -1,6 +1,7 @@
 // Proof: start-up and the bottom tab bar.
 //   Vault | Stats | + | Today | Club
-import { S, load, setUser } from './state.js';
+import { S, load, setUser, signOut } from './state.js';
+import { LIVE } from './config.js';
 import { currentLiveUser } from './auth.js';
 import { renderWelcome } from './welcome.js';
 import { renderOnboarding } from './onboarding.js';
@@ -118,10 +119,13 @@ window.addEventListener('hashchange', fromHash);
 
 async function boot() {
   await load();
-  // Coming back from Apple/Google/Microsoft in live mode.
-  if (!S.user) {
+  // Live mode: the real login is the source of truth. A leftover test-mode account
+  // (a different id) can't use clubs, cloud backup or reminders, so it is replaced.
+  if (LIVE) {
     const live = await currentLiveUser().catch(() => null);
-    if (live) await setUser({ ...live, email: live.email || S.user?.email || '' });
+    if (live) {
+      if (!S.user || S.user.id !== live.id) await setUser({ ...live, email: live.email || (S.user?.id === live.id ? S.user.email : '') });
+    } else if (S.user) { await signOut(); }
   }
   // A new phone: bring your goals and proof back from your account.
   if (S.user && !S.profile?.onboarded) await restoreProfile().then((ok) => ok && load()).catch(() => {});
