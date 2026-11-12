@@ -65,7 +65,7 @@ export async function renderToday(el) {
         return `<button class="cm ${p ? 'done' : ''}" data-capture="${k}" aria-label="${c.label}: ${p ? 'proven today, add another' : 'post proof'}">
           <span class="cm-ic">${p ? ic('check', 18, 2.4) : ic(c.icon, 20)}</span>
           <span class="cm-txt"><b>${c.label}</b><small>${p ? `Proven at ${fmtClock(p.ts)}` : c.hint}</small></span>
-          ${p?.photoId ? `<img class="cm-shot" data-media="${p.photoId}" alt="">` : `<span class="cm-go">${ic('camera', 18)}</span>`}
+          <span class="cm-go">${ic(p ? 'plus' : 'camera', 18)}</span>
         </button>`;
       }).join('')}
     </div>
@@ -99,12 +99,10 @@ export async function renderToday(el) {
   </section>
 
   <section class="day-sec" aria-label="Your day in photos">
-    <div class="sec-h"><h2 class="headline">Your day</h2><span class="dim">${todays.length ? `${todays.length} ${todays.length === 1 ? 'photo' : 'photos'}` : 'Moments don’t affect your streak'}</span></div>
+    <div class="sec-h"><h2 class="headline">Your day</h2><span class="dim">${todays.length ? `${todays.length} ${todays.length === 1 ? 'photo' : 'photos'} in your Vault` : 'Moments don’t affect your streak'}</span></div>
     <div class="day-strip">
       <button class="ds-add" data-moment aria-label="Add a photo from your day">${ic('plus', 20, 2.2)}<span>Moment</span></button>
-      ${todays.map((p) => `<button class="ds-shot" data-open="${p.id}" aria-label="${commitment(p.cKey).label} photo">
-        ${p.photoId ? `<img data-media="${p.photoId}" alt="">` : `<span class="ds-voice">${ic('wave', 20, 1.5)}</span>`}
-      </button>`).join('')}
+
     </div>
   </section>`;
 
