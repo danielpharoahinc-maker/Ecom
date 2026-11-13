@@ -28,7 +28,7 @@
     "ceo-of-bad-decisions": { front: shot("ceo-of-bad-decisions-front"), back: shot("ceo-of-bad-decisions-back") },
     "zero-exes":            { front: shot("zero-exes-front"),            back: shot("zero-exes-back") },
     "sweet-cupcake":        { front: shot("sweet-cupcake-front") },
-    "need-a-hug":           { front: real("need-a-hug"),                 back: shot("need-a-hug-back") },
+    "need-a-hug":           { front: real("need-a-hug") },   // back: the new big AWEZA print shows on the 3D shirt itself
     "captain-save":         { front: real("captain-save"),               back: shot("captain-save-back") },
     "black-out":           { front: shot("black-out-front"),            back: shot("black-out-back") },
     "time-of-your-life":   { front: shot("time-of-your-life-front"),    back: shot("time-of-your-life-back") },

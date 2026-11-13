@@ -38,3 +38,6 @@ The tee pages show R600 struck through next to the real R450, because the tees w
 - **It switches itself off on 31 January 2027** (`AW.config.was.until` in `data/products.js`). A reference price should not stay on a product for ever. Do not extend it unless you genuinely still sell or advertise at R600.
 - **Only for tees you actually advertised at R600.** Black Out Or Back Out and Time of Your Life were added later: if they were never advertised at R600, add `noWas: true` to them in `data/products.js` and the strike-through disappears for those two.
 - Bigger sizes show the matching "was" price (R640 for 2XL, R670 for 3XL to 5XL). The bag, checkout and card total always use the real prices.
+
+## 7. Need A Hug back print: check the colour in Printify
+On 13 November 2026 the back print in Printify (`IMG_0319.jpeg`, large arched AWEZA) shows as **light grey with no stripes** in Printify's own mockup. The website shows it **black with thin white stripes** (3D shirt and the back photo), as requested. The shirt Printify prints follows the print file, not the website, so open the product in Printify, check the file's colour and add the stripes there, or the shirts customers receive will not match the site.

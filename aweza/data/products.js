@@ -84,7 +84,7 @@ AW.collections = [
       id: "need-a-hug", name: "Need A Hug Tee", collection: "no-filter", price: 450,
       colourName: "White", sizes: STD, fit: "Heavyweight cotton, classic fit",
       images: img("need-a-hug", FRONT_FIRST),
-      summary: "Bold black type across the chest that says exactly what it means. Small AWEZA mark on the back, hugs not guaranteed.",
+      summary: "Bold black type across the chest that says exactly what it means. Big arched AWEZA lettering across the back, hugs not guaranteed.",
     },
     {
       id: "black-out", name: "Black Out Or Back Out Tee", collection: "bad-decisions", price: 450,
