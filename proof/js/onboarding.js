@@ -4,7 +4,11 @@
 // account counts. A draft is kept so leaving for the payment page and coming
 // back picks up exactly where you were.
 import { STEPS, CATALOG, MAX_GOALS, MIN_GOALS, needFor } from './data.js';
-import { S, saveProfile } from './state.js';
+import { S, saveProfile, setUser, load } from './state.js';
+import { mountAgePull } from './agepull.js';
+import { consentHTML, consentOK, saveConsent, createAccount } from './account.js';
+import { waitForLink } from './welcome.js';
+import { restoreProfile } from './sync.js';
 import { pushProfile, startCheckout, waitForAccess } from './billing.js';
 import { proffSVG } from './proff.js';
 import { PRICES, TRIAL_DAYS, PAYMENTS_LIVE, REQUIRE_CARD } from './config.js';
@@ -27,7 +31,8 @@ const paidReturn = () => { try { return sessionStorage.getItem('proof:paid') ===
 export const trialStepOn = () => PAYMENTS_LIVE && REQUIRE_CARD;
 
 export function renderOnboarding(root, onDone) {
-  steps = STEPS.filter((s) => s.type !== 'trial' || trialStepOn());
+  // Already signed in (came back through the email link)? The account steps are done.
+  steps = STEPS.filter((s) => (s.type !== 'trial' || trialStepOn()) && !((s.type === 'age' || s.type === 'account') && S.user));
   ans = { commitments: [], name: (S.user?.name || '').split(' ')[0] || '' };
   i = 0;
   const d = store.get(DRAFT);
@@ -60,7 +65,7 @@ function draw(root, onDone) {
       <button class="icon-btn" data-back aria-label="Back" ${i === 0 ? 'style="visibility:hidden"' : ''}>${ic('back', 22)}</button>
       <div class="ob-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}">
         <div class="ob-bar"><i style="width:${pct(Math.max(0, i - 1))}%"></i></div>
-        <span class="ob-pct">${i === 0 ? 'Account created. ' : ''}${p}% set up</span>
+        <span class="ob-pct">${p}% set up</span>
       </div>
       <span class="icon-btn" aria-hidden="true"></span>
     </header>
@@ -81,8 +86,58 @@ function draw(root, onDone) {
   if (step.type === 'choice') bindChoice(root, step, next);
   if (step.type === 'commit') bindCommit(root, next);
   if (step.type === 'name') bindName(root, next);
+  if (step.type === 'age') bindAge(root, next);
+  if (step.type === 'account') bindAccount(root, next, onDone, () => draw(root, onDone));
   if (step.type === 'perm') bindPerm(root, next);
   if (step.type === 'trial') bindTrial(root, next);
+}
+
+/* ---------- age: pull to set it ---------- */
+
+function bindAge(root, next) {
+  const cta = root.querySelector('[data-next]');
+  const ctl = mountAgePull(root.querySelector('[data-agepull]'), {
+    value: ans.age || 15,
+    onChange: ({ age, touched }) => { ans.age = age; ans.ageSet = touched; cta.disabled = !(touched && age >= 13); store.set(DRAFT, { t: Date.now(), i, ans }); },
+  });
+  if (ans.ageSet && ans.age) { ctl.set(ans.age); cta.disabled = ans.age < 13; }
+  cta.addEventListener('click', next);
+}
+
+/* ---------- account: terms, email, then you're in ---------- */
+
+function bindAccount(root, next, onDone, redraw) {
+  const form = root.querySelector('.acct'), btn = form.querySelector('[type=submit]'), err = form.querySelector('.form-err'), email = root.querySelector('#email');
+  const minor = (ans.age || 18) < 18;
+  const ok = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+  const sync = () => { btn.disabled = !(consentOK(form) && ok(email.value.trim())); };
+  form.addEventListener('input', sync); form.addEventListener('change', sync);
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const addr = email.value.trim().toLowerCase();
+    if (!ok(addr)) { err.textContent = 'Enter a full email address, like you@gmail.com.'; err.hidden = false; return; }
+    err.hidden = true; btn.disabled = true; btn.textContent = 'One moment…';
+    try {
+      const res = await createAccount(addr);
+      if (res.existing) {
+        // That email already has an account: the link signs you in and brings your data back.
+        return waitForLink(root.querySelector('.ob-body'), addr, {
+          onUser: async (user) => {
+            await setUser(user);
+            if (await restoreProfile().catch(() => false)) { await load(); store.del(DRAFT); return onDone({ existing: true }); }
+            saveConsent({ age: ans.age, minor }); next();
+          },
+          onBack: redraw,
+        });
+      }
+      saveConsent({ age: ans.age, minor });
+      haptic(20);
+      await setUser(res.user);
+      if (res.user && !res.user.local) toast('Link sent to your email. Tap it to save your account. Keep going.');
+      next();
+    } catch (e2) { err.textContent = e2.message || 'Couldn’t create your account. Try again.'; err.hidden = false; btn.disabled = false; btn.textContent = 'Create my account'; }
+  });
+  sync();
 }
 
 /* ---------- choice (one or two answers) ---------- */
@@ -268,6 +323,20 @@ function body(step) {
       <label class="sr" for="name">Your name</label>
       <input id="name" class="big-input" maxlength="24" autocomplete="given-name" placeholder="First name" value="${esc(ans.name)}">
       <div class="ob-foot"><button class="btn btn-primary" data-next type="submit">Continue</button></div>
+    </form>`;
+  }
+
+  if (step.type === 'age') {
+    return `<div class="age-step"><div data-agepull></div><div class="ob-foot"><button class="btn btn-primary" data-next disabled>Continue</button></div></div>`;
+  }
+
+  if (step.type === 'account') {
+    return `<form class="acct" novalidate>
+      ${consentHTML({ minor: (ans.age || 18) < 18 })}
+      <label class="sr" for="email">Email</label>
+      <input id="email" class="big-input" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required>
+      <p class="form-err" role="alert" hidden></p>
+      <div class="ob-foot"><button class="btn btn-primary" type="submit" disabled>Create my account</button></div>
     </form>`;
   }
 

@@ -980,3 +980,38 @@ img.img-fade.loaded { opacity: 1; }
 .shutter-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
 .shutter-row > :first-child { justify-self: start; }
 .shutter-row .cancel-btn { justify-self: end; }
+
+/* Goal is picked after the photo, not before */
+.cap-for { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; }
+.cap-for p { margin: 0; font-size: 14px; font-weight: 600; color: var(--mute); }
+.cap-for .cap-chips { position: static; padding: 0; justify-content: flex-start; }
+
+/* Pull to set your age */
+.age-step { display: flex; flex-direction: column; gap: 18px; align-items: center; padding-top: 6px; }
+[data-agepull] { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 14px; --p: 0deg; }
+.ap { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; outline: none; }
+.ap:focus-visible .ap-ring { box-shadow: 0 0 0 2px var(--accent); }
+.ap-pull { position: relative; display: flex; flex-direction: column; align-items: center; padding: 8px 0 30px; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; transform: translateY(var(--dy, 0px)); transition: transform .55s var(--spring); }
+[data-agepull]:not(.touched) .ap-pull { animation: apNudge 2.6s ease-in-out .8s 2; }
+.pulling .ap-pull { transition: none; cursor: grabbing; }
+.ap-ring { width: 212px; height: 212px; border-radius: 50%; padding: 8px; box-sizing: border-box; display: grid; place-items: center; background: conic-gradient(var(--accent) var(--p), var(--s2) 0); box-shadow: 0 18px 40px -22px rgba(0, 0, 0, .9); transition: box-shadow .3s; }
+.adult .ap-ring, .minor .ap-ring { box-shadow: 0 18px 40px -22px rgba(216, 201, 168, .5); }
+.young .ap-ring { background: conic-gradient(var(--danger) var(--p), var(--s2) 0); }
+.ap-num { width: 100%; height: 100%; border-radius: 50%; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.ap-num b { font-family: var(--display); font-size: 84px; line-height: .95; font-weight: 800; letter-spacing: -.04em; font-variant-numeric: tabular-nums; transition: color .2s; }
+.ap-num b.dim { color: var(--mute); }
+.ap-num b.pop { animation: apPop .28s var(--spring); }
+.ap-num small { color: var(--mute); font-size: 14px; }
+.ap-grip { position: absolute; bottom: 8px; }
+.ap-grip i { display: block; width: 56px; height: 8px; border-radius: 4px; background: var(--accent); opacity: .75; box-shadow: 0 0 14px rgba(216, 201, 168, .35); }
+.ap-step { width: 48px; height: 48px; border-radius: 50%; background: var(--s2); color: var(--ink-2); font-size: 24px; line-height: 1; box-shadow: var(--hi); transition: transform .15s var(--spring); }
+.ap-step:active { transform: scale(.9); }
+.ap-hint, .ap-verdict { margin: 0; text-align: center; font-size: 16px; color: var(--ink-2); min-height: 24px; }
+.ap-verdict { color: var(--accent); font-weight: 600; }
+.young .ap-verdict { color: var(--danger); }
+.acct { display: flex; flex-direction: column; gap: 14px; }
+.acct .consent { gap: 14px; }
+@keyframes apPop { 0% { transform: scale(.88); } 60% { transform: scale(1.06); } 100% { transform: scale(1); } }
+@keyframes apNudge { 0%, 70%, 100% { transform: translateY(0); } 85% { transform: translateY(22px); } }
+@media (prefers-reduced-motion: reduce) { [data-agepull]:not(.touched) .ap-pull, .ap-num b.pop { animation: none; } }
+.age-step .ob-foot, .age-step .ob-foot .btn { width: 100%; }

@@ -55,6 +55,8 @@ export const STEPS = [
   },
   { id: 'commitments', type: 'commit', title: 'Pick your goals', sub: 'Choose 1 to 6. You can change them any time.' },
   { id: 'name', type: 'name', title: 'What should your crew call you?', sub: 'This shows on your proof and in clubs.' },
+  { id: 'age', type: 'age', title: 'How old are you?' },
+  { id: 'account', type: 'account', title: 'Save your account' },
   { id: 'perm', type: 'perm', title: 'Proof needs your camera and mic', sub: 'A photo shows what you did. Your voice says it in 5 seconds.' },
   { id: 'trial', type: 'trial', title: 'Start your 30 days free', sub: 'Add a card now. You pay nothing until day 30.' },
 ];

@@ -33,17 +33,24 @@ const TABS = [
 const params = new URLSearchParams(location.search);
 if (params.has('join')) { rememberInvite(params.get('join')); history.replaceState(null, '', location.pathname); }
 
+let started = false; // "Get started" tapped this visit
+const hasDraft = () => { try { return Boolean(localStorage.getItem('proof:ob')); } catch { return false; } };
+
 function route(opts = {}) {
-  if (!S.user) { unmountProff(); return renderWelcome(app, () => route()); }
   if (!S.profile?.onboarded) {
     unmountProff();
+    // A new person: intro, then setup. The account comes at the end of setup.
+    if (!S.user && !started && !hasDraft()) return renderWelcome(app, () => route(), { onStart: () => { started = true; route(); } });
     return renderOnboarding(app, (o) => {
       S.tab = 'today';
       route();
+      if (o?.existing) return; // signed back in to an existing account: no tour
       // Proff explains the app, then you post your first proof.
       setTimeout(() => startTour(() => { if (o?.firstProof) setTimeout(() => openCapture(), 300); }), 450);
     });
   }
+  // Set up but signed out: sign in.
+  if (!S.user) { unmountProff(); return renderWelcome(app, () => route(), { mode: 'signin' }); }
   shell();
   mountProff();
   if (tourNeeded() && !opts.fromOnboarding) setTimeout(() => startTour(), 600);

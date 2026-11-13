@@ -86,7 +86,6 @@ async function camera() {
       <button class="icon-btn glass round" data-close aria-label="Close">${ic('close', 22)}</button>
       <button class="icon-btn glass round" data-flip aria-label="Switch camera">${ic('flip', 22)}</button>
     </header>
-    ${chips()}
     <p class="cam-hint" hidden>Tap the shutter to open your camera.</p>
     <footer class="cam-bottom">
       <div class="modes" role="tablist">
@@ -101,7 +100,6 @@ async function camera() {
     </footer>
     <input type="file" accept="image/*" capture="environment" hidden>
   </div>`;
-  bindChips();
   const video = root.querySelector('video');
   const file = root.querySelector('input[type=file]');
 
@@ -185,7 +183,7 @@ function review() {
       <b data-ctitle>${c.label}</b>
       <button class="icon-btn" data-close aria-label="Close">${ic('close', 22)}</button>
     </header>
-    ${mode === 'voice' ? chips() : ''}
+    <div class="cap-for"><p>What was it for?</p>${chips()}</div>
     ${photoURL ? `<div class="rev-photo"><img src="${photoURL}" alt="Your proof photo"></div>` : ''}
     <div class="talk ${mode === 'voice' ? 'big' : ''}">
       <div class="talk-row">
@@ -203,7 +201,7 @@ function review() {
     <button class="btn btn-primary post" data-post>${ic('check', 20, 2.2)}<span>Post proof</span></button>
   </div>`;
 
-  if (mode === 'voice') bindChips();
+  bindChips();
   root.querySelector('[data-close]').addEventListener('click', close);
   root.querySelector('[data-retake]').addEventListener('click', () => {
     stopTalk(true); photo = null; audio = null; transcript = ''; mode = 'photo'; camera();

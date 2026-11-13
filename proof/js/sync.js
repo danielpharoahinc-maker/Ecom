@@ -61,7 +61,6 @@ export async function syncProofs() {
 // A new phone: bring your profile and proof back from the account.
 export async function restoreProfile() {
   if (!LIVE || !S.user) return false;
-  try { if (localStorage.getItem('proof:ob')) return false; } catch { /* ignore */ } // mid-onboarding
   const c = await getClient().catch(() => null);
   if (!c) return false;
   const { data } = await c.from('profiles').select('name, goal, proof_time, commitments, goal_log, created_at').eq('id', S.user.id).maybeSingle();
@@ -72,6 +71,7 @@ export async function restoreProfile() {
     goalLog: data.goal_log?.length ? data.goal_log : [{ ts: created, keys: data.commitments }],
     createdAt: created, onboarded: true, tourDone: true, firstProofDone: true,
   });
+  try { localStorage.removeItem('proof:ob'); } catch { /* ignore */ }
   return true;
 }
 
