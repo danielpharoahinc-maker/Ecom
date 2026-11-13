@@ -24,15 +24,17 @@
   // real Printify hanger photo, white background cut away so it sits cleanly on the wall
   const real = id => ({ src: PH + id + "-front-real.webp", m: M[id + "-front-real"], aspect: 640 / 801, real: false });
   const PHOTOS = {
-    "signature-lips":       { front: shot("signature-lips-front"),       back: shot("signature-lips-back") },
-    "ceo-of-bad-decisions": { front: shot("ceo-of-bad-decisions-front"), back: shot("ceo-of-bad-decisions-back") },
-    "zero-exes":            { front: shot("zero-exes-front"),            back: shot("zero-exes-back") },
+    // Fronts only. The backs changed (neck AWEZA, big AWEZA backs), so at rest the 3D shirt itself shows them.
+    "signature-lips":       { front: shot("signature-lips-front") },
+    "ceo-of-bad-decisions": { front: shot("ceo-of-bad-decisions-front") },
+    "zero-exes":            { front: shot("zero-exes-front") },
     "sweet-cupcake":        { front: shot("sweet-cupcake-front") },
-    "need-a-hug":           { front: real("need-a-hug") },   // back: the new big AWEZA print shows on the 3D shirt itself
-    "captain-save":         { front: real("captain-save"),               back: shot("captain-save-back") },
-    "black-out":           { front: shot("black-out-front"),            back: shot("black-out-back") },
-    "time-of-your-life":   { front: shot("time-of-your-life-front"),    back: shot("time-of-your-life-back") },
+    "need-a-hug":           { front: real("need-a-hug") },
+    "captain-save":         { front: real("captain-save") },
+    "black-out":            { front: shot("black-out-front") },
+    "time-of-your-life":    { front: shot("time-of-your-life-front") },
   };
+
   // Warm the cache for the hanging-shot photos once the rail is drawn and the browser is idle, and not at all on a
   // data-saver or very slow connection (each photo is also fetched when its shirt settles, so nothing breaks).
   const warmPhotos = () => {

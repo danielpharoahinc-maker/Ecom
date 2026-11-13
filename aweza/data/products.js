@@ -78,7 +78,7 @@ AW.collections = [
       id: "captain-save", name: "Captain Save Tee", collection: "no-filter", price: 450,
       colourName: "White", sizes: STD, fit: "Heavyweight cotton, classic fit",
       images: img("captain-save", FRONT_FIRST),
-      summary: "A loud red and yellow shield across the chest, for the guy who always swoops in. AWEZA on the back, so they know who to thank.",
+      summary: "A loud red and yellow shield across the chest, for the guy who always swoops in. A big arched AWEZA across the back, so they know who to thank.",
     },
     {
       id: "need-a-hug", name: "Need A Hug Tee", collection: "no-filter", price: 450,

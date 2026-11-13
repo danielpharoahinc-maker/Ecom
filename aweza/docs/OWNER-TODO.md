@@ -39,5 +39,12 @@ The tee pages show R600 struck through next to the real R450, because the tees w
 - **Only for tees you actually advertised at R600.** Black Out Or Back Out and Time of Your Life were added later: if they were never advertised at R600, add `noWas: true` to them in `data/products.js` and the strike-through disappears for those two.
 - Bigger sizes show the matching "was" price (R640 for 2XL, R670 for 3XL to 5XL). The bag, checkout and card total always use the real prices.
 
-## 7. Need A Hug back print: check the colour in Printify
-On 13 November 2026 the back print in Printify (`IMG_0319.jpeg`, large arched AWEZA) shows as **light grey with no stripes** in Printify's own mockup. The website shows it **black with thin white stripes** (3D shirt and the back photo), as requested. The shirt Printify prints follows the print file, not the website, so open the product in Printify, check the file's colour and add the stripes there, or the shirts customers receive will not match the site.
+## 7. AWEZA on the back of every shirt (done in Printify on 13 November 2026)
+At your request I changed all 8 products in Printify (Printify's API, your account):
+- **Need A Hug and Captain Save:** the back is now the big arched grey AWEZA with two thin lines through it, in the same place and size as the Need A Hug back you set up (`AWEZA-arched-big-v2.png`). Captain Save's back used to be only the small AWEZA logo.
+- **The other six** (Signature Lips, Sweet Cupcake, CEO, Zero Ex's, Black Out, Time of Your Life): a smaller arched grey AWEZA with two lines at the neck, above the existing back print (`AWEZA-arched-neck-v2.png`). To make room, I moved the back print down slightly on CEO, Zero Ex's, Black Out and Time of Your Life, and made the Sweet Cupcake print 12% smaller (it filled the whole printable area).
+- **The writing is light grey** (as in your Printify file), not black. The lines are a darker grey.
+- **A full backup of every product as it was before the change** is in `docs/printify-backup-2026-11-13/` (one file per product). To undo, put a product's `print_areas` back through Printify's "update product" call, or ask me to.
+- Printify's API will not take back its empty "text layer" in the neck area, so I left that layer out of the update. It had no text and no visible effect, and Printify added it back by itself.
+- The website's 3D shirts and back photos match these changes. The old AI back photos (which showed the old backs) are gone, so at rest the 3D shirt itself shows each back.
+- **Please look at each product in Printify yourself** and approve the mockups before selling: I only checked the mockups Printify generated.
