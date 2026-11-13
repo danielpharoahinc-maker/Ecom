@@ -1015,3 +1015,32 @@ img.img-fade.loaded { opacity: 1; }
 @keyframes apNudge { 0%, 70%, 100% { transform: translateY(0); } 85% { transform: translateY(22px); } }
 @media (prefers-reduced-motion: reduce) { [data-agepull]:not(.touched) .ap-pull, .ap-num b.pop { animation: none; } }
 .age-step .ob-foot, .age-step .ob-foot .btn { width: 100%; }
+
+/* "Is this for...": animated goal cards after the photo */
+.cap-for { display: none; }
+.gpick { display: flex; flex-direction: column; gap: 8px; }
+.gpick-q { margin: 0 2px; font-family: var(--display); font-size: 19px; font-weight: 700; color: var(--ink); animation: gpIn .45s var(--spring) backwards; }
+.gpick-row { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; padding: 4px 2px 10px; margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
+.gpick-row::-webkit-scrollbar { display: none; }
+.gtile { position: relative; flex: none; scroll-snap-align: center; width: 116px; min-height: 92px; padding: 12px 10px; border-radius: var(--r-card); background: var(--s2); color: var(--ink-2); display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 8px; text-align: left; box-shadow: var(--hi); transition: background .25s, color .25s, transform .2s var(--spring), box-shadow .25s; animation: gtIn .55s var(--spring) calc(.12s + var(--i, 0) * 70ms) backwards; }
+.gtile b { font-size: 15px; line-height: 1.15; font-weight: 600; text-wrap: balance; }
+.gtile small { position: absolute; top: 8px; right: 8px; font-size: 10.5px; color: var(--mute); }
+.gtile:active { transform: scale(.94); }
+.gt-ic { display: inline-flex; }
+.gt-tick { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--on-sel); color: var(--sel); transform: scale(0); transition: transform .35s var(--spring); }
+.gtile.on { background: var(--sel); color: var(--on-sel); box-shadow: 0 10px 24px -12px rgba(216, 201, 168, .6); }
+.gtile.on .gt-tick { transform: scale(1); }
+.gtile.on small { display: none; }
+.gtile.hit { animation: gtHit .45s var(--spring); }
+.gtile.guess::after { content: "Likely"; position: absolute; right: 8px; top: 8px; padding: 2px 7px; border-radius: 99px; background: var(--on-sel); color: var(--sel); font-size: 10.5px; font-weight: 700; letter-spacing: .02em; animation: gtPulse 1.6s ease-in-out 1s 3; }
+.gtile.guess .gt-tick { display: none; }
+.goal-sticker { position: absolute; left: 12px; bottom: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px 7px 10px; border-radius: 99px; background: var(--sel); color: var(--on-sel); font-size: 14px; font-weight: 700; box-shadow: 0 8px 20px -6px rgba(0, 0, 0, .7); animation: stickIn .6s var(--spring) .35s backwards; }
+.goal-sticker.land { animation: stickLand .5s var(--spring); }
+.rev-photo { position: relative; }
+@keyframes gtIn { from { opacity: 0; transform: translateY(26px) scale(.9); } to { opacity: 1; transform: none; } }
+@keyframes gpIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes gtHit { 0% { transform: scale(.9); } 55% { transform: scale(1.07); } 100% { transform: scale(1); } }
+@keyframes gtPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+@keyframes stickIn { from { opacity: 0; transform: translateY(14px) rotate(-6deg) scale(.8); } to { opacity: 1; transform: none; } }
+@keyframes stickLand { 0% { transform: translateY(-18px) rotate(-8deg) scale(1.25); opacity: .4; } 60% { transform: translateY(2px) rotate(2deg) scale(.97); opacity: 1; } 100% { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .gtile, .gpick-q, .goal-sticker, .gtile.hit, .gtile.guess::after, .goal-sticker.land { animation: none; } }

@@ -53,25 +53,43 @@ function close() {
   }, 250);
 }
 
+// "Is this for...": big cards that rise in one by one. One tap picks, and a sticker
+// lands on the photo. Nobody has to pick: the most likely goal is already chosen.
 function chips() {
   const done = doneToday(S.proofs);
-  return `<div class="cap-chips" role="tablist" aria-label="Commitment">${[...S.profile.commitments, 'moment'].map((k) => {
+  const guess = S.profile.commitments.find((k) => !done.has(k));
+  return `<div class="gpick" role="radiogroup" aria-label="What was it for?">
+    <p class="gpick-q">Is this for…</p>
+    <div class="gpick-row">${[...S.profile.commitments, 'moment'].map((k, n) => {
     const c = commitment(k);
-    return `<button class="cchip ${k === cKey ? 'on' : ''}" data-k="${k}" role="tab" aria-selected="${k === cKey}">
-      ${done.has(k) ? ic('check', 14, 2.4) : ic(c.icon, 16)}<span>${c.label}</span></button>`;
-  }).join('')}</div>`;
+    return `<button class="gtile ${k === cKey ? 'on' : ''} ${k === guess && k === cKey ? 'guess' : ''}" style="--i:${n}" data-k="${k}" role="radio" aria-checked="${k === cKey}">
+      <span class="gt-ic">${ic(c.icon, 26)}</span><b>${k === 'moment' ? 'Just a moment' : c.label}</b>
+      <i class="gt-tick" aria-hidden="true">${ic('check', 14, 3)}</i>${done.has(k) && k !== 'moment' ? '<small>done today</small>' : ''}</button>`;
+  }).join('')}</div></div>`;
+}
+
+function sticker() {
+  const c = commitment(cKey);
+  return `${ic(c.icon, 16)}<span>${cKey === 'moment' ? 'Moment' : c.label}</span>`;
 }
 
 function bindChips() {
-  root.querySelectorAll('.cchip').forEach((b) => b.addEventListener('click', () => {
-    haptic();
+  const photoEl = root.querySelector('.rev-photo');
+  if (photoEl && !photoEl.querySelector('.goal-sticker')) { const st = document.createElement('div'); st.className = 'goal-sticker'; st.innerHTML = sticker(); photoEl.append(st); }
+  root.querySelectorAll('.gtile').forEach((b) => b.addEventListener('click', () => {
+    haptic(14); sfx('tick');
     cKey = b.dataset.k;
-    root.querySelectorAll('.cchip').forEach((x) => {
-      x.classList.toggle('on', x === b);
-      x.setAttribute('aria-selected', x === b);
+    root.querySelectorAll('.gtile').forEach((x) => {
+      const on = x === b;
+      x.classList.toggle('on', on); x.classList.remove('guess');
+      x.setAttribute('aria-checked', on);
     });
+    b.classList.remove('hit'); void b.offsetWidth; b.classList.add('hit');
+    b.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
     const t = root.querySelector('[data-ctitle]');
     if (t) t.textContent = commitment(cKey).label;
+    const st = root.querySelector('.goal-sticker');
+    if (st) { st.innerHTML = sticker(); st.classList.remove('land'); void st.offsetWidth; st.classList.add('land'); }
   }));
 }
 
@@ -183,8 +201,8 @@ function review() {
       <b data-ctitle>${c.label}</b>
       <button class="icon-btn" data-close aria-label="Close">${ic('close', 22)}</button>
     </header>
-    <div class="cap-for"><p>What was it for?</p>${chips()}</div>
     ${photoURL ? `<div class="rev-photo"><img src="${photoURL}" alt="Your proof photo"></div>` : ''}
+    ${chips()}
     <div class="talk ${mode === 'voice' ? 'big' : ''}">
       <div class="talk-row">
         <button class="mic" data-mic aria-label="Record what you did">${ic('mic', 24)}</button>
