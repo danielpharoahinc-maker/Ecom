@@ -58,7 +58,7 @@
       // The page is navigating away; never resolve with anything useful.
       return new Promise(() => {});
     }
-    if (res.status === 400 || res.status === 413) {
+    if (res.status === 400 || res.status === 413 || res.status === 429) {
       const m = data && typeof data.error === "string" && data.error.length < 200 ? data.error : MSG.generic;
       throw new Error(m);
     }
