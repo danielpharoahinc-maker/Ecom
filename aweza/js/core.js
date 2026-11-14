@@ -31,7 +31,9 @@
   let lines = [];
   try { lines = JSON.parse(localStorage.getItem(KEY) || "[]"); } catch { lines = []; }
   if (!Array.isArray(lines)) lines = [];
-  lines = lines.filter(l => l && AW.byId(l.id));
+  // Whatever is in storage is untrusted: keep only well-formed lines (known tee, known size, whole quantity 1 to 20).
+  lines = lines.filter(l => l && typeof l.id === "string" && AW.byId(l.id) && typeof l.size === "string" && AW.byId(l.id).sizes.includes(l.size))
+    .map(l => ({ id: l.id, size: l.size, qty: Math.max(1, Math.min(20, Math.floor(Number(l.qty)) || 1)) }));
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(lines)); } catch {} AW.emit("cart"); };
   /* Multi-buy ("2 for R700"): tees are grouped in sets of deal.qty, dearest base prices together, and each full
      set costs deal.price instead of its base prices. Size extras are paid on top. Mirrored on the server in

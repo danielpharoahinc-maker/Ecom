@@ -35,7 +35,7 @@
       <li class="tk-ship">
         <p class="tk-ship-c">${esc(s.carrier)}${s.deliveredAt ? ` · delivered ${esc(fmtDate(s.deliveredAt))}` : ""}</p>
         ${s.number ? `<p class="tk-ship-n">Tracking number <b>${esc(s.number)}</b></p>` : ""}
-        ${s.url ? `<a class="btn btn--primary tk-ship-a" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer"><span class="btn-label">Track the parcel</span></a>` : ""}
+        ${s.url && /^https:\/\//.test(s.url) ? `<a class="btn btn--primary tk-ship-a" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer"><span class="btn-label">Track the parcel</span></a>` : ""}
       </li>`).join("");
     const items = (r.items || []).map(i => `<li>${i.qty} × ${esc(i.name)}${i.size ? `, size ${esc(i.size)}` : ""}</li>`).join("");
     return `

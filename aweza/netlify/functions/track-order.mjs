@@ -5,21 +5,11 @@
 
 import { loadCatalogue } from "./_lib/catalogue.mjs";
 import { findOrderByLabel } from "./_lib/printify.mjs";
-import { json, log } from "./_lib/http.mjs";
+import { json, log, rateLimited } from "./_lib/http.mjs";
 
 const MAX_BODY = 2 * 1024;
 const NOT_FOUND = "We couldn't find an order with those details. Check the order number and the email you used. If you only just paid, give it a few minutes and try again.";
 const REF_RE = /^AW[A-Z0-9]{6,12}$/;
-
-// Best-effort limit per visitor so the lookup can't be used to guess order numbers. (Serverless instances are
-// short-lived, so this is a speed bump, not a guarantee. The email must also match, which is the real guard.)
-const hits = new Map();
-function throttled(ip) {
-  const now = Date.now(), win = 10 * 60 * 1000, list = (hits.get(ip) || []).filter(t => now - t < win);
-  list.push(now); hits.set(ip, list);
-  if (hits.size > 5000) hits.clear();
-  return list.length > 12;
-}
 
 function sameOrigin(req) {
   const origin = req.headers.get("origin");
@@ -69,8 +59,7 @@ function itemsOf(o, cat) {
 export default async function handler(req) {
   if (req.method !== "POST") return json(405, { error: "Method not allowed" }, { allow: "POST" });
   if (!sameOrigin(req)) return json(403, { error: "Forbidden" });
-  const ip = (req.headers.get("x-nf-client-connection-ip") || (req.headers.get("x-forwarded-for") || "").split(",")[0] || "unknown").trim();
-  if (throttled(ip)) return json(429, { error: "Too many tries. Please wait a few minutes and try again." });
+  if (rateLimited(req, "track", 12, 10 * 60 * 1000)) return json(429, { error: "Too many tries. Please wait a few minutes and try again." });
 
   let input;
   try {

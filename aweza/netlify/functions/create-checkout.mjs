@@ -8,7 +8,7 @@ import crypto from "node:crypto";
 import {
   loadCatalogue, validateOrder, priceOrder, packOrder, ValidationError, MAX_METADATA_CHARS,
 } from "./_lib/catalogue.mjs";
-import { json, log, fetchWithTimeout, siteOrigin } from "./_lib/http.mjs";
+import { json, log, fetchWithTimeout, siteOrigin, rateLimited } from "./_lib/http.mjs";
 
 const YOCO_CHECKOUT_URL = "https://payments.yoco.com/api/checkouts";
 const MAX_BODY = 16 * 1024;
@@ -39,6 +39,7 @@ export default async function handler(req) {
   }
   if (req.method !== "POST") return json(405, { error: "Method not allowed." }, { allow: "POST, OPTIONS" });
   if (!sameOrigin(req)) return json(403, { error: "Checkout must be started from the AWEZA site." });
+  if (rateLimited(req, "checkout", 20, 10 * 60 * 1000)) return json(429, { error: "Too many attempts. Please wait a few minutes and try again." });
 
   const ctype = req.headers.get("content-type") || "";
   if (!ctype.toLowerCase().includes("application/json")) return json(415, { error: "Something is off with your order. Refresh and try again." });
@@ -125,6 +126,8 @@ export default async function handler(req) {
   try {
     const u = new URL(data.redirectUrl);
     if (u.protocol !== "https:") throw new Error("insecure");
+    // Only ever send customers to Yoco's own payment page.
+    if (u.hostname !== "yoco.com" && !u.hostname.endsWith(".yoco.com")) throw new Error("not yoco");
     redirectUrl = u.toString();
   } catch {
     log("yoco_bad_redirect", { ref });

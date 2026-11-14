@@ -27,6 +27,21 @@ export async function fetchWithTimeout(url, opts = {}, ms = 8000) {
   }
 }
 
+/**
+ * Best-effort rate limit per visitor (keyed by IP and a name). Serverless instances are short-lived and not shared,
+ * so this is a speed bump against scripts and guessing, not a guarantee; the real guards are the signature checks,
+ * the email match on tracking, and the server-side pricing.
+ */
+const hitLog = new Map();
+export function rateLimited(req, name, max, windowMs) {
+  const ip = (req.headers.get("x-nf-client-connection-ip") || (req.headers.get("x-forwarded-for") || "").split(",")[0] || "unknown").trim().slice(0, 64);
+  const key = name + "|" + ip, now = Date.now();
+  const list = (hitLog.get(key) || []).filter(t => now - t < windowMs);
+  list.push(now); hitLog.set(key, list);
+  if (hitLog.size > 5000) hitLog.clear();
+  return list.length > max;
+}
+
 /** Origin of the deployed site: SITE_URL env, else the request's own origin. */
 export function siteOrigin(req) {
   const env = (process.env.SITE_URL || "").trim();

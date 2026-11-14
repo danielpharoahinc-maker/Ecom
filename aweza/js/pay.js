@@ -23,7 +23,8 @@
   const safeHttps = (url) => {
     try {
       const u = new URL(url, location.href);
-      return u.protocol === "https:" || u.hostname === "localhost" || u.hostname === "127.0.0.1" ? u.href : null;
+      const yoco = u.hostname === "yoco.com" || u.hostname.endsWith(".yoco.com");
+      return (u.protocol === "https:" && yoco) || u.hostname === "localhost" || u.hostname === "127.0.0.1" ? u.href : null;
     } catch (e) { return null; }
   };
 

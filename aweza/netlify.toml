@@ -15,7 +15,49 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# Never publish the owner tooling or server source as static files.
+# Never publish the owner tooling, server source, price costs or config as static files.
+[[redirects]]
+  from = "/data/printify-variants.json"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/netlify.toml"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/package.json"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/package-lock.json"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/README.md"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/.git/*"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/.env*"
+  to = "/404"
+  status = 404
+  force = true
+
 [[redirects]]
   from = "/scripts/*"
   to = "/404"
@@ -40,15 +82,14 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Frame-Options = "SAMEORIGIN"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Cross-Origin-Opener-Policy = "same-origin"
+    X-Permitted-Cross-Domain-Policies = "none"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+    # Only this site's own code may run; styles and fonts also from Google Fonts. Nothing may frame the site, and
+    # forms and base addresses can only point back at it. Checkout goes by a normal redirect, which this does not block.
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-src 'none'; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; manifest-src 'self'; worker-src 'self' blob:; upgrade-insecure-requests"
 
-[[headers]]
-  for = "/data/printify-variants.json"
-  [headers.values]
-    Cache-Control = "public, max-age=300"
-
-# Caching: pictures, the 3D model and the 3D library change rarely, so browsers may keep them for a day (files are not
-# renamed when they change, so not longer). Code and styles are re-checked every few minutes.
 [[headers]]
   for = "/images/*"
   [headers.values]
