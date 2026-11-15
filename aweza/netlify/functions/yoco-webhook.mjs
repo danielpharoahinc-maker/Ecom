@@ -9,7 +9,10 @@
 import { loadCatalogue, validateOrder, priceOrder, unpackOrder } from "./_lib/catalogue.mjs";
 import { verifyWebhook } from "./_lib/yoco.mjs";
 import { createOrder, findExistingOrder, sendToProduction, isDuplicateError, PrintifyError } from "./_lib/printify.mjs";
-import { json, log } from "./_lib/http.mjs";
+import { json, log, siteOrigin } from "./_lib/http.mjs";
+import { mailEnabled, sendMail, confirmationEmail } from "./_lib/email.mjs";
+import { trackToken } from "./_lib/track-token.mjs";
+import { etaText } from "./_lib/eta.mjs";
 
 const MAX_BODY = 64 * 1024;
 
@@ -90,7 +93,8 @@ export default async function handler(req) {
         return { product_id: pv.printify_product_id, variant_id: pv.sizes[l.size].variant_id, quantity: l.qty };
       }),
       shipping_method: 1,
-      send_shipping_notification: true,
+      // Printify emails the customer when it ships. Set PRINTIFY_NOTIFY_CUSTOMER=false once our own emails are confirmed working.
+      send_shipping_notification: process.env.PRINTIFY_NOTIFY_CUSTOMER !== "false",
       address_to: {
         first_name: c.firstName,
         last_name: c.lastName,
@@ -125,6 +129,18 @@ export default async function handler(req) {
         // Order exists; the owner can approve it by hand. Do not make Yoco retry.
         log("send_to_production_failed", { ref, printifyOrderId: created.id, status: e && e.status });
       }
+    }
+
+    // Order confirmation email. Sent only when the Printify order was freshly created, so a retried webhook cannot
+    // send it twice; a failure here never fails the payment.
+    if (mailEnabled()) {
+      try {
+        const names = new Map(cat.products.map(p => [p.id, p.name]));
+        const items = pricing.lines.map(l => ({ name: names.get(l.id) || l.name, size: l.size, qty: l.qty, price: l.unit * l.qty * 100 }));
+        const mail = confirmationEmail({ siteUrl: siteOrigin(req), ref, token: trackToken(ref), first: order.customer.firstName, items, pricing, eta: etaText(cat.config), test: isTest });
+        const r = await sendMail({ to: order.customer.email, subject: mail.subject, html: mail.html, text: mail.text, idempotencyKey: "confirm:" + checkoutId });
+        log(r.ok ? "email_sent" : "email_failed", { type: "confirmation", status: r.status || 0, test: isTest });
+      } catch (e) { log("email_failed", { type: "confirmation", name: String(e && e.name) }); }
     }
     return json(200, { received: true, status: "created", printifyOrderId: created.id });
   } catch (e) {

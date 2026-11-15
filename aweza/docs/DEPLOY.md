@@ -30,6 +30,12 @@ Netlify: **Site configuration, Environment variables**. Mark the secret ones as 
 | `PRINTIFY_API_TOKEN` | yes | (long token) | Printify, My account, Connections, generate a token with orders write + products read. |
 | `PRINTIFY_SHOP_ID` | recommended | `29483178` | The AWEZA shop. Defaults to 29483178 if unset. |
 | `SITE_URL` | recommended | `https://aweza.co.za` | Used to build the Yoco return URLs and as an allowed origin. Falls back to the request's own origin. |
+| `RESEND_API_KEY` | for emails | `re_...` | API key from resend.com (create it with "sending access"). Without it no emails are sent. |
+| `MAIL_FROM` | for emails | `AWEZA <orders@your-domain.com>` | The sender. The domain must be verified in Resend (section 9). |
+| `MAIL_REPLY_TO` | no | `hello@your-domain.com` | Where customers' replies go. |
+| `PRINTIFY_WEBHOOK_SECRET` | for tracking emails | (printed once by the script in section 9) | Lets the site trust "shipped" and "delivered" messages from Printify. |
+| `TRACK_SECRET` | no | any long random text | Signs the private tracking links in emails. Falls back to `YOCO_WEBHOOK_SECRET`. |
+| `PRINTIFY_NOTIFY_CUSTOMER` | no | `false` | Set `false` once our emails are confirmed working, so customers don't also get Printify's own shipping email. Default: Printify's email stays on. |
 | `PRINTIFY_AUTO_SEND` | no | `true` | Only `true` turns it on. Sends paid **live** orders straight to production. Test-mode payments are never auto-sent. Leave unset for launch. |
 
 Never put any of these in the repo or in `js/`.
@@ -169,3 +175,29 @@ Customers can track an order at `#/track` ("Track order" in the header, "Track y
 - **Printify also emails customers** when their parcel ships (`send_shipping_notification` is on), so they get the tracking link even if they never visit the page.
 - **Safety:** wrong order number or email gives the same "couldn't find" message (so nobody can probe for orders), and there is a best-effort limit of 12 lookups per 10 minutes per visitor.
 - **Tested against the documented Printify order shape, not a real order:** the shop had no orders on 11 November 2026. Place one test order and watch it on the page before you promote this.
+
+## 9. Customer emails and tracking (order confirmed, on its way, delivered)
+
+What customers get once this is set up:
+1. **Order confirmed** (the moment their payment is verified): order number, items, total, estimated arrival, and a **Track your order** button.
+2. **On its way** (when Printify ships the parcel): carrier, **tracking number**, a link to track the parcel, and a link to the AWEZA tracking page.
+3. **Delivered** (when the courier marks it delivered).
+The buttons open `#/track/<order number>.<private token>`: the tracking page loads straight away with no email retyping. The token is made from the order number and a secret, so nobody can make one for someone else's order. The plain "Track your order" page (order number + email) still works too.
+
+Setup (about 20 minutes, once the site has its domain):
+1. **Create a Resend account** (resend.com, free to start) and **Add domain** with your site's domain. Resend shows a few DNS records (SPF, DKIM): add them at your domain registrar and click Verify. Until it is verified Resend will not send from your domain.
+2. In Resend create an **API key** with sending access. In Netlify add `RESEND_API_KEY` and `MAIL_FROM` (for example `AWEZA <orders@your-domain.com>`), and `MAIL_REPLY_TO` if you like. Redeploy.
+3. **Tell Printify to call your site** when parcels ship. On your own computer, in the `aweza` folder:
+   ```sh
+   export PRINTIFY_API_TOKEN=...      # never commit it
+   node scripts/register-printify-webhooks.mjs https://your-domain.com
+   ```
+   It registers `order:shipment:created` and `order:shipment:delivered` and prints `PRINTIFY_WEBHOOK_SECRET=...` **once**. Put it in Netlify and redeploy. (`--list` shows what is registered.)
+4. **Test:** place a test order with your own email. You should get the confirmation email within a minute (the subject starts with `[TEST]` in Yoco test mode). The shipped and delivered emails come from Printify's events, which only fire for real shipments, so check them with the first real order, or in Printify's webhook settings send a test event.
+5. When you have received the confirmation and a shipped email once, set `PRINTIFY_NOTIFY_CUSTOMER=false` so customers do not get two shipping emails (ours and Printify's). Until then, leave it alone: Printify's email is the safety net.
+
+Notes:
+- If the email service is down or not set up, orders and payments still work; nothing is lost. A failed email is logged in Netlify (`email_failed`).
+- Emails are sent only when the Printify order is **freshly created**, and Resend is given an idempotency key, so a retried webhook does not send twice.
+- Customers' addresses are used only to send these emails. Mention it in your Privacy page.
+- The shipped email appears only once Printify has a tracking number. Printify only creates one after you have **approved the order** in Printify (unless `PRINTIFY_AUTO_SEND=true`).

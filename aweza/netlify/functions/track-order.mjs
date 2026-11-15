@@ -6,6 +6,7 @@
 import { loadCatalogue } from "./_lib/catalogue.mjs";
 import { findOrderByLabel } from "./_lib/printify.mjs";
 import { json, log, rateLimited } from "./_lib/http.mjs";
+import { tokenOk } from "./_lib/track-token.mjs";
 
 const MAX_BODY = 2 * 1024;
 const NOT_FOUND = "We couldn't find an order with those details. Check the order number and the email you used. If you only just paid, give it a few minutes and try again.";
@@ -70,14 +71,16 @@ export default async function handler(req) {
 
   const ref = String((input && input.ref) || "").trim().toUpperCase().replace(/\s+/g, "");
   const email = String((input && input.email) || "").trim().toLowerCase();
-  if (!REF_RE.test(ref) || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 254) return json(404, { error: NOT_FOUND });
+  const token = typeof (input && input.token) === "string" ? input.token.trim() : "";
+  const viaToken = !!token && REF_RE.test(ref) && tokenOk(ref, token);        // the private link from the customer's email
+  if (!REF_RE.test(ref) || (!viaToken && (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 254))) return json(404, { error: NOT_FOUND });
 
   try {
     const cat = loadCatalogue();
     // Test-mode orders are labelled TEST-<ref>; try the live label first.
     const order = (await findOrderByLabel(ref)) || (await findOrderByLabel("TEST-" + ref));
     const orderEmail = order && order.address_to && String(order.address_to.email || "").trim().toLowerCase();
-    if (!order || !orderEmail || orderEmail !== email) { log("track_miss", { found: !!order }); return json(404, { error: NOT_FOUND }); }
+    if (!order || (!viaToken && (!orderEmail || orderEmail !== email))) { log("track_miss", { found: !!order }); return json(404, { error: NOT_FOUND }); }
     const d = describeOrder(order);
     const shipments = (Array.isArray(order.shipments) ? order.shipments : []).filter(s => s && (s.number || s.url)).map(s => ({
       carrier: prettyCarrier(s.carrier),

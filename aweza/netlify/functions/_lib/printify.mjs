@@ -57,6 +57,9 @@ export async function findExistingOrder({ externalId, label, pages = 3 }) {
 /** Find one order by its label (our customer-facing order number), newest first. Used by the tracking page. */
 export const findOrderByLabel = (label, pages = 6) => findExistingOrder({ label, pages });
 
+/** One order by its Printify id (status, shipments with tracking, buyer email). */
+export const getOrder = id => call("GET", `/shops/${shopId()}/orders/${encodeURIComponent(id)}.json`, null, 6000);
+
 export const createOrder = (order) => call("POST", `/shops/${shopId()}/orders.json`, order, 8000);
 
 export const sendToProduction = (orderId) =>

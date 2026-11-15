@@ -49,22 +49,22 @@
       </div>`;
   };
 
-  async function lookup(form) {
+  async function lookup(form, token) {
     const err = form.querySelector(".tk-error"), out = form.parentElement.querySelector(".tk-result"), go = form.querySelector(".tk-go");
     const ref = form.elements.ref.value.trim().toUpperCase().replace(/\s+/g, ""), email = form.elements.email.value.trim();
     out.innerHTML = ""; err.hidden = true;
     if (!REF_RE.test(ref)) { err.textContent = "That doesn't look like an order number. It starts with AW and is on your confirmation page."; err.hidden = false; form.elements.ref.focus(); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { err.textContent = "Enter the email you ordered with."; err.hidden = false; form.elements.email.focus(); return; }
+    if (!token && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { err.textContent = "Enter the email you ordered with."; err.hidden = false; form.elements.email.focus(); return; }
     go.disabled = true; go.setAttribute("aria-busy", "true"); go.querySelector(".btn-label").textContent = "Looking it up...";
     try {
-      const res = await fetch(ENDPOINT, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ref, email }), cache: "no-store" });
+      const res = await fetch(ENDPOINT, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(token ? { ref, token } : { ref, email }), cache: "no-store" });
       let data = null; try { data = await res.json(); } catch (e) { data = null; }
       if (res.ok && data && typeof data.stage === "number") {
         out.innerHTML = resultHTML(data);
-        try { localStorage.setItem("aweza-last-order", JSON.stringify({ ref, email })); } catch (e) { /* ignore */ }
+        try { localStorage.setItem("aweza-last-order", JSON.stringify(token ? { ref } : { ref, email })); } catch (e) { /* ignore */ }
         out.scrollIntoView({ block: "start", behavior: "smooth" });
       } else {
-        err.textContent = (data && data.error) || "We couldn't look that up right now. Please try again in a moment."; err.hidden = false;
+        err.textContent = token ? "That tracking link didn't work. Enter your order number and email below instead." : ((data && data.error) || "We couldn't look that up right now. Please try again in a moment."); err.hidden = false;
       }
     } catch (e) {
       err.textContent = navigator.onLine === false ? "You seem to be offline. Check your connection and try again." : "Tracking is temporarily unavailable. Please try again in a few minutes."; err.hidden = false;
@@ -79,6 +79,9 @@
     app.innerHTML = formHTML(s.ref || "", s.email || "");
     const form = app.querySelector(".tk-form");
     form.addEventListener("submit", e => { e.preventDefault(); lookup(form); });
+    // The private link in our emails, "#/track/AWREF.<token>", looks the order up straight away, no email needed.
+    const tl = /^(AW[A-Z0-9]{6,12})\.([a-f0-9]{16,64})$/i.exec(String(arg || ""));
+    if (tl) { form.elements.ref.value = tl[1].toUpperCase(); lookup(form, tl[2].toLowerCase()); return; }
     // "#/track/go" (from the order-confirmed page) or "#/track/AWREF" looks it up straight away when we know both.
     if (arg && REF_RE.test(String(arg).toUpperCase())) form.elements.ref.value = String(arg).toUpperCase();
     if ((arg === "go" || (arg && REF_RE.test(String(arg).toUpperCase()))) && form.elements.ref.value && form.elements.email.value) lookup(form);

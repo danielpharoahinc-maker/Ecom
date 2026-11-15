@@ -18,6 +18,12 @@ No website can be promised "unhackable". This is what protects AWEZA, what was f
 - **The payment redirect is pinned to Yoco** on both the server and the browser.
 - Tracking links must be `https`.
 
+## Added with customer emails (15 November 2026)
+- The Printify "shipped/delivered" endpoint only accepts messages signed with your `PRINTIFY_WEBHOOK_SECRET` (HMAC-SHA256, constant-time check) and refuses to run if the secret is missing. Tested: forged, unsigned and altered messages send no email.
+- Email contents are escaped, so a customer's name cannot inject anything into an email.
+- The private tracking links in emails carry a signed token tied to one order number. Keep `TRACK_SECRET` (or `YOCO_WEBHOOK_SECRET`) private; changing it breaks old links.
+- The Resend API key is a secret like the others: Netlify only, never in the code.
+
 ## What only you can do (this is where most real break-ins happen)
 1. **Turn on two-step login (2FA) everywhere:** GitHub, Netlify, Yoco, Printify, your domain registrar, your email, Higgsfield. A stolen password with no 2FA is the most likely way in.
 2. **Lock the domain** at the registrar (transfer lock on) and use a strong, unique password.

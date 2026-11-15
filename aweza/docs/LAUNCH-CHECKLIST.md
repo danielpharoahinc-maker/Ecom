@@ -28,6 +28,14 @@ Detailed commands are in `docs/DEPLOY.md`; security in `docs/SECURITY.md`; lefto
 - [ ] **You:** Test on a real iPhone and a real Android phone: the rail, swipe to turn, Choose size / Add to bag, checkout with autofill, the friend link.
 - [ ] **You:** Look at **every product in Printify** (front, back, sizes, mockups) and approve them. The new arched AWEZA backs were set up by Claude.
 
+## D2. Customer emails and tracking (do this after the domain is connected)
+- [ ] **You:** Make a free **Resend** account (resend.com), add your domain, add the DNS records it shows at your registrar, and click Verify.
+- [ ] **You:** In Resend create an API key. In Netlify add `RESEND_API_KEY` and `MAIL_FROM` (e.g. `AWEZA <orders@your-domain.com>`). Redeploy.
+- [ ] **You:** On your computer run `node scripts/register-printify-webhooks.mjs https://your-domain.com` (with `PRINTIFY_API_TOKEN` set). Copy the `PRINTIFY_WEBHOOK_SECRET` it prints into Netlify. Redeploy.
+- [ ] **You:** Place a test order with your own email: you should get the "Paid. Good decision." email and its **Track your order** button should open the tracking page with no typing.
+- [ ] **You:** With your first real order, approve it in Printify and check you receive the "On its way" email with the tracking number, then the "Delivered" one.
+- [ ] **You:** Once you've received our emails, set `PRINTIFY_NOTIFY_CUSTOMER=false` in Netlify so customers don't get Printify's shipping email as well.
+
 ## E. Legal and trust pages (before real customers)
 - [ ] **You:** Fill in `AW.config.business` in `data/products.js` (name, registration number, VAT number, email, phone, address, city, founder).
 - [ ] **You (with an attorney):** Finish the Terms, Returns, Refunds and Privacy pages (the "[...]" placeholders), register the **Information Officer** with the Information Regulator (POPIA), and have the "was R600" and returns wording checked against the Consumer Protection Act. Then remove the "Draft" notice.
