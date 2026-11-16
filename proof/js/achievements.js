@@ -114,6 +114,6 @@ export async function checkUnlocks() {
   if (!fresh.length) return [];
   fresh.forEach((a) => { got[a.id] = Date.now(); });
   await saveProfile({ ...S.profile, unlocked: got });
-  return fresh;
+  return fresh.filter((a) => a.skin !== 0); // the default skin unlocks quietly
 }
 export const unlockedSkins = () => new Set(evaluate().filter((a) => a.done).map((a) => a.skin));

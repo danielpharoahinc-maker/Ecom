@@ -151,6 +151,23 @@ export function think(text) {
   return { personal, matches, near };
 }
 
+// Proff as a buddy: one short line about right now, from your own day.
+export function buddyLine() {
+  const P = S.profile; if (!P) return null;
+  const t = today(), h = new Date().getHours(), first = (P.name || '').split(' ')[0];
+  const has = (k) => P.commitments.includes(k);
+  const left = t.left.map((k) => commitment(k));
+  if (!t.left.length) return { pose: 'cheer', text: 'Every goal done. Rest well, you earned it.' };
+  if (h < 10 && has('sun') && t.left.includes('sun')) return { pose: 'point', text: `Morning, ${first}. Sunlight first. Step outside and take it.` };
+  if (h < 10 && has('wake') && t.left.includes('wake')) return { pose: 'point', text: 'Up early? Prove it before anything else.' };
+  if (h >= 11 && h < 15 && P.commitments.some((k) => isFoodKey(k)) && t.left.some(isFoodKey)) return { pose: 'talk', text: 'Lunch soon. Snap your meal, I’ll stamp it.' };
+  if (t.have >= t.need) return { pose: 'cheer', text: `Streak’s safe. ${left[0].label} is a bonus.` };
+  if (h >= 20) return { pose: 'worried', text: `${t.need - t.have} more to keep your streak. Do the easiest one now.` };
+  if (t.have === 0) return { pose: 'talk', text: `${h < 12 ? 'Morning' : h < 18 ? 'Afternoon' : 'Evening'}, ${first}. Start with ${left[0].label}.` };
+  return { pose: 'point', text: `${t.need - t.have} more keeps today’s streak. ${left[0].label} next?` };
+}
+const isFoodKey = (k) => ['eat', 'meals', 'protein', 'nosugar'].includes(k);
+
 // Questions worth tapping, based on where you are right now.
 export function suggestions() {
   if (!S.profile) return [];

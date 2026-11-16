@@ -157,4 +157,20 @@ export const QA = [
     a: 'Sounds are off until you switch them on. Tap your initial on Today, then Sounds.' },
   { t: 7, q: 'Something is broken. What do I do?', k: 'bug broken not working glitch crash error stuck',
     a: 'Close Proof and open it again. If it’s still wrong, sign out and back in: your proof is safe in your account. Tell the person who gave you Proof exactly what you tapped and what happened.' },
+
+  // New things
+  { t: 7, q: 'What is Connect Claude?', k: 'claude api key connect notion ai meals review',
+    a: 'It lets your own Claude see your Proof (goals, streak, meals) through a private key you create. Claude can look at your meal photos, tell you how good the meal was, and add your day to your Lock-in plan in Notion. Open your initial on Today, then Connect Claude.' },
+  { t: 7, q: 'How do I get Claude to review my meals?', k: 'meal food photo analyse review claude good',
+    a: 'Log meals with a food goal like Eat clean or Log your meals, create your key under Connect Claude, then paste the setup message into Claude and ask it to review your meals. Its verdict shows up on the meal in your Vault.' },
+  { t: 7, q: 'Is my API key safe?', k: 'api key safe secret revoke share',
+    a: 'Only a scrambled copy is stored, and the key is shown once. Anyone who has it can see your proof and photos, so keep it private. You can revoke it any time under Connect Claude.' },
+  { t: 4, q: 'What are achievements?', k: 'achievements badges rewards unlock progress',
+    a: 'There are 100, from your first proof to a year-long streak. Each one unlocks a new skin for me. Open your initial on Today, then Achievements and skins.' },
+  { t: 4, q: 'How do I change how Proff looks?', k: 'skin wardrobe outfit crown shades colour change',
+    a: 'Open the Wardrobe from Achievements and skins, tap a skin and tap Wear. Locked skins show what you need to do to earn them. The crowns are the hardest.' },
+  { t: 1, q: 'How do I log a meal?', k: 'meal food eat photo breakfast lunch dinner snack',
+    a: 'Pick a food goal like Eat clean or Log your meals, take a photo of the plate, tap which meal it was and any tags, and post. Claude can review it once you have connected it.' },
+  { t: 7, q: 'Why does my phone buzz?', k: 'vibration haptic buzz shake feedback',
+    a: 'A short buzz means something good happened, like posting a proof. A longer, harder one means something didn’t work. Android phones vibrate. iPhones give a small tap in newer versions of iOS.' },
 ];

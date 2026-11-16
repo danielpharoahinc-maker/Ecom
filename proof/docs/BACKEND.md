@@ -168,3 +168,24 @@ To start charging (do with a parent, Paystack business account):
 6. Publish Terms and Privacy pages before the first real charge.
 
 Sign-in on iPhone home-screen apps: add custom SMTP (Authentication > Emails) so the email carries the 6-digit code.
+
+
+## 5. Meals, the Proof API and Claude (migration-3)
+
+Run `supabase/migration-3.sql` (already applied to the live project; safe to re-run). It adds:
+- `proofs.meta` (meal type and tags) and `proofs.analysis` (Claude's review, writable only by the API; a trigger stops the app from forging it),
+- an `update own proof` policy so a retried sync can't get stuck,
+- `api_keys` (hashed keys) with `create_api_key()`, `list_api_keys()`, `revoke_api_key()`.
+
+Deploy the function: `proof-api` (JWT off; it checks the API key itself).
+
+How you use it:
+1. In the app: your initial on Today, then **Connect Claude**, then **Create API key**. Copy the setup message.
+2. Paste it into Claude. It can read `?r=summary`, `?r=meals&pending=true` (with photo links) and save reviews with `POST ?r=analysis`. The review then appears on the meal in your Vault.
+3. For Notion: with Claude's Notion connector on, ask it to "review my pending Proof meals and add today to my Lock-in plan in Notion".
+
+Endpoints: `?r=help` (public), `summary`, `goals`, `proofs`, `meals`, `photo`, `analysis`. Keys can be revoked in the app. Never commit or share a key.
+
+## 6. Sign-in notes
+- Supabase's built-in email is capped at 2 emails an hour. Add custom SMTP (Authentication > Emails > SMTP, a Gmail app password works) so confirmation emails reach everyone. Signup carries on as a guest if an email can't be sent.
+- Anonymous sign-ins must stay ON (Authentication > Sign In / Providers): people play first and confirm their email later.

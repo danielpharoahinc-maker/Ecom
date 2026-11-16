@@ -6,6 +6,8 @@ import { startTour } from './proff.js';
 import { reminderSettings } from './reminders.js';
 import { commitment } from './data.js';
 import { sfx } from './fx.js';
+import { buddyLine } from './proff-brain.js';
+import { proffSVG, openAsk } from './proff.js';
 import { openConnectClaude } from './connect.js';
 import { openAchievements } from './wardrobe.js';
 import { doneToday, streak, needFor } from './stats.js';
@@ -54,6 +56,7 @@ export async function renderToday(el) {
     <button class="avatar" data-settings aria-label="Account">${esc(P.name[0].toUpperCase())}</button>
   </header>
 
+  ${(() => { const b = buddyLine(); return b ? `<button class="buddy" data-buddy aria-label="Ask Proff"><span class="buddy-pf">${proffSVG(b.pose, 46)}</span><span class="buddy-say">${esc(b.text)}</span></button>` : ''; })()}
   <section class="next-up ${have >= need ? 'kept' : ''}" aria-label="What to do next">
     <p class="nu-state">${have >= total ? `${ic('check', 16, 2.6)} Every goal done. Perfect day.` : have >= need ? `${ic('check', 16, 2.6)} Streak kept for today` : `${need - have} more to keep today’s streak`}</p>
     ${nextKey ? `<button class="btn ${have >= need ? 'btn-secondary' : 'btn-primary'} nu-btn" data-capture="${nextKey}">${ic('camera', 22)}<span>${have >= need ? 'Keep going: ' : ''}Prove ${esc(commitment(nextKey).label)}</span></button>` : ''}
@@ -114,6 +117,7 @@ export async function renderToday(el) {
   </section>`;
 
   hydrateMedia(el);
+  el.querySelector('[data-buddy]')?.addEventListener('click', () => openAsk());
   el.querySelectorAll('[data-capture]').forEach((b) => b.addEventListener('click', () => openCapture({ cKey: b.dataset.capture })));
   el.querySelector('[data-settings]').addEventListener('click', settings);
   el.querySelector('[data-sub]')?.addEventListener('click', () => banner.open());

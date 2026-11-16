@@ -1160,3 +1160,9 @@ img.img-fade.loaded { opacity: 1; }
 .unlock-list .i { color: var(--accent); flex: none; margin-top: 2px; }
 .unlock-list b { color: var(--ink); }
 .unlock .stack { width: 100%; }
+
+/* Proff as your buddy */
+.buddy { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 14px 8px 8px; border-radius: var(--r-card); background: var(--s1); text-align: left; box-shadow: var(--hi); transition: transform .15s var(--spring); }
+.buddy:active { transform: scale(.98); }
+.buddy-pf { flex: none; width: 46px; height: 46px; display: grid; place-items: center; }
+.buddy-say { font-size: 15.5px; line-height: 1.3; font-weight: 500; color: var(--ink); text-wrap: balance; }
