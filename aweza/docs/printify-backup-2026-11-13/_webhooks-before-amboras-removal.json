@@ -1,0 +1,48 @@
+{
+ "at": "2026-11-16T08:43:37.644Z",
+ "note": "Printify webhook subscriptions to api.amboras.com removed at the owner's request. Secrets are never returned by Printify, so these cannot be restored exactly.",
+ "removed": [
+  {
+   "id": "6adf858c9f2db66cc8019465",
+   "topic": "product:publish:started",
+   "url": "https://api.amboras.com/webhooks/printify/43163e7d-8a6d-45b9-81be-ede9726533b5",
+   "shop_id": 29483178
+  },
+  {
+   "id": "6adf858c5ae57b4269094255",
+   "topic": "product:deleted",
+   "url": "https://api.amboras.com/webhooks/printify/43163e7d-8a6d-45b9-81be-ede9726533b5",
+   "shop_id": 29483178
+  },
+  {
+   "id": "6adf858c63e0cf2a9d069203",
+   "topic": "order:updated",
+   "url": "https://api.amboras.com/webhooks/printify/43163e7d-8a6d-45b9-81be-ede9726533b5",
+   "shop_id": 29483178
+  },
+  {
+   "id": "6adf858c4e983b2c310f8c5c",
+   "topic": "order:sent-to-production",
+   "url": "https://api.amboras.com/webhooks/printify/43163e7d-8a6d-45b9-81be-ede9726533b5",
+   "shop_id": 29483178
+  },
+  {
+   "id": "6adf858c90ad121e6b028ff7",
+   "topic": "order:shipment:created",
+   "url": "https://api.amboras.com/webhooks/printify/43163e7d-8a6d-45b9-81be-ede9726533b5",
+   "shop_id": 29483178
+  },
+  {
+   "id": "6adf858df9903c0654013cb4",
+   "topic": "order:shipment:delivered",
+   "url": "https://api.amboras.com/webhooks/printify/43163e7d-8a6d-45b9-81be-ede9726533b5",
+   "shop_id": 29483178
+  },
+  {
+   "id": "6adf858d59392d6ebf0e147e",
+   "topic": "shop:disconnected",
+   "url": "https://api.amboras.com/webhooks/printify/43163e7d-8a6d-45b9-81be-ede9726533b5",
+   "shop_id": 29483178
+  }
+ ]
+}
