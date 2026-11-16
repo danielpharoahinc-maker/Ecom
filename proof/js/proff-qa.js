@@ -152,7 +152,7 @@ export const QA = [
   { t: 7, q: 'Can I use Proof on two phones?', k: 'devices another phone switch new phone laptop',
     a: 'Yes. Sign in with the same email and your proof comes with you.' },
   { t: 7, q: 'Is Proof for under 18s?', k: 'age kids child teen parent minor',
-    a: 'Yes, from 13 up. If you’re under 18, a parent or guardian needs to agree to the Terms and Privacy Policy, and you tick a box to confirm it when you create your account.' },
+    a: 'Yes, from 13 up. If you’re under 18, it’s a good idea to tell a parent or guardian you’re using it.' },
   { t: 7, q: 'Can I turn sounds off?', k: 'sounds mute noise haptic vibration',
     a: 'Sounds are off until you switch them on. Tap your initial on Today, then Sounds.' },
   { t: 7, q: 'Something is broken. What do I do?', k: 'bug broken not working glitch crash error stuck',

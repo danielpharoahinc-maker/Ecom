@@ -55,7 +55,7 @@ function signinView(root, onDone, opts) {
     <div class="welcome-copy"><h1 class="display">Welcome back.</h1></div>
     <div class="auth">
       <form class="email-form" novalidate>
-        ${consentHTML({ minor: false })}
+        ${consentHTML()}
         <label class="sr" for="email">Email</label>
         <input id="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required>
         <p class="form-err" role="alert" hidden></p>

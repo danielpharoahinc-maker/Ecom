@@ -341,7 +341,7 @@ function body(step) {
 
   if (step.type === 'account') {
     return `<form class="acct" novalidate>
-      ${consentHTML({ minor: (ans.age || 18) < 18 })}
+      ${consentHTML()}
       <label class="sr" for="email">Email</label>
       <input id="email" class="big-input" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required>
       <p class="form-err" role="alert" hidden></p>

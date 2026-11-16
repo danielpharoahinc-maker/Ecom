@@ -36,7 +36,7 @@ export function mountAgePull(el, { value = 15, onChange } = {}) {
     el.classList.toggle('young', touched && age < 13);
     wheel.setAttribute('aria-valuenow', age);
     hint.hidden = touched;
-    verdict.textContent = !touched ? '' : age < 13 ? 'Proof is for ages 13 and up.' : age < 18 ? 'Under 18: a parent or guardian needs to agree.' : '';
+    verdict.textContent = !touched ? '' : age < 13 ? 'Proof is for ages 13 and up.' : '';
     verdict.hidden = !verdict.textContent;
   };
   const pick = (i, fromUser) => {
@@ -55,8 +55,11 @@ export function mountAgePull(el, { value = 15, onChange } = {}) {
     clearTimeout(settle);
     settle = setTimeout(() => { if (ready) wheel.scrollTo({ top: idx * ROW, behavior: 'smooth' }); }, 120); // for browsers without snap
   }, { passive: true });
+  // Tapping the number already in the middle confirms it, so nobody has to scroll away and back.
+  wheel.addEventListener('click', () => { if (ready && !touched) pick(idx, true); });
   wheel.addEventListener('keydown', (e) => {
     const k = { ArrowDown: 1, ArrowUp: -1, PageDown: 5, PageUp: -5 }[e.key];
+    if (e.key === 'Enter' && !touched) { e.preventDefault(); pick(idx, true); return; }
     if (k) { e.preventDefault(); wheel.scrollTo({ top: (idx + k) * ROW, behavior: 'smooth' }); }
   });
   const set = (n) => { const i = ages.indexOf(n); if (i < 0) return; wheel.scrollTop = i * ROW; idx = i; age = n; touched = true; curve(); paint(); };
