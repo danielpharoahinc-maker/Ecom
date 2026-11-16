@@ -1087,3 +1087,33 @@ img.img-fade.loaded { opacity: 1; }
 [data-agepull]:not(.touched) .wheel-wrap { animation: wheelNudge 2.2s ease-in-out .8s 2; }
 @keyframes wheelNudge { 0%, 70%, 100% { transform: translateY(0); } 85% { transform: translateY(-8px); } }
 @media (prefers-reduced-motion: reduce) { .caret, [data-agepull]:not(.touched) .wheel-wrap { animation: none; } }
+
+.cat-h { margin: 18px 2px 8px; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--mute); }
+.cat-h:first-of-type { margin-top: 4px; }
+
+/* Meals and Claude's review */
+.meal-pick { display: flex; flex-direction: column; gap: 8px; animation: gpIn .4s var(--spring) both; }
+.mp-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.mp { padding: 8px 14px; min-height: 40px; border-radius: var(--pill); background: var(--s2); color: var(--ink-2); font-size: 15px; font-weight: 600; box-shadow: var(--hi); transition: background .2s, color .2s, transform .12s; }
+.mp:active { transform: scale(.95); }
+.mp.on { background: var(--sel); color: var(--on-sel); }
+.mp.tag { font-weight: 500; font-size: 14px; }
+.pv-meal { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }
+.pv-meal .mp { min-height: 0; padding: 5px 11px; font-size: 13px; }
+.ai-wait { margin: 6px 0 0; font-size: 14px; color: var(--mute); }
+.ai-card { margin-top: 8px; padding: 14px; border-radius: var(--r-card); background: var(--s2); box-shadow: var(--hi), inset 3px 0 0 var(--accent); display: flex; flex-direction: column; gap: 6px; }
+.ai-card.v-poor { box-shadow: var(--hi), inset 3px 0 0 var(--danger); }
+.ai-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: var(--mute); text-transform: uppercase; letter-spacing: .06em; }
+.ai-score { font-family: var(--display); font-size: 30px; font-weight: 800; color: var(--ink); letter-spacing: -.02em; text-transform: none; }
+.ai-score small { font-size: 14px; color: var(--mute); }
+.ai-verdict { margin: 0; font-family: var(--display); font-size: 20px; font-weight: 700; }
+.ai-sum { margin: 0; color: var(--ink-2); line-height: 1.4; }
+.ai-tips { margin: 2px 0 0; padding-left: 18px; color: var(--ink-2); font-size: 15px; line-height: 1.4; }
+.ai-badge { font-style: normal; padding: 1px 6px; border-radius: 99px; background: var(--accent); color: var(--on-sel); font-size: 10.5px; font-weight: 800; }
+
+/* Connect Claude */
+.cc-key { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: var(--r-card); background: var(--accent-deep); box-shadow: var(--hi), inset 3px 0 0 var(--accent); }
+.cc-key code { display: block; padding: 10px 12px; border-radius: var(--r-ctl); background: var(--bg); color: var(--accent); font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; user-select: all; -webkit-user-select: all; }
+.cc-keys { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.cc-keys li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-radius: var(--r-card); background: var(--s2); }
+.cc-keys small { display: block; color: var(--mute); font-size: 13px; margin-top: 2px; }

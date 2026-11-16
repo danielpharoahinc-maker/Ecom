@@ -150,7 +150,9 @@ export async function startAccount(email) {
       await sendEmailCode(email);
       return { existing: true };
     }
-    throw new Error(friendly(error));
+    // The email couldn't be sent (limits, mail setup). Don't block anyone: they keep playing as a
+    // guest, and the Account screen offers to send the confirmation again.
+    return { user: { ...toUser(session.user), email }, emailPending: true };
   }
   return { user: { ...toUser(session.user), email } };
 }

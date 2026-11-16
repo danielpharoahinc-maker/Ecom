@@ -106,7 +106,7 @@ function renderInside(el, animate) {
       <div class="prints">${ps.map((p) => `
         <button class="print" data-open="${p.id}" style="--d:${animate ? Math.min(n++, 14) * 80 : 0}ms" aria-label="${commitment(p.cKey).label} at ${fmtClock(p.ts)}">
           <span class="print-img">${p.photoId ? `<img data-media="${p.photoId}" alt="${commitment(p.cKey).label} proof from ${fmtShortDay(p.ts)}" loading="lazy">` : `<span class="print-voice">“${esc((p.note || 'Voice proof').slice(0, 60))}”</span>`}</span>
-          <span class="print-cap">${ic(commitment(p.cKey).icon, 13)}<time>${fmtClock(p.ts)}</time></span>
+          <span class="print-cap">${ic(commitment(p.cKey).icon, 13)}${p.analysis ? `<em class="ai-badge">${Math.round(p.analysis.score ?? 0)}</em>` : ''}<time>${fmtClock(p.ts)}</time></span>
         </button>`).join('')}</div>
     </section>`).join('') : `
     <div class="empty">

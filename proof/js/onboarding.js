@@ -3,7 +3,7 @@
 // and it ends with your first proof. The bar starts at 20% because creating the
 // account counts. A draft is kept so leaving for the payment page and coming
 // back picks up exactly where you were.
-import { STEPS, CATALOG, MAX_GOALS, MIN_GOALS, needFor } from './data.js';
+import { STEPS, groupedCatalog, MAX_GOALS, MIN_GOALS, needFor } from './data.js';
 import { S, saveProfile, setUser, load } from './state.js';
 import { mountAgePull } from './agepull.js';
 import { consentHTML, consentOK, saveConsent, createAccount } from './account.js';
@@ -142,7 +142,7 @@ function bindAccount(root, next, onDone, redraw) {
       saveConsent({ age: ans.age, minor });
       haptic(20);
       await setUser(res.user);
-      if (res.user && !res.user.local) toast('Link sent to your email. Tap it to save your account. Keep going.');
+      if (res.user && !res.user.local) toast(res.emailPending ? 'You’re in. We’ll send your confirmation email shortly.' : 'Link sent to your email. Tap it to save your account. Keep going.');
       next();
     } catch (e2) { err.textContent = e2.message || 'Couldn’t create your account. Try again.'; err.hidden = false; btn.disabled = false; btn.textContent = 'Create my account'; }
   });
@@ -314,12 +314,12 @@ function body(step) {
   }
 
   if (step.type === 'commit') {
-    return `<div class="ctiles">${CATALOG.map((c) => `
+    return `${groupedCatalog().map((g) => `<h3 class="cat-h">${g.cat}</h3><div class="ctiles">${g.items.map((c) => `
       <button class="ctile" data-k="${c.key}" aria-pressed="false">
         <span class="ctile-n" aria-hidden="true"></span>
         ${ic(c.icon, 26)}
         <b>${c.label}</b>
-      </button>`).join('')}</div>
+      </button>`).join('')}</div>`).join('')}
       <div class="proff-note">${proffSVG('talk', 52)}<p>Prove <b>half</b> of your goals in a day and your streak lives. Start with what you can really do. You can change them any time.</p></div>
       <div class="ob-foot">
         <p class="commit-count" aria-live="polite"></p>

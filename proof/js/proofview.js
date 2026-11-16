@@ -5,6 +5,19 @@ import { openSheet, confirmSheet } from './sheet.js';
 import { ic } from './icons.js';
 import { esc, fmtDay, fmtClock, fmtDur, toast } from './util.js';
 
+const VERDICT = { great: 'Great meal', good: 'Good meal', ok: 'Okay meal', poor: 'Not a good one' };
+function aiCard(p) {
+  const a = p.analysis;
+  if (!a) return p.meal ? `<p class="ai-wait">${S.profile?.apiConnected ? 'Claude hasn’t reviewed this meal yet. Ask Claude to check your Proof meals.' : 'Connect Claude in Account to get this meal reviewed.'}</p>` : '';
+  const s = Math.max(0, Math.min(10, Math.round(a.score ?? 0)));
+  return `<div class="ai-card v-${esc(a.verdict || 'ok')}">
+    <div class="ai-top"><b>Claude’s take</b><span class="ai-score">${s}<small>/10</small></span></div>
+    <p class="ai-verdict">${esc(VERDICT[a.verdict] || a.verdict || '')}</p>
+    ${a.summary ? `<p class="ai-sum">${esc(a.summary)}</p>` : ''}
+    ${(a.tips || []).length ? `<ul class="ai-tips">${a.tips.slice(0, 4).map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+  </div>`;
+}
+
 export async function openProof(id) {
   const p = S.proofs.find((x) => x.id === id);
   if (!p) return;
@@ -17,7 +30,9 @@ export async function openProof(id) {
       <div><b>${c.label}</b><small>${fmtDay(p.ts)}, ${fmtClock(p.ts)}</small></div>
       <button class="icon-btn round quiet" data-more aria-label="Delete this proof">${ic('trash', 18)}</button>
     </div>
+    ${p.meal ? `<div class="pv-meal"><span class="mp on">${esc(p.meal.type)}</span>${(p.meal.tags || []).map((t) => `<span class="mp">${esc(t)}</span>`).join('')}</div>` : ''}
     ${p.note ? `<p class="pv-note">“${esc(p.note)}”</p>` : ''}
+    ${aiCard(p)}
     ${aud ? `<button class="btn btn-secondary" data-play>${ic('play', 18)}<span>Play voice note ${fmtDur(p.audioSecs || 0)}</span></button><audio src="${aud}" hidden></audio>` : ''}
   `, {
     tall: true,

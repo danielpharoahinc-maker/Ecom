@@ -4,7 +4,7 @@
 //   Post.
 // Voice mode skips the photo for times a picture doesn't fit (prayer, a call).
 import { S, addProof, saveProfile } from './state.js';
-import { commitment } from './data.js';
+import { commitment, isFood } from './data.js';
 import { doneToday, streak, needFor } from './stats.js';
 import { ic } from './icons.js';
 import { esc, haptic, toast, fmtDur, emit, feel } from './util.js';
@@ -70,6 +70,29 @@ function chips() {
   }).join('')}</div></div>`;
 }
 
+const MEAL_TAGS = ['Protein', 'Veg or fruit', 'Whole food', 'Home cooked', 'Sugary', 'Fried', 'Processed'];
+function mealBlock() {
+  const h = new Date().getHours();
+  meal = { type: h < 10 ? 'Breakfast' : h < 15 ? 'Lunch' : h < 18 ? 'Snack' : 'Dinner', tags: [] };
+  return `<div class="meal-pick" ${isFood(cKey) ? '' : 'hidden'}>
+    <p class="gpick-q">Which meal?</p>
+    <div class="mp-row">${['Breakfast', 'Lunch', 'Dinner', 'Snack'].map((t) => `<button type="button" class="mp ${t === meal.type ? 'on' : ''}" data-meal="${t}">${t}</button>`).join('')}</div>
+    <div class="mp-row">${MEAL_TAGS.map((t) => `<button type="button" class="mp tag" data-tag="${t}" aria-pressed="false">${t}</button>`).join('')}</div>
+  </div>`;
+}
+function bindMeal() {
+  const box = root.querySelector('.meal-pick'); if (!box) return;
+  box.querySelectorAll('[data-meal]').forEach((b) => b.addEventListener('click', () => {
+    haptic(10); meal.type = b.dataset.meal;
+    box.querySelectorAll('[data-meal]').forEach((x) => x.classList.toggle('on', x === b));
+  }));
+  box.querySelectorAll('[data-tag]').forEach((b) => b.addEventListener('click', () => {
+    haptic(8); const t = b.dataset.tag;
+    meal.tags = meal.tags.includes(t) ? meal.tags.filter((x) => x !== t) : [...meal.tags, t];
+    b.classList.toggle('on', meal.tags.includes(t)); b.setAttribute('aria-pressed', meal.tags.includes(t));
+  }));
+}
+
 function sticker() {
   const c = commitment(cKey);
   return `${ic(c.icon, 16)}<span>${cKey === 'moment' ? 'Moment' : c.label}</span>`;
@@ -88,6 +111,7 @@ function bindChips() {
     });
     b.classList.remove('hit'); void b.offsetWidth; b.classList.add('hit');
     b.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    const mp = root.querySelector('.meal-pick'); if (mp) mp.hidden = !isFood(cKey);
     const t = root.querySelector('[data-ctitle]');
     if (t) t.textContent = commitment(cKey).label;
     const st = root.querySelector('.goal-sticker');
@@ -205,6 +229,7 @@ function review() {
     </header>
     ${photoURL ? `<div class="rev-photo"><img src="${photoURL}" alt="Your proof photo"></div>` : ''}
     ${chips()}
+    ${mealBlock()}
     <div class="talk ${mode === 'voice' ? 'big' : ''}">
       <div class="talk-row">
         <button class="mic" data-mic aria-label="Record what you did">${ic('mic', 24)}</button>
@@ -221,7 +246,7 @@ function review() {
     <button class="btn btn-primary post" data-post>${ic('check', 20, 2.2)}<span>Post proof</span></button>
   </div>`;
 
-  bindChips();
+  bindChips(); bindMeal();
   root.querySelector('[data-close]').addEventListener('click', close);
   root.querySelector('[data-retake]').addEventListener('click', () => {
     stopTalk(true); photo = null; audio = null; transcript = ''; mode = 'photo'; camera();
@@ -370,6 +395,7 @@ function dictateOnly() {
 /* ---------- Post ---------- */
 
 let qa = null; // the photo check for the proof being posted
+let meal = null; // which meal, for food goals
 
 async function post(force) {
   if (rec) stopTalk();
@@ -391,6 +417,7 @@ async function post(force) {
     cKey, kind: photo ? 'photo' : 'voice',
     note, audioSecs: audio ? Math.round(audioSecs) : 0,
     ...(qa ? { qa: { ok: qa.ok, score: qa.score, tags: qa.tags, hash: qa.hash, forced: !qa.ok } } : {}),
+    ...(isFood(cKey) && meal ? { meal: { type: meal.type, tags: meal.tags } } : {}),
   }, photo, audio);
   haptic(25);
   success();

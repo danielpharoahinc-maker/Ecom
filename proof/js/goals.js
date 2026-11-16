@@ -1,7 +1,7 @@
 // Your goals: pick 1 to 6 and change them whenever life changes.
 // Past days keep the goals you had then, so editing never rewrites your history.
 import { S, setGoals } from './state.js';
-import { CATALOG, MAX_GOALS, MIN_GOALS, needFor } from './data.js';
+import { groupedCatalog, MAX_GOALS, MIN_GOALS, needFor } from './data.js';
 import { pushProfile } from './billing.js';
 import { openSheet } from './sheet.js';
 import { proffSVG } from './proff.js';
@@ -12,11 +12,11 @@ export function openGoals() {
   let picked = [...S.profile.commitments];
   openSheet(`
     <div class="ask-head">${proffSVG('talk', 64)}<div><b class="h2">Your goals</b><p class="goal-rule"></p></div></div>
-    <div class="ctiles">${CATALOG.map((c) => `
+    ${groupedCatalog().map((g) => `<h3 class="cat-h">${g.cat}</h3><div class="ctiles">${g.items.map((c) => `
       <button class="ctile" data-k="${c.key}" aria-pressed="false">
         <span class="ctile-n" aria-hidden="true"></span>
         ${ic(c.icon, 26)}<b>${c.label}</b>
-      </button>`).join('')}</div>
+      </button>`).join('')}</div>`).join('')}
     <p class="fine goal-note" aria-live="polite"></p>
     <div class="stack"><button class="btn btn-primary" data-save>Save goals</button></div>`, {
     tall: true,

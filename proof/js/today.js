@@ -6,6 +6,7 @@ import { startTour } from './proff.js';
 import { reminderSettings } from './reminders.js';
 import { commitment } from './data.js';
 import { sfx } from './fx.js';
+import { openConnectClaude } from './connect.js';
 import { doneToday, streak, needFor } from './stats.js';
 import { openGoals } from './goals.js';
 import { focusLine } from './review.js';
@@ -218,6 +219,7 @@ function settings() {
     ${LIVE ? '' : '<p class="fine">Test version: your proof is saved in this browser only.</p>'}
     <div class="stack">
       <button class="btn btn-secondary" data-edit-goals>${ic('target', 20)}<span>Your goals</span></button>
+      <button class="btn btn-secondary" data-claude>${ic('sparkle', 20)}<span>Connect Claude</span></button>
       <button class="btn btn-secondary" data-rem>${ic('clock', 20)}<span>Reminders</span></button>
       <button class="btn btn-secondary" data-tour>Show me around again</button>
       <button class="btn btn-secondary" data-sounds>${S.profile.sounds ? 'Sounds: on' : 'Sounds: off'}</button>
@@ -239,6 +241,7 @@ function settings() {
       body.querySelector('[data-plan-row]').addEventListener('click', () => { close(); setTimeout(subscriptionSheet, 320); });
       body.querySelector('[data-edit-goals]').addEventListener('click', () => { close(); setTimeout(openGoals, 320); });
       body.querySelector('[data-tour]').addEventListener('click', () => { close(); setTimeout(() => startTour(), 320); });
+      body.querySelector('[data-claude]').addEventListener('click', () => { close(); setTimeout(openConnectClaude, 320); });
       body.querySelector('[data-rem]').addEventListener('click', () => { close(); setTimeout(() => reminderSettings(), 320); });
       body.querySelector('[data-sounds]').addEventListener('click', async (e) => {
         await saveProfile({ ...S.profile, sounds: !S.profile.sounds });

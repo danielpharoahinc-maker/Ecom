@@ -6,7 +6,7 @@ import { LIVE } from './config.js';
 import { S, saveProfile } from './state.js';
 import * as db from './db.js';
 import { getClient } from './auth.js';
-import { emit, uid } from './util.js';
+import { emit, uid, toast, feel } from './util.js';
 import { pushProfile } from './billing.js';
 
 const BUCKET = 'proof-media';
@@ -50,7 +50,7 @@ export async function syncProofs() {
       const { data, error } = await c.from('proofs').upsert({
         user_id: S.user.id, client_id: p.id, c_key: p.cKey, kind: p.kind || (p.photoId ? 'photo' : 'voice'),
         note: p.note || null, photo_path: photoPath, audio_path: audioPath, audio_secs: p.audioSecs || null,
-        created_at: new Date(p.ts).toISOString(),
+        created_at: new Date(p.ts).toISOString(), meta: p.meal ? { meal: p.meal } : null,
       }, { onConflict: 'user_id,client_id' }).select('id').single();
       if (error) throw error;
       await remember(p, { remoteId: data.id, photoPath, audioPath });
@@ -131,6 +131,21 @@ export async function ensureProfile() {
   return { ok: true };
 }
 
+// Claude's reviews of your meals (written through the Proof API) come back here.
+export async function pullAnalyses() {
+  if (!LIVE || !S.user || !S.profile?.onboarded) return;
+  const c = await getClient().catch(() => null);
+  if (!c) return;
+  const since = new Date(Date.now() - 21 * 864e5).toISOString();
+  const { data } = await c.from('proofs').select('id, analysis').eq('user_id', S.user.id).not('analysis', 'is', null).gte('created_at', since);
+  let fresh = 0;
+  for (const r of data || []) {
+    const p = S.proofs.find((x) => x.remoteId === r.id);
+    if (p && p.analysis?.at !== r.analysis.at) { await remember(p, { analysis: r.analysis }); fresh++; }
+  }
+  if (fresh) { emit('proof:changed'); toast(fresh === 1 ? 'Claude reviewed your meal' : `Claude reviewed ${fresh} meals`); feel('good'); }
+}
+
 export function startSync() {
   if (!LIVE) return;
   const soon = () => { clearTimeout(timer); timer = setTimeout(syncProofs, 900); };
@@ -138,7 +153,8 @@ export function startSync() {
   window.addEventListener('online', soon);
   window.addEventListener('proof:deleted', (e) => removeRemote(e.detail));
   document.addEventListener('visibilitychange', () => { if (!document.hidden) soon(); });
-  ensureProfile().then(() => { syncProofs(); pullMine(); });
+  ensureProfile().then(() => { syncProofs(); pullMine(); pullAnalyses(); });
+  setInterval(() => { if (!document.hidden && S.profile?.apiConnected) pullAnalyses(); }, 45000);
   window.addEventListener('online', () => ensureProfile().then(() => syncProofs()));
   window.addEventListener('proof:profile', () => { profileOk = false; ensureProfile(); });
 }
