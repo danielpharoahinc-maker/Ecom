@@ -418,12 +418,12 @@
   page("returns", "Returns", () => shell({
     key: "returns", route: "returns", label: "Returns", folio: "No. 04", legal: true, draft: true,
     title: "Returns<em class=\"t-accent\">.</em>", sub: "If we got it wrong, we make it right.",
-    meta: [["Version", "Draft 0.1"], ["Last updated", ph("date")], ["Report within", ph("X") + " days"]],
+    meta: [["Version", "Draft 0.1"], ["Last updated", ph("date")], ["Report within", "7 days"]],
     sections: [
       { id: "short", title: "The short version", html: list([
         "Defect, misprint or wrong item? We replace it or refund you.",
-        `Tell us within ${ph("X")} days of delivery, with a photo.`,
-        `Each tee is printed for you, so we don't accept change-of-mind returns ${ph("owner to decide")}.`,
+        `Tell us within 7 days of delivery, with a photo.`,
+        `Each tee is printed for you, so we don't accept change-of-mind returns (defects and misprints only).`,
       ]) },
       { id: "covered", title: "What's covered", html: list([
         "Faulty tees: holes, loose seams, fabric flaws.",
@@ -432,20 +432,20 @@
         "Parcels damaged on the way to you.",
       ]) },
       { id: "not", title: "What isn't", html: `${list([
-        `Change of mind, or ordering the wrong size. Check the <a href="#/size-guide">size guide</a> first. ${ph("Owner to decide: offer exchanges at the customer's cost?")}`,
+        `Change of mind, or ordering the wrong size. Check the <a href="#/size-guide">size guide</a> first.`,
         "Damage from wear, or from washing against the care label.",
       ])}<p>None of this limits your rights under the Consumer Protection Act (see below).</p>` },
       { id: "how", title: "How to return", html: steps([
-        `<strong>Email us.</strong> Write to ${ph("Email")} within ${ph("X")} days of delivery. Include your order number.`,
+        `<strong>Email us.</strong> Write to ${ph("Email")} within 7 days of delivery. Include your order number.`,
         "<strong>Send a photo.</strong> One of the problem, one of the size label.",
-        `<strong>We reply within ${ph("2 working days")}.</strong> With a replacement, or a refund if you prefer.`,
+        `<strong>We reply within 2 working days.</strong> With a replacement, or a refund if you prefer.`,
         `<strong>Keep it for now.</strong> You may not need to send it back. ${ph("Owner to confirm with the fulfilment partner")}.`,
       ]) },
       { id: "cpa", title: "Defective goods and the CPA", html: `<p>The Consumer Protection Act gives you the right to return defective goods within six months of delivery for a repair, replacement or refund. We honour that, and nothing on this page takes it away.</p>` },
       { id: "cooling", title: "Cooling-off period", html: `
         <p>The Electronic Communications and Transactions Act gives a seven-day cooling-off period on many online purchases. It may not apply to goods made to a customer's specifications.</p>
         <p class="pg-flag"><strong>For owner and legal review:</strong> decide whether printed-to-order stock designs count as "made to specification". Until confirmed, assume the cooling-off right applies and state how returns under it work: ${ph("process, who pays return delivery, refund within 30 days")}.</p>` },
-      { id: "refunds", title: "Refunds", html: `<p>Approved refunds go back to the card you paid with within ${ph("X")} working days. Delivery fees are refunded when the mistake was ours.</p>` },
+      { id: "refunds", title: "Refunds", html: `<p>Approved refunds go back to the card you paid with within 10 working days. Delivery fees are refunded when the mistake was ours.</p>` },
     ],
   }));
 

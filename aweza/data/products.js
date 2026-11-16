@@ -30,7 +30,7 @@ AW.config = {
   was: { price: 600, until: "2027-01-31" },
   // Business details for the Help, Terms and Privacy pages. Fill these in and the "[Email]"-style placeholders on those
   // pages are replaced by the real thing. Anything left empty still shows as a placeholder (see docs/OWNER-TODO.md).
-  business: { name: "", regNo: "", vatNo: "", email: "", phone: "", address: "", city: "", founder: "" },
+  business: { name: "", regNo: "", vatNo: "Not VAT registered", email: "Danielpharoah.inc@gmail.com", phone: "0611833502", address: "35a Bosduif", city: "George", founder: "" },
   // Limited drop: the server stops taking orders after this date (end of day, South African time).
   drop: { name: "Drop 01", ends: "2026-12-31", label: "31 Dec" },
 };
