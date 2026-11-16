@@ -3,6 +3,7 @@
 import { S, load, setUser, signOut } from './state.js';
 import { LIVE } from './config.js';
 import { rememberInvite, pendingInvite, clearInvite } from './invite.js';
+import { runUnlocks } from './wardrobe.js';
 import { currentLiveUser } from './auth.js';
 import { renderWelcome } from './welcome.js';
 import { renderOnboarding } from './onboarding.js';
@@ -146,6 +147,8 @@ async function boot() {
     startSync(); // save proof to your account, pull it back on a new phone
     fromHash();
     setTimeout(runNudges, 2200);
+    setTimeout(runUnlocks, 3400);
+    let ut; window.addEventListener('proof:changed', () => { clearTimeout(ut); ut = setTimeout(runUnlocks, 3600); });
   }
   if (S.profile?.onboarded && action === 'snap') openCapture();
   if (S.profile?.onboarded && action === 'talk') openCapture({ mode: 'voice' });

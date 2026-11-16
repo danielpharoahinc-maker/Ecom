@@ -1,7 +1,7 @@
 // Club, live: real clubs on the server. Friends see who has proven what today,
 // each other's proof, and can give one-tap respect. Everything the database
 // shows you is already limited to your clubs by its own rules.
-import { S } from './state.js';
+import { S, saveProfile } from './state.js';
 import { getClient } from './auth.js';
 import { ensureProfile } from './sync.js';
 import { signOut } from './state.js';
@@ -85,6 +85,7 @@ async function refresh() {
     }
     st.phase = 'ready';
     writeCache();
+    if (!S.profile.joinedClub) saveProfile({ ...S.profile, joinedClub: true });
   } catch (e) {
     if (st.phase !== 'ready') { st.phase = 'error'; st.reason = e.reason || ''; st.error = e.reason ? e.message : (e.message && e.message !== 'offline' ? `Couldn’t load your club: ${e.message}` : 'Couldn’t reach your club. Check your connection.'); }
   } finally {
