@@ -38,7 +38,7 @@ async function call(method, pathname, body, ms = 6000) {
 
 /**
  * Look through the most recent orders for one we already created for this
- * Yoco checkout. Matches on external_id, Printify's metadata.shop_order_id,
+ * Paystack checkout. Matches on external_id, Printify's metadata.shop_order_id,
  * or our label (the short order ref).
  */
 export async function findExistingOrder({ externalId, label, pages = 3 }) {

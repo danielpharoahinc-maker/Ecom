@@ -503,7 +503,7 @@
       </div>
     </aside>`;
 
-  /* Apple Pay / Google Pay: the secure payment page (Yoco) offers both and asks for Face ID, Touch ID or a fingerprint.
+  /* Apple Pay / Google Pay: the secure payment page (Paystack) offers both (where your device supports them) and asks for Face ID, Touch ID or a fingerprint.
      We cannot show the wallet sheet on this page, so we tell people what to expect on their device. */
   const walletKind = () => {
     let apple = false;
@@ -511,9 +511,9 @@
     return apple ? "apple" : /Android/i.test(navigator.userAgent || "") ? "google" : "other";
   };
   const walletLine = () => ({
-    apple: "Apple Pay works on this device. Tap Pay, then confirm with Face ID or Touch ID. No card number to type.",
-    google: "Google Pay works on the next screen. Tap Pay, then confirm with your fingerprint or face. No card number to type.",
-    other: "On the next screen, choose Apple Pay, Google Pay or card.",
+    apple: "On the next screen, pay securely by card. Wallet options appear there if Paystack offers them for your card.",
+    google: "On the next screen, pay securely by card. Wallet options appear there if Paystack offers them for your card.",
+    other: "On the next screen, pay securely by card.",
   })[walletKind()];
   const payLabel = () => `Pay ${rand(AW.cart.total())}`;
 
@@ -549,12 +549,12 @@
                 <div class="co-alert" role="alert" hidden></div>
                 <div class="co-wallets" data-wallet="${walletKind()}">
                   <ul class="co-wallet-marks" aria-label="Ways to pay">
-                    <li>Apple Pay</li><li>Google Pay</li><li>Card</li>
+                    <li>Visa</li><li>Mastercard</li>
                   </ul>
                   <p class="co-wallet-line">${walletLine()}</p>
                 </div>
                 ${btn(payLabel(), { type: "submit", block: true, size: "lg", icon: "lock", cls: "co-pay", labelAttr: "data-co-paylabel" })}
-                <p class="co-fine">You'll pay on Yoco's secure payment page. We never see or store your card details.</p>
+                <p class="co-fine">You'll pay on Paystack's secure payment page. We never see or store your card details.</p>
                 <div class="co-soon" hidden tabindex="-1">
                   <span class="co-soon-mark" aria-hidden="true">${lipsArt("co-soon-lips")}</span>
                   <div class="co-soon-text">

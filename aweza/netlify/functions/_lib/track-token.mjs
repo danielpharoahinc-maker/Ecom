@@ -1,9 +1,9 @@
 // A private tracking link for emails: https://site/#/track/<order number>.<token>
 // The token is an HMAC of the order number, so only the person who got the email can use that link (no email retyping),
-// and nobody can make one for another order. Secret: TRACK_SECRET, or else YOCO_WEBHOOK_SECRET.
+// and nobody can make one for another order. Secret: TRACK_SECRET, or else PAYSTACK_SECRET_KEY.
 import crypto from "node:crypto";
 
-const secret = () => process.env.TRACK_SECRET || process.env.YOCO_WEBHOOK_SECRET || "";
+const secret = () => process.env.TRACK_SECRET || process.env.PAYSTACK_SECRET_KEY || "";
 
 export function trackToken(ref) {
   const s = secret();

@@ -18,5 +18,5 @@ No build step is needed: it's plain HTML, CSS and JavaScript.
 
 ## Still to do
 - Replace the placeholder shirt drawings with real Printify mockup images
-- Connect checkout to a South African payment gateway (PayFast, Yoco or Paystack)
+- Connect checkout to a South African payment gateway (PayFast, Paystack or Paystack)
 - Send paid orders to Printify through a small backend. The Printify API key must never go in these browser files.

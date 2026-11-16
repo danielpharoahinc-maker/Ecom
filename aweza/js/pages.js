@@ -346,7 +346,7 @@
         </div>
         <p>Every tee is printed after you order, then shipped to you anywhere in South Africa. Allow about ${AW.eta().days[0]} to ${AW.eta().days[1]} working days from order to delivery. Around the festive season it can run a little longer. You'll get a tracking link by email when it ships.</p>` },
       { id: "payments", title: "Payments", html: `
-        <p>Card payments are processed securely by our payment provider, Yoco. We never see or store your card number. Prices are in Rand ${ph("and include VAT, if registered")}.</p>
+        <p>Card payments are processed securely by our payment provider, Paystack. We never see or store your card number. Prices are in Rand ${ph("and include VAT, if registered")}.</p>
         <p class="pg-note">Payments are launching soon. Your bag is saved on this device until then.</p>` },
       { id: "orders", title: "Orders", html: `
         <p>Printed to order means we start fast. Need to change a size or address? Email ${ph("Email")} within ${ph("X hours")} of ordering and we'll fix it before it goes to print.</p>
@@ -461,7 +461,7 @@
         "Your order is accepted when we email you a confirmation. Until then, we may decline it.",
         "If a price is clearly wrong, we'll tell you and you can cancel for a full refund.",
       ]) },
-      { id: "payment", title: "Payment", html: `<p>Card payments are processed by our payment provider, Yoco, over a secure connection. We don't receive or store your full card details. Payment is taken when you place your order.</p>` },
+      { id: "payment", title: "Payment", html: `<p>Card payments are processed by our payment provider, Paystack, over a secure connection. We don't receive or store your full card details. Payment is taken when you place your order.</p>` },
       { id: "delivery", title: "Delivery", html: `<p>We deliver within South Africa only. Delivery costs ${delivery} and is free on orders of ${freeOver} or more. Tees are printed to order, so allow about ${AW.eta().days[0]} to ${AW.eta().days[1]} working days. Delivery dates are estimates, not promises. Ownership and risk pass to you on delivery.</p>` },
       { id: "returns", title: "Returns and refunds", html: `<p>See our <a href="#/returns">returns policy</a>. Your rights under the Consumer Protection Act and the ECT Act are not affected.</p>` },
       { id: "ip", title: "Our designs", html: `<p>The AWEZA name, the lips and every print on this site belong to ${ph("Registered business name")}. Buying a tee doesn't give you the right to copy or sell the designs.</p>` },
@@ -494,7 +494,7 @@
         "To send drop news, only if you opted in. Unsubscribe any time.",
       ]) + "<p>We don't sell your information. Ever.</p>" },
       { id: "share", title: "Who we share it with", html: `<p>We share only what each partner needs to do its job, under agreements that require them to protect it:</p>${list([
-        "<strong>Yoco</strong>, our payment provider, to process card payments.",
+        "<strong>Paystack</strong>, our payment provider, to process card payments.",
         "<strong>Printify</strong> and its print partners, to print and pack your tee.",
         `<strong>Couriers</strong>, to deliver it. ${ph("Name the courier(s)")}.`,
         `<strong>Our website host</strong> ${ph("name")}, to run this site.`,

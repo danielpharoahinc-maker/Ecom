@@ -3,11 +3,11 @@
 No website can be promised "unhackable". This is what protects AWEZA, what was fixed, and what only you can do.
 
 ## How an order is protected
-- **Prices are set on the server only.** The browser can claim any price; the payment function re-prices every order from `data/products.js` and tells Yoco the amount.
-- **Payments are confirmed by Yoco, not by the browser.** The webhook only accepts messages signed by Yoco (HMAC-SHA256 with your `YOCO_WEBHOOK_SECRET`, checked in constant time, rejected if older than 3 minutes) and re-checks the amount before creating the Printify order. Forged, altered and replayed messages are all rejected (tested).
-- **Card details never touch the site.** Customers pay on Yoco's own page. The checkout function only ever sends customers to a `yoco.com` address.
+- **Prices are set on the server only.** The browser can claim any price; the payment function re-prices every order from `data/products.js` and tells Paystack the amount.
+- **Payments are confirmed by Paystack, not by the browser.** The webhook only accepts messages signed by Paystack (HMAC-SHA512 with your `PAYSTACK_SECRET_KEY`, checked in constant time, rejected if older than 3 minutes) and re-checks the amount before creating the Printify order. Forged, altered and replayed messages are all rejected (tested).
+- **Card details never touch the site.** Customers pay on Paystack's own page. The checkout function only ever sends customers to a `paystack.com` address.
 - **Order tracking needs the order number and the email.** Wrong guesses all get the same answer; there is a per-visitor limit.
-- **Secrets live only in Netlify environment variables** (`YOCO_SECRET_KEY`, `YOCO_WEBHOOK_SECRET`, `PRINTIFY_API_TOKEN`). None are in the code or its git history (scanned 14 Nov 2026).
+- **Secrets live only in Netlify environment variables** (`PAYSTACK_SECRET_KEY`, `PRINTIFY_API_TOKEN`). None are in the code or its git history (scanned 14 Nov 2026).
 
 ## Fixed in this audit
 - **Your wholesale costs were publicly downloadable** (`/data/printify-variants.json`, with Printify product ids). It is now blocked, along with `netlify.toml`, `package.json`, `README.md`, `.git` and `.env*`. (The server functions still read it from their own bundle.)
@@ -15,27 +15,27 @@ No website can be promised "unhackable". This is what protects AWEZA, what was f
 - **Other headers:** HTTPS-only (HSTS), no framing by other sites, no content sniffing, tighter browser permissions, same-origin isolation.
 - **Rate limits** on checkout (20 per 10 minutes per visitor) and tracking (12), best effort.
 - **The cart stored in the browser is treated as untrusted:** unknown tees, sizes and quantities are dropped or clamped, so a tampered cart cannot inject anything.
-- **The payment redirect is pinned to Yoco** on both the server and the browser.
+- **The payment redirect is pinned to Paystack** on both the server and the browser.
 - Tracking links must be `https`.
 
 ## Added with customer emails (15 November 2026)
 - The Printify "shipped/delivered" endpoint only accepts messages signed with your `PRINTIFY_WEBHOOK_SECRET` (HMAC-SHA256, constant-time check) and refuses to run if the secret is missing. Tested: forged, unsigned and altered messages send no email.
 - Email contents are escaped, so a customer's name cannot inject anything into an email.
-- The private tracking links in emails carry a signed token tied to one order number. Keep `TRACK_SECRET` (or `YOCO_WEBHOOK_SECRET`) private; changing it breaks old links.
+- The private tracking links in emails carry a signed token tied to one order number. Keep `TRACK_SECRET` (or `PAYSTACK_SECRET_KEY`) private; changing it breaks old links.
 - The Resend API key is a secret like the others: Netlify only, never in the code.
 
 ## What only you can do (this is where most real break-ins happen)
-1. **Turn on two-step login (2FA) everywhere:** GitHub, Netlify, Yoco, Printify, your domain registrar, your email, Higgsfield. A stolen password with no 2FA is the most likely way in.
+1. **Turn on two-step login (2FA) everywhere:** GitHub, Netlify, Paystack, Printify, your domain registrar, your email, Higgsfield. A stolen password with no 2FA is the most likely way in.
 2. **Lock the domain** at the registrar (transfer lock on) and use a strong, unique password.
-3. **Use Yoco test keys first**, then live keys. Keep the live key only in Netlify. If a key may have leaked, roll it in the Yoco dashboard straight away.
+3. **Use Paystack test keys first**, then live keys. Keep the live key only in Netlify. If a key may have leaked, roll it in the Paystack dashboard straight away.
 4. **Rotate the Printify API token** when this build is finished: it was used by the AI session that built the site. Create a new token in Printify (Account, Connections), put it in Netlify, delete the old one.
 5. **Set `SITE_URL`** in Netlify to your real address once you have a domain.
 6. **GitHub:** turn on secret scanning and branch protection, and keep the repository private.
-7. **Watch for trouble:** check Netlify function logs and the Yoco dashboard now and then; Yoco can alert you to odd payments.
+7. **Watch for trouble:** check Netlify function logs and the Paystack dashboard now and then; Paystack can alert you to odd payments.
 8. **Keep `vendor/three.min.js` (version r149) up to date** now and then; it is the only third-party code the site runs.
 9. **If customer data is ever exposed**, South African law (POPIA) requires you to report it to the Information Regulator and the people affected. See the privacy page placeholders in `docs/OWNER-TODO.md`.
 
 ## Known limits
 - The rate limits and the referral codes are only a speed bump (no shared database): the real guards are signatures, email matching and server-side pricing.
 - Anyone can type any friend code and get the R50 (no customer database to check against).
-- Attacks on Netlify, Yoco, Printify or the registrar themselves are outside what this code can stop: that is what 2FA is for.
+- Attacks on Netlify, Paystack, Printify or the registrar themselves are outside what this code can stop: that is what 2FA is for.

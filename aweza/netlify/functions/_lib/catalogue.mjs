@@ -207,8 +207,8 @@ export function priceOrder(lines, cat = loadCatalogue(), ref = "") {
   };
 }
 
-// ---------- compact fulfilment payload carried in Yoco metadata ----------
-// Yoco documents metadata as "map from string to any" with no published size
+// ---------- compact fulfilment payload carried in Paystack metadata ----------
+// Paystack documents metadata as "map from string to any" with no published size
 // limit, so we keep it small (a few hundred bytes) and store it as one JSON
 // string. MAX_METADATA_CHARS is a self-imposed guard.
 

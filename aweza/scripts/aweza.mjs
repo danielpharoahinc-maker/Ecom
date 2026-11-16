@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// AWEZA setup CLI: connects Printify, Yoco, Resend and your site, and checks that everything works.
+// AWEZA setup CLI: connects Printify, Paystack, Resend and your site, and checks that everything works.
 //
 //   node scripts/aweza.mjs doctor [--site https://your-domain.com]   check every connection (safe, read-only)
 //   node scripts/aweza.mjs setup                                     guided set-up (asks a few questions)
@@ -8,7 +8,7 @@
 //   node scripts/aweza.mjs sync                                      refresh Printify product ids and costs
 //
 // Keys are read from environment variables (never from files, never printed):
-//   PRINTIFY_API_TOKEN   YOCO_SECRET_KEY   RESEND_API_KEY   (and optional PRINTIFY_SHOP_ID, SITE_URL)
+//   PRINTIFY_API_TOKEN   PAYSTACK_SECRET_KEY   RESEND_API_KEY   (and optional PRINTIFY_SHOP_ID, SITE_URL)
 // Node 18+, no packages. Run it from your own computer in the aweza/ folder.
 
 import readline from "node:readline";
@@ -71,16 +71,16 @@ async function checkPrintify() {
   note("Printify can't be checked for a saved card or Premium by the API: look at printify.com/app/account/payment/details");
 }
 
-async function checkYoco() {
-  head("Yoco");
-  const k = process.env.YOCO_SECRET_KEY;
-  if (!k) return note("YOCO_SECRET_KEY is not set here (it lives in Netlify; set it in this shell only to test the connection).");
-  const mode = k.startsWith("sk_live") ? "LIVE" : k.startsWith("sk_test") ? "TEST" : "unknown";
-  note(`Key mode: ${mode}`);
-  const r = await api("https://payments.yoco.com/api/checkouts/aweza-doctor-probe", k);
-  if (r.status === 401 || r.status === 403) fail(`Yoco rejected the key (HTTP ${r.status}).`);
-  else if (r.status === 0) fail("Could not reach Yoco: " + r.data);
-  else ok("Yoco accepted the key");
+async function checkPaystack() {
+  head("Paystack");
+  const k = process.env.PAYSTACK_SECRET_KEY;
+  if (!k) return note("PAYSTACK_SECRET_KEY is not set here (it lives in Netlify; set it in this shell only to test the connection).");
+  if (!/^sk_(test|live)_/.test(k)) return fail("PAYSTACK_SECRET_KEY must start with sk_test_ or sk_live_ (the SECRET key, not pk_).");
+  note(k.startsWith("sk_live_") ? "LIVE key: real money" : "TEST key: no real money (use this until you have placed a test order)");
+  const r = await api("https://api.paystack.co/balance", k);
+  if (r.status === 401 || r.status === 403) fail(`Paystack rejected the key (HTTP ${r.status}).`);
+  else if (r.status === 0) fail("Could not reach Paystack: " + r.data);
+  else ok("Paystack accepted the key");
 }
 
 async function checkResend() {
@@ -107,7 +107,7 @@ async function checkSite(site) {
   const priv = await get("/data/printify-variants.json"); priv.status === 404 ? ok("Wholesale cost file is not public") : fail(`/data/printify-variants.json is PUBLIC (HTTP ${priv.status})`);
   const fn = async (name, method = "POST") => { try { const r = await fetch(u("/.netlify/functions/" + name), { method, headers: { "content-type": "application/json" }, body: method === "POST" ? "{}" : undefined }); return r.status; } catch { return 0; } };
   const co = await fn("create-checkout", "GET"); co === 405 ? ok("Checkout function is live") : fail(`Checkout function answered ${co} (expected 405 for a GET)`);
-  const yw = await fn("yoco-webhook"); yw === 401 ? ok("Yoco webhook is live and rejects unsigned calls") : yw === 500 ? fail("Yoco webhook says YOCO_WEBHOOK_SECRET is not set in Netlify") : fail(`Yoco webhook answered ${yw}`);
+  const yw = await fn("paystack-webhook"); yw === 401 ? ok("Paystack webhook is live and rejects unsigned calls") : yw === 500 ? fail("Paystack webhook says PAYSTACK_SECRET_KEY is not set in Netlify") : fail(`Paystack webhook answered ${yw}`);
   const pw = await fn("printify-webhook"); pw === 401 ? ok("Printify webhook is live and rejects unsigned calls") : pw === 500 ? fail("Printify webhook says PRINTIFY_WEBHOOK_SECRET is not set in Netlify") : fail(`Printify webhook answered ${pw}`);
   const tr = await fn("track-order"); tr === 404 || tr === 429 ? ok("Tracking function is live") : fail(`Tracking function answered ${tr}`);
 }
@@ -116,7 +116,7 @@ async function doctor(args) {
   const i = args.indexOf("--site"); const site = (i >= 0 ? args[i + 1] : process.env.SITE_URL) || ""; SITE_ARG = site;
   console.log("AWEZA doctor: read-only checks. Nothing is changed.");
   head("This computer"); Number(process.versions.node.split(".")[0]) >= 18 ? ok("Node " + process.versions.node) : fail("Node 18 or newer is needed");
-  await checkPrintify(); await checkYoco(); await checkResend();
+  await checkPrintify(); await checkPaystack(); await checkResend();
   site ? await checkSite(site) : (head("Your live site"), note("Add --site https://your-domain.com (or set SITE_URL) to test the live site."));
   head("Result"); problems ? console.log(`  ${problems} thing(s) need attention (see ✖ above).`) : console.log("  All good.");
   process.exitCode = problems ? 1 : 0;
@@ -150,12 +150,9 @@ async function setup() {
     if (await yes("Register the Printify shipped/delivered events for " + site + "?")) {
       try { const r = await register(site); ok("Printify will call " + r.url); if (r.done.length) out.PRINTIFY_WEBHOOK_SECRET = r.secret; } catch (e) { fail(e.message); }
     }
-    if (await yes("Register the Yoco payment webhook for " + site + "?")) {
-      const k = process.env.YOCO_SECRET_KEY || await ask("Yoco secret key (sk_test_... first)", { secret: true }); process.env.YOCO_SECRET_KEY = k;
-      const r = await api("https://payments.yoco.com/api/webhooks", k, { method: "POST", body: JSON.stringify({ name: "aweza", url: new URL("/.netlify/functions/yoco-webhook", site).href }) });
-      if (r.status >= 200 && r.status < 300 && r.data && r.data.secret) { ok("Yoco webhook registered"); out.YOCO_WEBHOOK_SECRET = r.data.secret; out.YOCO_SECRET_KEY = k; }
-      else fail(`Yoco said HTTP ${r.status}: ${JSON.stringify(r.data).slice(0, 200)}`);
-    }
+    note("Paystack webhook (cannot be set by API): in the Paystack dashboard open Settings > API Keys & Webhooks and paste this as the Live and Test webhook URL:");
+    note("  " + new URL("/.netlify/functions/paystack-webhook", site).href);
+    out.PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || await ask("Paystack SECRET key (sk_test_... first, blank to skip)", { secret: true });
   }
   if (await yes("Check email (Resend) now?")) { process.env.RESEND_API_KEY = process.env.RESEND_API_KEY || await ask("Resend API key", { secret: true }); await checkResend(); out.RESEND_API_KEY = process.env.RESEND_API_KEY; if (site) out.MAIL_FROM = "AWEZA <orders@" + new URL(site).hostname.replace(/^www\./, "") + ">"; }
   if (site) out.SITE_URL = site; out.PRINTIFY_API_TOKEN = process.env.PRINTIFY_API_TOKEN; out.PRINTIFY_SHOP_ID = SHOP;
@@ -190,12 +187,12 @@ async function status(args) {
 }
 function launch(args) {
   const E = n => !!process.env[n], items = [
-    ["Printify token", E("PRINTIFY_API_TOKEN")], ["Yoco secret key", E("YOCO_SECRET_KEY")], ["Resend key", E("RESEND_API_KEY")],
+    ["Printify token", E("PRINTIFY_API_TOKEN")], ["Paystack secret key", E("PAYSTACK_SECRET_KEY")], ["Resend key", E("RESEND_API_KEY")],
     ["Site URL set", E("SITE_URL")], ["Printify webhook secret", E("PRINTIFY_WEBHOOK_SECRET")],
   ];
   head("Keys available to this CLI"); for (const [n, v] of items) v ? ok(n) : note(n + ": not set here");
   head("Only you can do these (cannot be automated)");
-  ["Netlify billing/credits so deploys work", "Buy awezaclothing.com and add it in Netlify", "Printify card + Premium (printify.com/app/account/payment/details)", "Yoco business verification + Verified Domain", "Resend: verify the domain DNS records", "Revoke the Amboras token in Printify > Connections", "Turn on 2FA everywhere"].forEach(x => note("[ ] " + x));
+  ["Netlify billing/credits so deploys work", "Buy awezaclothing.com and add it in Netlify", "Printify card + Premium (printify.com/app/account/payment/details)", "Paystack: finish business verification (Settings > Business) and paste the webhook URL (Settings > API Keys & Webhooks)", "Resend: verify the domain DNS records", "Revoke the Amboras token in Printify > Connections", "Turn on 2FA everywhere"].forEach(x => note("[ ] " + x));
   head("Then run, in order"); ["deploy", "webhooks https://awezaclothing.com", "doctor --site https://awezaclothing.com", "status"].forEach(x => note("node scripts/aweza.mjs " + x));
 }
 

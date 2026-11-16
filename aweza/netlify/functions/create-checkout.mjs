@@ -1,8 +1,8 @@
 // POST /.netlify/functions/create-checkout
 // Body: the order object from DIRECTION §11. Validates it, re-prices it on
-// the server (browser totals are ignored), creates a Yoco hosted checkout and
+// the server (browser totals are ignored), initialises a Paystack transaction and
 // returns { redirectUrl, checkoutId }.
-// Yoco reference: https://developer.yoco.com/api-reference/checkout-api/checkout/create-checkout
+// Paystack reference: https://paystack.com/docs/api/transaction/#initialize
 
 import crypto from "node:crypto";
 import {
@@ -10,7 +10,7 @@ import {
 } from "./_lib/catalogue.mjs";
 import { json, log, fetchWithTimeout, siteOrigin, rateLimited } from "./_lib/http.mjs";
 
-const YOCO_CHECKOUT_URL = "https://payments.yoco.com/api/checkouts";
+const PAYSTACK_INIT_URL = "https://api.paystack.co/transaction/initialize";
 const MAX_BODY = 16 * 1024;
 const UNAVAILABLE = "Payments are temporarily unavailable. Please try again in a few minutes.";
 
@@ -20,16 +20,6 @@ function sameOrigin(req) {
   const allowed = new Set([new URL(req.url).origin]);
   try { if (process.env.SITE_URL) allowed.add(new URL(process.env.SITE_URL).origin); } catch { /* ignore */ }
   return allowed.has(origin);
-}
-
-function idempotencyKey(req, order, pricing) {
-  // A stable key per payment attempt: pay.js sends a random attempt id, so a
-  // double-tap or network retry of the same attempt reuses the same Yoco
-  // checkout, while a fresh attempt (after cancelling) gets a new one.
-  const attempt = (req.headers.get("x-aweza-attempt") || "").replace(/[^\w-]/g, "").slice(0, 64);
-  const bucket = attempt || String(Math.floor(Date.now() / (5 * 60 * 1000)));
-  const canon = JSON.stringify([order.lines, order.customer, order.address, order.ref, pricing.totalCents]);
-  return "aweza-" + crypto.createHash("sha256").update(bucket + "|" + canon).digest("hex").slice(0, 40);
 }
 
 export default async function handler(req) {
@@ -68,9 +58,9 @@ export default async function handler(req) {
   }
   if (pricing.totalCents < 200) return json(400, { error: "Your order total is too low to pay online." });
 
-  const secret = process.env.YOCO_SECRET_KEY;
+  const secret = process.env.PAYSTACK_SECRET_KEY;
   if (!secret) {
-    log("config_missing", { name: "YOCO_SECRET_KEY" });
+    log("config_missing", { name: "PAYSTACK_SECRET_KEY" });
     return json(503, { error: UNAVAILABLE });
   }
 
@@ -79,61 +69,48 @@ export default async function handler(req) {
 
   const origin = siteOrigin(req);
   const ref = "AW" + crypto.randomBytes(4).toString("hex").toUpperCase();
+  // Paystack sends the customer back to callback_url with ?trxref=&reference= appended; the site shows the success page.
   const body = {
+    email: order.customer.email,
     amount: pricing.totalCents,
     currency: "ZAR",
-    successUrl: `${origin}/?order=${ref}#/checkout/success`,
-    cancelUrl: `${origin}/#/checkout/cancelled`,
-    failureUrl: `${origin}/#/checkout/failed`,
-    clientReferenceId: ref,
-    subtotalAmount: pricing.subtotalCents,
-    ...(pricing.discountCents ? { totalDiscount: pricing.discountCents } : {}),
-    lineItems: [
-      ...pricing.lines.map(l => ({
-        displayName: `${l.name} (${l.size})`.slice(0, 100),
-        quantity: l.qty,
-        pricingDetails: { price: l.unit * 100 },
-      })),
-      ...(pricing.deliveryCents ? [{ displayName: "Delivery", quantity: 1, pricingDetails: { price: pricing.deliveryCents } }] : []),
-    ],
+    reference: ref,
+    callback_url: `${origin}/?order=${ref}`,
+    cancel_action: `${origin}/#/checkout/cancelled`,
     metadata: { source: "aweza-web", ref, order: packed },
   };
 
   let res, data;
   try {
-    res = await fetchWithTimeout(YOCO_CHECKOUT_URL, {
+    res = await fetchWithTimeout(PAYSTACK_INIT_URL, {
       method: "POST",
-      headers: {
-        authorization: `Bearer ${secret}`,
-        "content-type": "application/json",
-        "idempotency-key": idempotencyKey(req, order, pricing),
-      },
+      headers: { authorization: `Bearer ${secret}`, "content-type": "application/json" },
       body: JSON.stringify(body),
     }, 10000);
     data = await res.json().catch(() => ({}));
   } catch (e) {
-    log("yoco_network_error", { ref, message: String(e && e.name) });
+    log("paystack_network_error", { ref, message: String(e && e.name) });
     return json(502, { error: UNAVAILABLE });
   }
 
-  if (!res.ok || !data || typeof data.redirectUrl !== "string" || !data.id) {
-    // Yoco errors carry { message, reason, solution }; log the status only.
-    log("yoco_error", { ref, status: res.status });
+  const d = data && data.data;
+  if (!res.ok || !data || data.status !== true || !d || typeof d.authorization_url !== "string") {
+    log("paystack_error", { ref, status: res.status });
     return json(502, { error: UNAVAILABLE });
   }
 
   let redirectUrl;
   try {
-    const u = new URL(data.redirectUrl);
+    const u = new URL(d.authorization_url);
     if (u.protocol !== "https:") throw new Error("insecure");
-    // Only ever send customers to Yoco's own payment page.
-    if (u.hostname !== "yoco.com" && !u.hostname.endsWith(".yoco.com")) throw new Error("not yoco");
+    // Only ever send customers to Paystack's own payment page.
+    if (u.hostname !== "paystack.com" && !u.hostname.endsWith(".paystack.com")) throw new Error("not paystack");
     redirectUrl = u.toString();
   } catch {
-    log("yoco_bad_redirect", { ref });
+    log("paystack_bad_redirect", { ref });
     return json(502, { error: UNAVAILABLE });
   }
 
-  log("checkout_created", { ref, checkoutId: data.id, lines: order.lines.length, amount: pricing.totalCents, mode: data.processingMode });
-  return json(200, { redirectUrl, checkoutId: data.id });
+  log("checkout_created", { ref, lines: order.lines.length, amount: pricing.totalCents });
+  return json(200, { redirectUrl, checkoutId: ref });
 }

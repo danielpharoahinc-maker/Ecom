@@ -28,7 +28,7 @@ The Help, Terms and Privacy pages then show the real details instead of "[Email]
 Personality rights, trademark and (for alcohol imagery) advertising rules can all apply. Printify can also refuse or remove products. Get advice before spending on ads.
 
 ## 5. Before launch
-- Place one real test order end to end (Yoco test mode, then a Printify order) and check tracking, the confirmation page and the Printify email to the customer.
+- Place one real test order end to end (Paystack test mode, then a Printify order) and check tracking, the confirmation page and the Printify email to the customer.
 - Decide whether to set `PRINTIFY_AUTO_SEND=true` so paid orders go straight to print (otherwise you approve each one in Printify).
 - Log delivery times of the first 10 orders and tune `shipping.days` in `data/products.js`.
 

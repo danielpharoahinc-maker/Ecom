@@ -15,7 +15,7 @@ Written by the Head Creative Director. Every specialist follows this file and th
 - **Signature asset: THE LIPS.** Red lips, AWEZA on the teeth, "Time Of Your Life" script (`images/brand/art/lips-logo.jpg`). It is the centrepiece of the home hero and returns at key brand moments (intro, signature spotlight, empty bag, 404, footer, page curtain). Show it BIG. Red belongs to the lips.
 - **Audience:** mostly young South African MEN (late teens to 30s), also women. Casting, imagery, copy and ads skew male. Mostly on phones and mobile data: fast, legible, thumb-friendly.
 - **Not "AI slop".** The site must feel human and art-directed. See §14 (anti-template rules). Every agent reads it.
-- **Originality rule:** nothing copied. No other brand's logo, slogans, layouts that are clearly someone's trade dress, or names. Never name another fashion or sportswear brand anywhere on the site. Payment and fulfilment partners (Yoco, Printify) may be named only in legal/help copy where the law or clarity needs it.
+- **Originality rule:** nothing copied. No other brand's logo, slogans, layouts that are clearly someone's trade dress, or names. Never name another fashion or sportswear brand anywhere on the site. Payment and fulfilment partners (Paystack, Printify) may be named only in legal/help copy where the law or clarity needs it.
 
 ## 2. Voice
 
@@ -396,7 +396,7 @@ Editorial template: DM Serif Display page title `--fs-d1`, accent subtitle, `--m
   totals: { subtotal, delivery, total, currency: "ZAR" }   // display only, in Rand (integers)
 }
 ```
-`AW_PAY` returns a Promise: on success it redirects the browser (never resolves meaningfully); on failure it rejects with `Error(userFacingMessage)`, which the checkout shows inline. Yoco return URLs: `<origin>/#/checkout/success`, `#/checkout/cancelled`, `#/checkout/failed`. The success route empties the bag.
+`AW_PAY` returns a Promise: on success it redirects the browser (never resolves meaningfully); on failure it rejects with `Error(userFacingMessage)`, which the checkout shows inline. Paystack return URLs: `<origin>/#/checkout/success`, `#/checkout/cancelled`, `#/checkout/failed`. The success route empties the bag.
 Province values are the full names: Eastern Cape, Free State, Gauteng, KwaZulu-Natal, Limpopo, Mpumalanga, Northern Cape, North West, Western Cape.
 
 ## 12. Class-prefix map and ownership

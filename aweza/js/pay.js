@@ -1,6 +1,6 @@
 /* AWEZA payments bridge (agent 10).
    window.AW_PAY(order) -> Promise. Sends the order (DIRECTION §11) to the
-   create-checkout function, then sends the browser to Yoco's hosted payment
+   create-checkout function, then sends the browser to Paystack's hosted payment
    page. Rejects with Error(userFacingMessage) on failure. No secrets here:
    the server re-prices everything and holds the keys. */
 (() => {
@@ -13,6 +13,12 @@
     generic: "We couldn't start your payment. Please try again.",
   };
 
+  // Paystack sends people back to /?order=REF&trxref=...&reference=... (no #): land them on the success page.
+  try {
+    const q = new URLSearchParams(location.search);
+    if (/^AW[A-Z0-9]{6,12}$/i.test(q.get("order") || "") && (q.get("reference") || q.get("trxref")) && !/^#\/checkout/.test(location.hash)) location.hash = "#/checkout/success";
+  } catch (e) { /* ignore */ }
+
   let inflight = null;
 
   const attemptId = () => {
@@ -23,8 +29,8 @@
   const safeHttps = (url) => {
     try {
       const u = new URL(url, location.href);
-      const yoco = u.hostname === "yoco.com" || u.hostname.endsWith(".yoco.com");
-      return (u.protocol === "https:" && yoco) || u.hostname === "localhost" || u.hostname === "127.0.0.1" ? u.href : null;
+      const host = u.hostname === "paystack.com" || u.hostname.endsWith(".paystack.com");
+      return (u.protocol === "https:" && host) || u.hostname === "localhost" || u.hostname === "127.0.0.1" ? u.href : null;
     } catch (e) { return null; }
   };
 
@@ -66,7 +72,7 @@
     throw new Error(MSG.generic);
   }
 
-  // Coming back from Yoco via the back button (bfcache) must allow a new attempt.
+  // Coming back from Paystack via the back button (bfcache) must allow a new attempt.
   window.addEventListener("pageshow", (e) => { if (e.persisted) inflight = null; });
 
   window.AW_PAY = (order) => {
