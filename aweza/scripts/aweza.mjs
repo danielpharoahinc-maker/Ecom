@@ -4,6 +4,7 @@
 //   node scripts/aweza.mjs doctor [--site https://your-domain.com]   check every connection (safe, read-only)
 //   node scripts/aweza.mjs setup                                     guided set-up (asks a few questions)
 //   node scripts/aweza.mjs webhooks https://your-domain.com          register the Printify shipped/delivered events
+//   node scripts/aweza.mjs status | orders [N] | launch | deploy   run the whole business from one place
 //   node scripts/aweza.mjs sync                                      refresh Printify product ids and costs
 //
 // Keys are read from environment variables (never from files, never printed):
@@ -167,10 +168,45 @@ async function setup() {
   console.log("\nNext: redeploy, then run:  node scripts/aweza.mjs doctor --site " + (site || "https://your-domain"));
 }
 
+// ---------------------------------------------------------------- orders / status / launch / deploy
+const PF = "https://api.printify.com/v1";
+async function orders(args) {
+  const t = process.env.PRINTIFY_API_TOKEN; if (!t) { console.error("Set PRINTIFY_API_TOKEN first."); process.exit(1); }
+  const n = Number(args[0]) || 10;
+  const r = await api(`${PF}/shops/${SHOP}/orders.json?limit=${n}`, t);
+  if (r.status !== 200) return fail(`Printify answered ${r.status}`);
+  const list = r.data.data || []; head(`Latest ${list.length} order(s) of ${r.data.total ?? list.length}`);
+  for (const o of list) {
+    const ship = (o.shipments || [])[0];
+    console.log(`  ${String(o.id).slice(-8)}  ${String(o.created_at || "").slice(0, 10)}  ${(o.status || "").padEnd(12)} ${o.address_to ? o.address_to.first_name + " " + (o.address_to.last_name || "") : ""}${ship && ship.tracking_number ? "  tracking " + ship.tracking_number : ""}`);
+  }
+}
+async function status(args) {
+  console.log("AWEZA status");
+  await orders(["5"]);
+  const t = process.env.PRINTIFY_API_TOKEN;
+  if (t) { const p = await api(`${PF}/shops/${SHOP}/products.json?limit=50`, t); head("Shop"); p.status === 200 ? note(`${(p.data.data || []).length} products, ${(p.data.data || []).filter(x => x.visible).length} visible`) : fail("products " + p.status); }
+  await doctor(args);
+}
+function launch(args) {
+  const E = n => !!process.env[n], items = [
+    ["Printify token", E("PRINTIFY_API_TOKEN")], ["Yoco secret key", E("YOCO_SECRET_KEY")], ["Resend key", E("RESEND_API_KEY")],
+    ["Site URL set", E("SITE_URL")], ["Printify webhook secret", E("PRINTIFY_WEBHOOK_SECRET")],
+  ];
+  head("Keys available to this CLI"); for (const [n, v] of items) v ? ok(n) : note(n + ": not set here");
+  head("Only you can do these (cannot be automated)");
+  ["Netlify billing/credits so deploys work", "Buy awezaclothing.com and add it in Netlify", "Printify card + Premium (printify.com/app/account/payment/details)", "Yoco business verification + Verified Domain", "Resend: verify the domain DNS records", "Revoke the Amboras token in Printify > Connections", "Turn on 2FA everywhere"].forEach(x => note("[ ] " + x));
+  head("Then run, in order"); ["deploy", "webhooks https://awezaclothing.com", "doctor --site https://awezaclothing.com", "status"].forEach(x => note("node scripts/aweza.mjs " + x));
+}
+
 // ---------------------------------------------------------------- main
 const [cmd, ...rest] = process.argv.slice(2);
-if (cmd === "doctor") await doctor(rest);
+if (cmd === "orders") await orders(rest);
+else if (cmd === "status") await status(rest);
+else if (cmd === "launch") launch(rest);
+else if (cmd === "deploy") { process.exitCode = spawnSync(process.execPath, [path.join(ROOT, "scripts/deploy-netlify.mjs"), ...rest], { stdio: "inherit", env: process.env }).status; }
+else if (cmd === "doctor") await doctor(rest);
 else if (cmd === "setup") await setup();
 else if (cmd === "webhooks") { if (!process.env.PRINTIFY_API_TOKEN) { console.error("Set PRINTIFY_API_TOKEN first."); process.exit(1); } const r = await register(rest[0] || process.env.SITE_URL || ""); console.log("Printify will call", r.url, "\nRegistered:", r.done.join(", ") || "nothing new", r.done.length ? "\nPRINTIFY_WEBHOOK_SECRET=" + r.secret + "\n(put it in Netlify; shown once)" : ""); }
 else if (cmd === "sync") { process.exitCode = spawnSync(process.execPath, [path.join(ROOT, "scripts/sync-printify.mjs"), ...rest], { stdio: "inherit", env: process.env }).status; }
-else console.log("AWEZA CLI\n  doctor [--site URL]   check every connection (read-only)\n  setup                 guided set-up\n  webhooks URL          register Printify shipped/delivered events\n  sync                  refresh Printify ids and costs");
+else console.log("AWEZA CLI\n  status                orders + shop + every connection in one view\n  orders [N]            latest Printify orders and tracking\n  launch                what is left before going live\n  deploy                publish the site + functions to Netlify\n  doctor [--site URL]   check every connection (read-only)\n  setup                 guided set-up\n  webhooks URL          register Printify shipped/delivered events\n  sync                  refresh Printify ids and costs");
