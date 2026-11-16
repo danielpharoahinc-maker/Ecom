@@ -2,6 +2,7 @@
 // haptics. Sound is OFF by default (gyms, classrooms) and switchable in Account.
 // No audio files: sounds are made on the spot with the Web Audio API.
 import { S } from './state.js';
+import { feel } from './util.js';
 
 let ctx;
 const on = () => Boolean(S.profile?.sounds) && !matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -24,7 +25,8 @@ export function sfx(kind) {
     else if (kind === 'tick') tone(1000, t, 0.06, 0.08, 'triangle');
   } catch { /* no audio: fine */ }
 }
-export const buzz = (p) => { try { navigator.vibrate?.(p); } catch { /* ignore */ } };
+export { feel };
+export const buzz = (p) => feel(Array.isArray(p) && p.length > 2 ? 'great' : 'good');
 // Count a number up, so a streak feels earned.
 export function countUp(el, to, ms = 650) {
   if (!el || to < 1 || matchMedia('(prefers-reduced-motion: reduce)').matches) { if (el) el.textContent = to; return; }

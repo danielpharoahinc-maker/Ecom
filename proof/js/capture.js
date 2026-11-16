@@ -7,12 +7,13 @@ import { S, addProof, saveProfile } from './state.js';
 import { commitment } from './data.js';
 import { doneToday, streak, needFor } from './stats.js';
 import { ic } from './icons.js';
-import { esc, haptic, toast, fmtDur, emit } from './util.js';
+import { esc, haptic, toast, fmtDur, emit, feel } from './util.js';
 import { getDictation } from './speech.js';
 import { canPost, paywall } from './billing.js';
 import { proffSVG, inkMark } from './proff.js';
 import { sfx, buzz, countUp } from './fx.js';
 import { checkPhoto } from './quality.js';
+import { tapOrigin, circleReveal } from './origin.js';
 
 const MAX_TALK = 60; // seconds
 
@@ -35,7 +36,8 @@ export function openCapture(opts = {}) {
   root.setAttribute('aria-label', 'Post proof');
   document.body.appendChild(root);
   document.body.classList.add('noscroll');
-  requestAnimationFrame(() => root.classList.add('open'));
+  const o = tapOrigin();
+  if (o) { root.classList.add('open', 'from-origin'); circleReveal(root, o); } else requestAnimationFrame(() => root.classList.add('open'));
   haptic(12);
   mode === 'photo' ? camera() : review();
 }
@@ -401,7 +403,7 @@ function qaWarning(r) {
   el.innerHTML = `${proffSVG('worried', 52)}<div class="qa-txt"><b>Proff isn’t convinced.</b><ul>${r.problems.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
     <div class="qa-btns"><button class="btn btn-secondary" data-qa-retake>Retake</button><button class="btn btn-quiet" data-qa-anyway>Post anyway</button></div></div>`;
   root.querySelector('[data-post]').before(el);
-  haptic(15);
+  feel('warn');
   el.querySelector('[data-qa-retake]').addEventListener('click', () => root.querySelector('[data-retake]').click());
   el.querySelector('[data-qa-anyway]').addEventListener('click', () => { el.remove(); post(true); });
 }
@@ -424,7 +426,7 @@ function success() {
     <button class="btn btn-primary" data-close>Done</button>
   </div>`;
   root.querySelector('[data-close]').addEventListener('click', finish);
-  sfx('stamp'); buzz([18, 40, 30]);
+  sfx('stamp'); feel(qa?.ok ? 'great' : 'good');
   countUp(root.querySelector('[data-streak-n]'), st);
   const t = setTimeout(finish, 2600);
   function finish() {

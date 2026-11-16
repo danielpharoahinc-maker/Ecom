@@ -16,6 +16,7 @@ import { ic } from './icons.js';
 import { esc, haptic, toast } from './util.js';
 
 const HEAD_START = 20;
+const POSE = { choice: 'talk', commit: 'point', name: 'talk', age: 'think', account: 'talk', perm: 'point', trial: 'cheer' };
 const DRAFT = 'proof:ob';
 let i = 0;
 let ans = {};
@@ -69,8 +70,9 @@ function draw(root, onDone) {
       </div>
       <span class="icon-btn" aria-hidden="true"></span>
     </header>
-    <div class="ob-head">
-      <h1 class="title">${step.title}</h1>
+    <div class="ob-proff">
+      <div class="pf" data-pf>${proffSVG(POSE[step.type] || 'talk', 84)}</div>
+      <div class="say"><h1 class="title">${step.title}</h1></div>
     </div>
     <div class="ob-body">${body(step)}</div>
   </section>`;
@@ -80,6 +82,13 @@ function draw(root, onDone) {
     if (bar) bar.style.width = `${p}%`;
   }));
 
+  // Proff cheers when you pick something.
+  root.addEventListener('click', (e) => {
+    if (!e.target.closest('.choice, .ctile, .gtile')) return;
+    const pf = root.querySelector('[data-pf]'); if (!pf) return;
+    pf.innerHTML = proffSVG('cheer', 84);
+    clearTimeout(pf._t); pf._t = setTimeout(() => { pf.innerHTML = proffSVG(POSE[step.type] || 'talk', 84); }, 1100);
+  });
   const next = () => { if (i + 1 >= steps.length) return finish(onDone); i++; draw(root, onDone); };
   root.querySelector('[data-back]').addEventListener('click', () => { if (i > 0) { i--; draw(root, onDone); } });
 

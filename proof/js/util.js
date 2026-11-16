@@ -44,7 +44,40 @@ export function fmtMins(m) {
   return r ? `${h} h ${r} min` : `${h} h`;
 }
 
-export const haptic = (ms = 8) => { try { navigator.vibrate?.(ms); } catch { /* not supported */ } };
+// Haptics. Android phones vibrate with patterns. iPhones ignore the vibrate call in web
+// apps, but Safari plays a real tap when a hidden switch input is toggled, so that is
+// used instead (iOS 17.4 and newer).
+let tapEl;
+function iosTap() {
+  try {
+    if (!tapEl) {
+      tapEl = document.createElement('label');
+      tapEl.setAttribute('aria-hidden', 'true');
+      tapEl.style.cssText = 'position:fixed;left:-99px;top:-99px;width:1px;height:1px;opacity:0;pointer-events:none';
+      tapEl.innerHTML = '<input type="checkbox" switch tabindex="-1">';
+      document.body.appendChild(tapEl);
+    }
+    tapEl.click();
+  } catch { /* no haptics here */ }
+}
+const canVibrate = () => typeof navigator.vibrate === 'function';
+export const haptic = (ms = 8) => { try { if (canVibrate()) navigator.vibrate(ms); else if (ms >= 10) iosTap(); } catch { /* not supported */ } };
+
+// Meaningful feelings: good news, great news, a warning, bad news.
+const FEEL = {
+  tick: { vib: 6, taps: [0] },
+  good: { vib: [14, 50, 22], taps: [0, 85] },
+  great: { vib: [18, 40, 18, 40, 60], taps: [0, 80, 170] },
+  warn: { vib: [30, 60, 30], taps: [0, 110] },
+  bad: { vib: [70, 40, 70, 40, 160], taps: [0, 60, 120, 260] },
+};
+export function feel(kind = 'tick') {
+  const f = FEEL[kind] || FEEL.tick;
+  try {
+    if (canVibrate()) navigator.vibrate(f.vib);
+    else f.taps.forEach((t) => setTimeout(iosTap, t));
+  } catch { /* not supported */ }
+}
 
 let toastTimer;
 export function toast(msg, { action, label = 'Undo', ms } = {}) {
@@ -56,6 +89,7 @@ export function toast(msg, { action, label = 'Undo', ms } = {}) {
     document.body.appendChild(el);
   }
   el.textContent = msg;
+  if (/couldn’t|can’t|isn’t available|failed|blocked|signed out|too many|wrong|try again|not allowed/i.test(msg)) feel('bad');
   if (action) {
     const b = document.createElement('button');
     b.className = 'toast-act'; b.textContent = label;

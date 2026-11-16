@@ -1,5 +1,6 @@
 // Bottom sheet: slides up over the app, tap outside or swipe the grabber to close.
 import { haptic } from './util.js';
+import { tapOrigin, growSheet, shrinkSheet } from './origin.js';
 
 const stack = [];
 let skipPop = 0;
@@ -20,7 +21,14 @@ export function openSheet(html, { onMount, tall = false } = {}) {
     </div>`;
   document.body.appendChild(wrap);
   document.body.classList.add('noscroll');
-  requestAnimationFrame(() => wrap.classList.add('open'));
+  // Opened by a tap? Then it grows out of the thing that was tapped.
+  const origin = tapOrigin();
+  const sheetEl = wrap.querySelector('.sheet');
+  if (origin) {
+    sheetEl.classList.add('from-origin');
+    wrap.classList.add('open');
+    growSheet(sheetEl, origin);
+  } else requestAnimationFrame(() => wrap.classList.add('open'));
   haptic();
 
   let closed = false;
@@ -32,12 +40,13 @@ export function openSheet(html, { onMount, tall = false } = {}) {
     closed = true;
     stack.splice(stack.indexOf(entry), 1);
     if (fromBack !== true) { try { skipPop++; history.back(); } catch { skipPop--; } }
-    wrap.classList.remove('open');
     wrap.dispatchEvent(new Event('sheet:close'));
+    const bg = wrap.querySelector('.sheet-bg');
+    if (origin) { bg.style.opacity = '0'; shrinkSheet(sheetEl, origin); } else wrap.classList.remove('open');
     setTimeout(() => {
       wrap.remove();
       if (!document.querySelector('.sheet-wrap, .cap')) document.body.classList.remove('noscroll');
-    }, 280);
+    }, origin ? 330 : 280);
   };
   entry.close = close;
   wrap.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) close(); });

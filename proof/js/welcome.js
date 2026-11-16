@@ -8,25 +8,44 @@ import { $, toast, haptic } from './util.js';
 import { LIVE } from './config.js';
 import { pendingInvite } from './invite.js';
 import { consentHTML, consentOK } from './account.js';
+import { proffSVG } from './proff.js';
 
 const EMAIL_OK = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
 
 export function renderWelcome(root, onDone, opts = {}) {
   if (opts.mode === 'signin') return signinView(root, onDone, opts);
   root.innerHTML = `
-  <section class="welcome">
-    <div class="welcome-art" aria-hidden="true"><div class="brand">${WORDMARK(84)}</div></div>
-    <div class="welcome-copy">
+  <section class="welcome intro">
+    <div class="intro-top" aria-hidden="true">${WORDMARK(34)}</div>
+    <div class="intro-stage">
       ${pendingInvite() ? `<p class="invite-banner">${ic('club', 18)}<span>You’re invited to a club. Set up Proof and you’ll be added.</span></p>` : ''}
-      <h1 class="display">Lock in.<br>Post proof.<br>Every day.</h1>
+      <div class="say say-big" aria-live="polite"><h1 class="title"><span data-type></span><i class="caret"></i></h1></div>
+      <div class="intro-proff" data-pf>${proffSVG('talk', 210)}</div>
     </div>
     <div class="auth">
-      <button class="btn btn-primary" data-start>Get started</button>
+      <button class="btn btn-primary" data-start>Let’s go</button>
       <button class="btn btn-quiet" data-have>I already have an account</button>
     </div>
   </section>`;
+  typeLines(root, ['Hi, I’m Proff.', 'This is Proof. I’ll ask you a few quick questions to set it up.']);
   $('[data-start]', root).addEventListener('click', () => { haptic(12); opts.onStart?.(); });
   $('[data-have]', root).addEventListener('click', () => { haptic(8); signinView(root, onDone, { ...opts, canBack: true }); });
+}
+
+// Proff types out what he says, then waves. Skipped for people who want less motion.
+function typeLines(root, lines) {
+  const out = $('[data-type]', root), pf = $('[data-pf]', root);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { out.textContent = lines.join(' '); return; }
+  let li = 0, ci = 0, text = '';
+  const tick = () => {
+    if (!document.body.contains(out)) return;
+    const line = lines[li];
+    if (ci < line.length) { text += line[ci++]; out.textContent = text; return setTimeout(tick, 32); }
+    li++; ci = 0;
+    if (li >= lines.length) { pf.innerHTML = proffSVG('cheer', 210); return; }
+    pf.innerHTML = proffSVG('talk', 210); text = ''; setTimeout(tick, 650);
+  };
+  tick();
 }
 
 function signinView(root, onDone, opts) {
