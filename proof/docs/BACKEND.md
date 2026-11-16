@@ -196,3 +196,9 @@ Deploy the function `analyze-meal` (JWT on; already deployed). To switch it on, 
 - It caps each person at 20 reviews a day. Each review costs a fraction of a cent.
 - Without the secret it answers `not_configured` and the app stops trying for 12 hours; the Connect Claude route (your own Claude through the Proof API) still works.
 - The photo goes to Anthropic to be analysed. Mention this in your privacy policy before turning it on for other people.
+
+## 8. Notion (notion-log)
+Deploy `notion-log` (JWT on; already deployed). To switch it on, add two secrets in Supabase > Edge Functions > Secrets (typed there, never in chat):
+- `NOTION_TOKEN`: create an integration at notion.so/profile/integrations and copy its token,
+- `NOTION_PARENT_PAGE_ID`: the id of a Notion page you have shared with that integration (page menu > Connections).
+Then Account > "Send today's log to Notion" creates a page "Lock-in log, <date>" with your goals as checkboxes and your meals with Claude's reviews. Until the secrets exist the button copies the log so you can paste it into Notion by hand.

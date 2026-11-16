@@ -18,11 +18,11 @@ import { openCapture } from './capture.js';
 import { openProof } from './proofview.js';
 import { paywall, planState, subscriptionSheet, trialBanner, daysLeft } from './billing.js';
 import { openSheet, confirmSheet } from './sheet.js';
-import { signOutLive, deleteAccountLive, emailStatus, resendConfirmation } from './auth.js';
+import { signOutLive, deleteAccountLive, emailStatus, resendConfirmation, getClient } from './auth.js';
 import { parsePlan } from './planner.js';
 import { getDictation } from './speech.js';
 import { ic } from './icons.js';
-import { esc, fmtDay, fmtClock, emit, haptic, toast } from './util.js';
+import { esc, fmtDay, fmtClock, emit, haptic, toast, feel } from './util.js';
 import { LIVE } from './config.js';
 
 let dictation; // resolved once, reused
@@ -226,7 +226,7 @@ function settings() {
     <div class="stack">
       <button class="btn btn-secondary" data-edit-goals>${ic('target', 20)}<span>Your goals</span></button>
       <button class="btn btn-secondary" data-ach>${ic('flame', 20)}<span>Achievements and skins</span></button>
-      <button class="btn btn-secondary" data-notion>${ic('copy', 20)}<span>Copy today’s log for Notion</span></button>
+      <button class="btn btn-secondary" data-notion>${ic('copy', 20)}<span>Send today’s log to Notion</span></button>
       <button class="btn btn-secondary" data-claude>${ic('sparkle', 20)}<span>Connect Claude</span></button>
       <button class="btn btn-secondary" data-rem>${ic('clock', 20)}<span>Reminders</span></button>
       <button class="btn btn-secondary" data-tour>Show me around again</button>
@@ -250,9 +250,15 @@ function settings() {
       body.querySelector('[data-edit-goals]').addEventListener('click', () => { close(); setTimeout(openGoals, 320); });
       body.querySelector('[data-tour]').addEventListener('click', () => { close(); setTimeout(() => startTour(), 320); });
       body.querySelector('[data-ach]').addEventListener('click', () => { close(); setTimeout(() => openAchievements('ach'), 320); });
-      body.querySelector('[data-notion]').addEventListener('click', async () => {
-        try { await navigator.clipboard.writeText(lockinLog()); toast('Copied. Paste it into your Lock-in plan in Notion.'); haptic(12); }
-        catch { toast('Couldn’t copy. Try again.'); }
+      body.querySelector('[data-notion]').addEventListener('click', async (e) => {
+        const btn = e.currentTarget; btn.disabled = true; haptic(10);
+        const copy = async (why) => { try { await navigator.clipboard.writeText(lockinLog()); toast(`${why} I copied the log. Paste it into your Lock-in plan in Notion.`); } catch { toast('Couldn’t copy. Try again.'); } };
+        try {
+          const c = LIVE ? await getClient().catch(() => null) : null;
+          const { data } = c ? await c.functions.invoke('notion-log', { body: {} }) : { data: null };
+          if (data?.status === 'ok') { toast('Sent to Notion'); feel('good'); }
+          else await copy(data?.status === 'not_configured' ? 'Notion isn’t connected yet.' : 'Couldn’t reach Notion.');
+        } finally { btn.disabled = false; }
       });
       body.querySelector('[data-claude]').addEventListener('click', () => { close(); setTimeout(openConnectClaude, 320); });
       body.querySelector('[data-rem]').addEventListener('click', () => { close(); setTimeout(() => reminderSettings(), 320); });
