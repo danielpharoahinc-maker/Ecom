@@ -1,0 +1,15 @@
+const { launch } = require('./lib.js');
+(async () => { const { b, p, errs } = await launch({ profile: { commitments: ['sun', 'meals', 'train', 'faith'], goalLog: [{ ts: Date.now() - 9 * 864e5, keys: ['sun', 'meals', 'train', 'faith'] }], unlocked: { 'setup': 1 } } });
+  const cons = []; p.on('console', m => { if (m.type() === 'error') cons.push(m.text().slice(0, 120)); });
+  const seen = []; const step = async (name, fn) => { try { await fn(); seen.push('ok  ' + name); } catch (e) { seen.push('FAIL ' + name + ': ' + e.message.split('\n')[0] + ' || overlay: ' + (await p.evaluate(() => { const w = document.querySelector('.sheet-wrap, .cap, .tour-card, .unlock'); return w ? w.className + ' :: ' + w.innerText.replace(/\s+/g, ' ').slice(0, 90) : 'none'; }))); } };
+  await step('today', async () => { await p.waitForSelector('.buddy'); await p.screenshot({ path: __dirname + '/s_today.png' }); });
+  await step('goal editor (33 goals)', async () => { await p.click('[data-edit-goals], [data-goals]').catch(async () => { await p.click('[data-settings]'); await p.click('[data-edit-goals]'); }); await p.waitForSelector('.ctile'); const n = await p.locator('.ctile').count(); if (n !== 33) throw new Error('tiles ' + n); await p.screenshot({ path: __dirname + '/s_goals.png' }); await p.keyboard.press('Escape'); await p.waitForTimeout(500); });
+  await step('account menu', async () => { await p.click('[data-settings]'); await p.waitForSelector('[data-claude]'); await p.screenshot({ path: __dirname + '/s_account.png' }); await p.keyboard.press('Escape'); await p.waitForTimeout(500); });
+  await step('connect claude (signed-out state)', async () => { await p.click('[data-settings]'); await p.click('[data-claude]'); await p.waitForSelector('.cc-body'); await p.waitForTimeout(900); await p.keyboard.press('Escape'); await p.waitForTimeout(500); });
+  await step('reminders sheet', async () => { await p.click('[data-settings]'); await p.click('[data-rem]'); await p.waitForTimeout(900); await p.keyboard.press('Escape'); await p.waitForTimeout(500); });
+  await step('stats', async () => { await p.click('[data-tab=stats]'); await p.waitForSelector('.st-hero'); });
+  await step('vault', async () => { await p.click('[data-tab=vault]'); await p.waitForSelector('.vault-stage, .coach'); });
+  await step('club (local mode)', async () => { await p.click('[data-tab=club]'); await p.waitForTimeout(600); });
+  await step('ask proff + new Q&A', async () => { await p.click('.proff-fab'); await p.fill('#ask-q', 'how do i connect claude'); await p.waitForTimeout(700); const t = await p.locator('.ask-results').innerText(); if (!/API|key|Claude/i.test(t)) throw new Error('no answer: ' + t.slice(0, 80)); await p.keyboard.press('Escape'); await p.waitForTimeout(400); });
+  await step('achievements + wardrobe', async () => { await p.click('[data-tab=today]'); await p.click('[data-settings]'); await p.click('[data-ach]'); await p.waitForSelector('.ach'); await p.click('[data-tab=ward]'); await p.waitForSelector('.sk'); });
+  console.log(seen.join('\n')); console.log('page errors:', errs, '| console errors:', cons); await b.close(); })();

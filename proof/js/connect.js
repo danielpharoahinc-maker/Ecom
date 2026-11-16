@@ -49,7 +49,7 @@ export function openConnectClaude() {
             </div>
             <p class="fine">Anyone with this key can see your proof and photos. Don’t share it. Revoke it below any time.</p>
           </div>` : ''}
-          ${(keys || []).length ? `<h3 class="cat-h">Your keys</h3><ul class="cc-keys">${keys.map((k) => `
+          ${(keys || []).length ? `<h2 class="cat-h">Your keys</h2><ul class="cc-keys">${keys.map((k) => `
             <li><span><b>${esc(k.label)}</b><small>…${esc(k.key_hint)} · made ${new Date(k.created_at).toLocaleDateString([], { day: 'numeric', month: 'short' })}${k.last_used_at ? ` · used ${new Date(k.last_used_at).toLocaleDateString([], { day: 'numeric', month: 'short' })}` : ' · not used yet'}</small></span>
             <button class="btn-pill danger" data-revoke="${k.id}">Revoke</button></li>`).join('')}</ul>` : ''}
           <div class="stack"><button class="btn ${fresh || (keys || []).length ? 'btn-quiet' : 'btn-primary'}" data-create>${ic('plus', 18)}<span>Create API key for Claude</span></button></div>`;

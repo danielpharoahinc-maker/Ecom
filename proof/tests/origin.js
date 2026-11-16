@@ -1,0 +1,13 @@
+const { launch } = require('./lib.js');
+(async () => { const { b, p, errs } = await launch();
+  const av = await p.locator('[data-settings]').boundingBox();
+  await p.click('[data-settings]'); await p.waitForTimeout(120);
+  const mid = await p.evaluate(() => { const s = document.querySelector('.sheet'); const r = s.getBoundingClientRect(); return { to: s.style.transformOrigin, w: Math.round(r.width), anim: s.getAnimations().length }; });
+  console.log('avatar centre:', Math.round(av.x + av.width / 2), Math.round(av.y + av.height / 2), '| sheet transform-origin:', mid.to, '| animating:', mid.anim > 0, '| width mid-animation (smaller than full):', mid.w);
+  await p.screenshot({ path: __dirname + '/o1.png' }); await p.waitForTimeout(700);
+  console.log('settled sheet width:', await p.evaluate(() => Math.round(document.querySelector('.sheet').getBoundingClientRect().width)));
+  await p.keyboard.press('Escape'); await p.waitForTimeout(500);
+  console.log('closed:', (await p.locator('.sheet-wrap').count()) === 0);
+  await p.click('.nu-btn'); await p.waitForTimeout(150);
+  console.log('camera reveal animating:', await p.evaluate(() => document.querySelector('.cap').getAnimations().length > 0));
+  console.log('ERR', errs); await b.close(); })();

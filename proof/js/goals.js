@@ -12,7 +12,7 @@ export function openGoals() {
   let picked = [...S.profile.commitments];
   openSheet(`
     <div class="ask-head">${proffSVG('talk', 64)}<div><b class="h2">Your goals</b><p class="goal-rule"></p></div></div>
-    ${groupedCatalog().map((g) => `<h3 class="cat-h">${g.cat}</h3><div class="ctiles">${g.items.map((c) => `
+    ${groupedCatalog().map((g) => `<h2 class="cat-h">${g.cat}</h2><div class="ctiles">${g.items.map((c) => `
       <button class="ctile" data-k="${c.key}" aria-pressed="false">
         <span class="ctile-n" aria-hidden="true"></span>
         ${ic(c.icon, 26)}<b>${c.label}</b>

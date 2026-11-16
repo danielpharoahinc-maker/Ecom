@@ -47,7 +47,7 @@ export function openAchievements(tab = 'ach') {
         const cats = [...new Set(ACHIEVEMENTS.map((a) => a.cat))];
         return cats.map((c) => {
           const items = list.filter((a) => a.cat === c).sort((a, b) => a.target - b.target);
-          return `<h3 class="cat-h">${esc(c)}</h3><ul class="ach-list">${items.map((a) => `
+          return `<h2 class="cat-h">${esc(c)}</h2><ul class="ach-list">${items.map((a) => `
             <li class="ach ${a.done ? 'done' : ''}">
               <span class="ach-ring" style="--p:${a.pct * 360}deg">${a.done ? ic('check', 16, 3) : `<i>${Math.round(a.pct * 100)}%</i>`}</span>
               <span class="ach-txt"><b>${esc(a.title)}</b><small>${esc(a.desc)}${a.done ? '' : ` · ${Math.min(a.value, a.target)}/${a.target}`}</small></span>

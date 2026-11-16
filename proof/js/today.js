@@ -9,6 +9,7 @@ import { sfx } from './fx.js';
 import { buddyLine } from './proff-brain.js';
 import { proffSVG, openAsk } from './proff.js';
 import { openConnectClaude } from './connect.js';
+import { lockinLog } from './lockin.js';
 import { openAchievements } from './wardrobe.js';
 import { doneToday, streak, needFor } from './stats.js';
 import { openGoals } from './goals.js';
@@ -225,6 +226,7 @@ function settings() {
     <div class="stack">
       <button class="btn btn-secondary" data-edit-goals>${ic('target', 20)}<span>Your goals</span></button>
       <button class="btn btn-secondary" data-ach>${ic('flame', 20)}<span>Achievements and skins</span></button>
+      <button class="btn btn-secondary" data-notion>${ic('copy', 20)}<span>Copy today’s log for Notion</span></button>
       <button class="btn btn-secondary" data-claude>${ic('sparkle', 20)}<span>Connect Claude</span></button>
       <button class="btn btn-secondary" data-rem>${ic('clock', 20)}<span>Reminders</span></button>
       <button class="btn btn-secondary" data-tour>Show me around again</button>
@@ -248,6 +250,10 @@ function settings() {
       body.querySelector('[data-edit-goals]').addEventListener('click', () => { close(); setTimeout(openGoals, 320); });
       body.querySelector('[data-tour]').addEventListener('click', () => { close(); setTimeout(() => startTour(), 320); });
       body.querySelector('[data-ach]').addEventListener('click', () => { close(); setTimeout(() => openAchievements('ach'), 320); });
+      body.querySelector('[data-notion]').addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(lockinLog()); toast('Copied. Paste it into your Lock-in plan in Notion.'); haptic(12); }
+        catch { toast('Couldn’t copy. Try again.'); }
+      });
       body.querySelector('[data-claude]').addEventListener('click', () => { close(); setTimeout(openConnectClaude, 320); });
       body.querySelector('[data-rem]').addEventListener('click', () => { close(); setTimeout(() => reminderSettings(), 320); });
       body.querySelector('[data-sounds]').addEventListener('click', async (e) => {

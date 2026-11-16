@@ -15,7 +15,7 @@ const EMAIL_OK = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
 export function renderWelcome(root, onDone, opts = {}) {
   if (opts.mode === 'signin') return signinView(root, onDone, opts);
   root.innerHTML = `
-  <section class="welcome intro">
+  <main class="welcome intro">
     <div class="intro-top" aria-hidden="true">${WORDMARK(34)}</div>
     <div class="intro-stage">
       ${pendingInvite() ? `<p class="invite-banner">${ic('club', 18)}<span>You’re invited to a club. Set up Proof and you’ll be added.</span></p>` : ''}
@@ -26,7 +26,7 @@ export function renderWelcome(root, onDone, opts = {}) {
       <button class="btn btn-primary" data-start>Let’s go</button>
       <button class="btn btn-quiet" data-have>I already have an account</button>
     </div>
-  </section>`;
+  </main>`;
   typeLines(root, ['Hi, I’m Proff.', 'This is Proof. I’ll ask you a few quick questions to set it up.']);
   $('[data-start]', root).addEventListener('click', () => { haptic(12); opts.onStart?.(); });
   $('[data-have]', root).addEventListener('click', () => { haptic(8); signinView(root, onDone, { ...opts, canBack: true }); });
@@ -50,7 +50,7 @@ function typeLines(root, lines) {
 
 function signinView(root, onDone, opts) {
   root.innerHTML = `
-  <section class="welcome">
+  <main class="welcome">
     <div class="welcome-art" aria-hidden="true"><div class="brand">${WORDMARK(72)}</div></div>
     <div class="welcome-copy"><h1 class="display">Welcome back.</h1></div>
     <div class="auth">
@@ -63,7 +63,7 @@ function signinView(root, onDone, opts) {
       </form>
       ${opts.canBack ? '<button class="btn btn-quiet" data-back>Back</button>' : ''}
     </div>
-  </section>`;
+  </main>`;
   const form = $('.email-form', root), err = $('.form-err', form), btn = form.querySelector('[type=submit]'), email = $('#email', root);
   const sync = () => { btn.disabled = !(consentOK(form) && EMAIL_OK(email.value.trim())); };
   form.addEventListener('input', sync); form.addEventListener('change', sync);

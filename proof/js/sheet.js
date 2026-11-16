@@ -79,6 +79,9 @@ export function openSheet(html, { onMount, tall = false } = {}) {
   document.addEventListener('keydown', onKey);
 
   const body = wrap.querySelector('.sheet-body');
+  // Screen readers need a name for the dialog: its first heading, kept up to date as the content loads.
+  const name = () => { const h = body.querySelector('h1, h2, h3, .h2, .title'); sheetEl.setAttribute('aria-label', (h?.textContent || '').trim() || 'Menu'); };
+  name(); new MutationObserver(name).observe(body, { childList: true, subtree: true, characterData: true });
   onMount?.(body, close);
   return close;
 }

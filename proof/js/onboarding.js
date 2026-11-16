@@ -61,10 +61,10 @@ function draw(root, onDone) {
   const p = pct(i);
   store.set(DRAFT, { t: Date.now(), i, ans });
   root.innerHTML = `
-  <section class="ob">
+  <main class="ob">
     <header class="ob-top">
       <button class="icon-btn" data-back aria-label="Back" ${i === 0 ? 'style="visibility:hidden"' : ''}>${ic('back', 22)}</button>
-      <div class="ob-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}">
+      <div class="ob-progress" role="progressbar" aria-label="Setup progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}">
         <div class="ob-bar"><i style="width:${pct(Math.max(0, i - 1))}%"></i></div>
         <span class="ob-pct">${p}% set up</span>
       </div>
@@ -75,7 +75,7 @@ function draw(root, onDone) {
       <div class="say"><h1 class="title">${step.title}</h1></div>
     </div>
     <div class="ob-body">${body(step)}</div>
-  </section>`;
+  </main>`;
 
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const bar = root.querySelector('.ob-bar i');
@@ -314,7 +314,7 @@ function body(step) {
   }
 
   if (step.type === 'commit') {
-    return `${groupedCatalog().map((g) => `<h3 class="cat-h">${g.cat}</h3><div class="ctiles">${g.items.map((c) => `
+    return `${groupedCatalog().map((g) => `<h2 class="cat-h">${g.cat}</h2><div class="ctiles">${g.items.map((c) => `
       <button class="ctile" data-k="${c.key}" aria-pressed="false">
         <span class="ctile-n" aria-hidden="true"></span>
         ${ic(c.icon, 26)}
