@@ -7,6 +7,7 @@
 //   GET  ?r=goals                     your goals
 //   GET  ?r=proofs&days=7&goal=eat    recent proof with signed photo links
 //   GET  ?r=meals&days=7              recent meals; pending=true -> not reviewed yet
+//   GET  ?r=daily_log&date=YYYY-MM-DD  a ready-made Lock-in log for that day (markdown, paste into Notion)
 //   GET  ?r=photo&id=<proof id>       the photo itself (send the key as usual)
 //   POST ?r=analysis                  {proof_id, score 0-10, verdict, summary, tips[]}
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
@@ -32,6 +33,7 @@ const HELP = {
     'GET ?r=goals': 'Your goals, and which ones are food goals.',
     'GET ?r=proofs&days=7&goal=<key>&limit=30': 'Recent proof (note, time, meal details, signed photo link, your earlier reviews).',
     'GET ?r=meals&days=7&pending=true': 'Recent meals. pending=true returns only the ones nobody has reviewed yet.',
+    'GET ?r=daily_log&date=YYYY-MM-DD': 'A ready-made Lock-in log for one day (goals ticked, meals with reviews, as markdown for Notion). Date defaults to today.',
     'GET ?r=photo&id=<proof id>': 'The photo itself.',
     'POST ?r=analysis': 'Save a review: {"proof_id": "...", "score": 0-10, "verdict": "great|good|ok|poor", "summary": "one or two sentences", "tips": ["...", "..."]}',
   },
@@ -75,8 +77,8 @@ Deno.serve(async (req) => {
   };
 
   if (r === 'proofs' || r === 'meals') {
-    const days = Math.min(60, Math.max(1, Number(url.searchParams.get('days') ?? 7)));
-    const limit = Math.min(50, Math.max(1, Number(url.searchParams.get('limit') ?? 30)));
+    const days = Math.min(60, Math.max(1, Number(url.searchParams.get('days')) || 7));
+    const limit = Math.min(50, Math.max(1, Number(url.searchParams.get('limit')) || 30));
     let q = admin.from('proofs').select('id, c_key, kind, note, created_at, photo_path, meta, analysis').eq('user_id', uid).gte('created_at', since(days)).order('created_at', { ascending: false }).limit(200);
     const goal = url.searchParams.get('goal');
     if (goal) q = q.eq('c_key', goal);
@@ -121,6 +123,33 @@ Deno.serve(async (req) => {
       goals_needed_for_streak: need, goals_done_today: doneToday.length, streak_days: streak,
       meals_today: meals.length, meals_waiting_for_review: rows.filter((p) => (FOOD.has(p.c_key) || p.meta?.meal) && !p.analysis && p.photo_path).length,
     });
+  }
+
+  if (r === 'daily_log') {
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(url.searchParams.get('date') ?? '') ? url.searchParams.get('date')! : dayIn(new Date(), tz);
+    const { data } = await admin.from('proofs').select('c_key, kind, note, created_at, meta, analysis').eq('user_id', uid).gte('created_at', since(75)).order('created_at', { ascending: true }).limit(2000);
+    const rows = (data ?? []).filter((p) => dayIn(new Date(p.created_at), tz) === date);
+    const clock = (iso: string) => new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+    const need = Math.max(1, Math.ceil(goals.length / 2));
+    const done = goals.filter((g) => rows.some((p) => p.c_key === g));
+    const goalLines = goals.map((g) => {
+      const p = rows.find((x) => x.c_key === g);
+      return `- [${p ? 'x' : ' '}] ${label(g)}${p ? ` (${clock(p.created_at)})` : ''}`;
+    });
+    const meals = rows.filter((p) => FOOD.has(p.c_key) || p.meta?.meal);
+    const mealLines = meals.map((p) => {
+      const a = p.analysis as any;
+      return `- ${clock(p.created_at)} ${p.meta?.meal?.type ?? 'Meal'}${p.note ? `: ${p.note}` : ''}${p.meta?.meal?.tags?.length ? ` [${p.meta.meal.tags.join(', ')}]` : ''}${a ? ` — ${a.score}/10, ${a.verdict}. ${a.summary ?? ''}` : ' — not reviewed yet'}`;
+    });
+    const moments = rows.filter((p) => p.c_key === 'moment').length;
+    const markdown = [
+      `# Lock-in log, ${date}`, '',
+      `Goals: ${done.length}/${goals.length} (${need} needed for the streak) ${done.length >= need ? '✅ streak kept' : '⚠️ streak at risk'}`, '',
+      '## Goals', ...goalLines, '',
+      '## Meals', ...(mealLines.length ? mealLines : ['- No meals logged']),
+      ...(moments ? ['', `## Moments`, `- ${moments} saved`] : []),
+    ].join('\n');
+    return json({ date, timezone: tz, goals_done: done.length, goals_total: goals.length, goals_needed: need, meals: meals.length, markdown });
   }
 
   if (r === 'analysis' && req.method === 'POST') {

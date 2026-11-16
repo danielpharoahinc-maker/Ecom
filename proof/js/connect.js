@@ -18,7 +18,7 @@ Auth header: Authorization: Bearer ${key}
 Start with GET ${apiBase()}?r=help to see what you can do. Today, please:
 1. Get my meals that still need a review (r=meals&pending=true), look at each photo and judge how good the meal is.
 2. Save a review for each one (POST r=analysis with proof_id, score 0-10, verdict, summary, tips).
-3. Add today's meals and my goal progress to my Lock-in plan in Notion.`;
+3. Get my day as a ready-made log (r=daily_log) and add it to my Lock-in plan in Notion.`;
 
 async function copy(text, done) {
   try { await navigator.clipboard.writeText(text); toast(done); feel('good'); }

@@ -155,16 +155,19 @@ export function think(text) {
 export function buddyLine() {
   const P = S.profile; if (!P) return null;
   const t = today(), h = new Date().getHours(), first = (P.name || '').split(' ')[0];
-  const has = (k) => P.commitments.includes(k);
-  const left = t.left.map((k) => commitment(k));
-  if (!t.left.length) return { pose: 'cheer', text: 'Every goal done. Rest well, you earned it.' };
-  if (h < 10 && has('sun') && t.left.includes('sun')) return { pose: 'point', text: `Morning, ${first}. Sunlight first. Step outside and take it.` };
-  if (h < 10 && has('wake') && t.left.includes('wake')) return { pose: 'point', text: 'Up early? Prove it before anything else.' };
-  if (h >= 11 && h < 15 && P.commitments.some((k) => isFoodKey(k)) && t.left.some(isFoodKey)) return { pose: 'talk', text: 'Lunch soon. Snap your meal, I’ll stamp it.' };
-  if (t.have >= t.need) return { pose: 'cheer', text: `Streak’s safe. ${left[0].label} is a bonus.` };
-  if (h >= 20) return { pose: 'worried', text: `${t.need - t.have} more to keep your streak. Do the easiest one now.` };
-  if (t.have === 0) return { pose: 'talk', text: `${h < 12 ? 'Morning' : h < 18 ? 'Afternoon' : 'Evening'}, ${first}. Start with ${left[0].label}.` };
-  return { pose: 'point', text: `${t.need - t.have} more keeps today’s streak. ${left[0].label} next?` };
+  const has = (k) => t.left.includes(k);
+  const next = t.left[0] ? commitment(t.left[0]).label : '';
+  const day = Math.floor(Date.now() / 864e5);
+  const pick = (...a) => a[day % a.length];
+  if (!t.left.length) return { pose: 'cheer', text: pick('Every goal done. Rest well, you earned it.', 'Perfect day. Put the phone down and enjoy it.') };
+  if (h < 10 && has('sun')) return { pose: 'point', text: `Morning, ${first}. Step outside and get your sunlight first.` };
+  if (h < 10 && has('wake')) return { pose: 'point', text: 'Up early? Take the proof now, before the day pulls you away.' };
+  if (h >= 11 && h < 15 && t.left.some(isFoodKey)) return { pose: 'talk', text: 'Lunch soon. Snap your plate and I’ll stamp it.' };
+  if (h >= 17 && h < 21 && t.left.some(isFoodKey)) return { pose: 'talk', text: 'Dinner time? Log it while it’s on the table.' };
+  if (t.have >= t.need) return { pose: 'cheer', text: pick(`Streak’s safe. ${next} is pure bonus.`, `You’re covered, ${first}. ${next} makes it a great day.`) };
+  if (h >= 20) return { pose: 'worried', text: pick('Late, but not too late. Do the easiest one now.', 'Ten minutes is all it takes. Pick the quickest goal.') };
+  if (t.have === 0) return { pose: 'talk', text: pick(`${next} first. Everything else gets easier after it.`, `Start small with ${next}. I’ll be right here.`) };
+  return { pose: 'point', text: pick(`${next} next? You’re already moving.`, 'Momentum is on your side. Keep going.') };
 }
 const isFoodKey = (k) => ['eat', 'meals', 'protein', 'nosugar'].includes(k);
 

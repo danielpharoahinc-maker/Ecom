@@ -100,7 +100,7 @@ let busy = false;
 export async function runUnlocks() {
   if (busy) return; busy = true;
   try {
-    if (document.querySelector('.cap, .sheet-wrap')) { setTimeout(() => { busy = false; runUnlocks(); }, 2500); return; }
+    if (document.querySelector('.cap, .sheet-wrap, .tour-card, .tour')) { setTimeout(() => { busy = false; runUnlocks(); }, 2500); return; }
     const fresh = await checkUnlocks();
     if (fresh.length) celebrate(fresh);
   } finally { busy = busy && false; }
