@@ -54,6 +54,7 @@ export async function syncProofs() {
       }, { onConflict: 'user_id,client_id' }).select('id').single();
       if (error) throw error;
       await remember(p, { remoteId: data.id, photoPath, audioPath });
+      if (p.meal && photoPath && !p.analysis) requestReview(c, p, data.id);
     }
   } catch { /* offline or not set up yet: try again later */ } finally { busy = false; }
 }
@@ -129,6 +130,19 @@ export async function ensureProfile() {
   }
   profileOk = true;
   return { ok: true };
+}
+
+// Meals get reviewed by Claude straight after they save, if the server has a Claude key.
+// If it doesn't (or the call fails) the app quietly stops trying for half a day.
+const OFF = 'proof:review-off';
+export const reviewOff = () => { try { return Date.now() - Number(localStorage.getItem(OFF) || 0) < 12 * 3600e3; } catch { return false; } };
+async function requestReview(c, p, remoteId) {
+  if (reviewOff()) return;
+  try {
+    const { data } = await c.functions.invoke('analyze-meal', { body: { proof_id: remoteId } });
+    if (data?.status === 'ok' && data.analysis) { await remember(p, { analysis: data.analysis }); emit('proof:changed'); toast('Claude reviewed your meal'); feel('good'); }
+    else if (data?.status === 'not_configured' || data?.status === 'model_error') { try { localStorage.setItem(OFF, String(Date.now())); } catch { /* ignore */ } }
+  } catch { /* the Connect Claude route still works */ }
 }
 
 // Claude's reviews of your meals (written through the Proof API) come back here.

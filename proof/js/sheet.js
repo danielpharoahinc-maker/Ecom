@@ -58,6 +58,7 @@ export function openSheet(html, { onMount, tall = false } = {}) {
     if (e.target.closest('input, textarea, button, a, select') && !e.target.closest('.grabber')) return;
     if (sheet.scrollTop > 0 && !e.target.closest('.grabber')) return;
     y0 = e.clientY; dy = 0; t0 = Date.now();
+    try { sheet.setPointerCapture(e.pointerId); } catch { /* ignore */ } // keep following the finger
   });
   sheet.addEventListener('pointermove', (e) => {
     if (y0 === null) return;
@@ -66,10 +67,10 @@ export function openSheet(html, { onMount, tall = false } = {}) {
   });
   const end = () => {
     if (y0 === null) return;
-    const fast = dy / Math.max(1, Date.now() - t0) > 0.6;
+    const fast = dy / Math.max(1, Date.now() - t0) > 0.35;
     sheet.style.transition = ''; sheet.style.transform = '';
     y0 = null;
-    if (dy > 110 || (fast && dy > 30)) close();
+    if (dy > 110 || (fast && dy > 40)) close();
   };
   sheet.addEventListener('pointerup', end);
   sheet.addEventListener('pointercancel', end);

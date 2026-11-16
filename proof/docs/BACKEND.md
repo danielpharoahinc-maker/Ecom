@@ -189,3 +189,10 @@ Endpoints: `?r=help` (public), `summary`, `goals`, `proofs`, `meals`, `photo`, `
 ## 6. Sign-in notes
 - Supabase's built-in email is capped at 2 emails an hour. Add custom SMTP (Authentication > Emails > SMTP, a Gmail app password works) so confirmation emails reach everyone. Signup carries on as a guest if an email can't be sent.
 - Anonymous sign-ins must stay ON (Authentication > Sign In / Providers): people play first and confirm their email later.
+
+## 7. Claude reviews your meals inside the app (analyze-meal)
+Deploy the function `analyze-meal` (JWT on; already deployed). To switch it on, add ONE secret in Supabase > Edge Functions > Secrets: `ANTHROPIC_API_KEY` (from console.anthropic.com; typed there, never pasted in chat). Optional: `ANALYZE_MODEL` (default `claude-haiku-5-5`).
+- After a meal photo uploads, the app asks the function to review it; the verdict appears on the meal a few seconds later.
+- It caps each person at 20 reviews a day. Each review costs a fraction of a cent.
+- Without the secret it answers `not_configured` and the app stops trying for 12 hours; the Connect Claude route (your own Claude through the Proof API) still works.
+- The photo goes to Anthropic to be analysed. Mention this in your privacy policy before turning it on for other people.

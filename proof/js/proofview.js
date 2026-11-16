@@ -4,11 +4,12 @@ import { commitment } from './data.js';
 import { openSheet, confirmSheet } from './sheet.js';
 import { ic } from './icons.js';
 import { esc, fmtDay, fmtClock, fmtDur, toast } from './util.js';
+import { reviewOff } from './sync.js';
 
 const VERDICT = { great: 'Great meal', good: 'Good meal', ok: 'Okay meal', poor: 'Not a good one' };
 function aiCard(p) {
   const a = p.analysis;
-  if (!a) return p.meal ? `<p class="ai-wait">${S.profile?.apiConnected ? 'Claude hasn’t reviewed this meal yet. Ask Claude to check your Proof meals.' : 'Connect Claude in Account to get this meal reviewed.'}</p>` : '';
+  if (!a) return p.meal ? `<p class="ai-wait">${!reviewOff() && p.remoteId ? 'Claude is reviewing this meal…' : S.profile?.apiConnected ? 'Claude hasn’t reviewed this meal yet. Ask Claude to check your Proof meals.' : 'Connect Claude in Account to get this meal reviewed.'}</p>` : '';
   const s = Math.max(0, Math.min(10, Math.round(a.score ?? 0)));
   return `<div class="ai-card v-${esc(a.verdict || 'ok')}">
     <div class="ai-top"><b>Claude’s take</b><span class="ai-score">${s}<small>/10</small></span></div>
