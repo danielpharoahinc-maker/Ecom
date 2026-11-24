@@ -109,11 +109,9 @@
   const texLoader = new T.TextureLoader();
   const loadTex = (src, renderer) => new Promise(res => texLoader.load(src, t => { t.encoding = T.sRGBEncoding; t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); res(t); }, undefined, () => res(null)));
 
-  // shared with js/spin.js (the scroll-spin shirt)
-  AW.rail3d.loadModel = loadModel; AW.rail3d.loadTex = loadTex; AW.rail3d.TEX = TEX;
-
   /* ---------- scene ---------- */
   let S = null; // live scene for the mounted rail
+  const S_TIME = { value: 0 };   // shared clock for the cloth flutter
 
   function build(stage, list) {
     teardown();
@@ -153,12 +151,25 @@
 
     const tees = list.map((p, i) => {
       const group = new T.Group();
-      const cloth = () => new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.92, metalness: 0, side: T.DoubleSide });
+      // Cloth flutter: the lower body of the shirt ripples in the air; the hanger and the shoulders stay put.
+      const uni = { uTime: S_TIME, uSeed: { value: i * 1.7 }, uAmp: { value: 0.8 } };
+      const cloth = () => {
+        const m = new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.92, metalness: 0, side: T.DoubleSide });
+        m.onBeforeCompile = sh => {
+          sh.uniforms.uTime = uni.uTime; sh.uniforms.uSeed = uni.uSeed; sh.uniforms.uAmp = uni.uAmp;
+          sh.vertexShader = "uniform float uTime; uniform float uSeed; uniform float uAmp;\n" + sh.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
+            float hang = clamp(-position.y / 1.535, 0.0, 1.0);
+            float kk = smoothstep(0.2, 1.0, hang); kk = kk * kk;
+            transformed.x += sin(uTime * 1.7 + position.y * 5.0 + uSeed) * 0.016 * kk * uAmp;
+            transformed.z += (sin(uTime * 1.3 + position.y * 4.0 + position.x * 3.0 + uSeed * 1.3) * 0.026 + sin(uTime * 2.6 + position.x * 7.0 + uSeed) * 0.008) * kk * uAmp;`);
+        };
+        return m;
+      };
       const front = new T.Mesh(undefined, cloth()), back = new T.Mesh(undefined, cloth());
       front.visible = back.visible = false;   // shown once the model and the photos are in
       [front, back].forEach(m => { m.castShadow = true; m.receiveShadow = true; group.add(m); });
       scene.add(group);
-      return { group, front, back, id: p.id, cur: { x: 0, ry: 1.3, s: 0.94 }, tgt: { x: 0, ry: 1.3, s: 0.94 },
+      return { group, front, back, uni, id: p.id, cur: { x: 0, ry: 1.3, s: 0.94 }, tgt: { x: 0, ry: 1.3, s: 0.94 },
                vel: { x: 0, ry: 0, s: 0 }, swing: 0, swingV: 0, lift: 0, liftV: 0, seed: i * 1.7 };
     });
 
@@ -210,9 +221,16 @@
     }
   }
 
-  function onLayout({ items, sel, w }) {
+  function onLayout({ items, sel, w, focus }) {
     if (!S) return;
     S.w = w;
+    // running a finger along the rail: the shirt under it and its neighbours are nudged and swing back
+    if (focus != null && focus !== S.lastFocus && sel == null && !reduced()) {
+      const dir = S.lastFocus == null ? 1 : Math.sign(focus - S.lastFocus) || 1;
+      S.tees.forEach((t, i) => { const d = i - focus; if (Math.abs(d) <= 2) t.swingV += dir * (d === 0 ? 1.1 : 0.45 / Math.abs(d)) * (d >= 0 ? 1 : -0.6); });
+      wake();
+    }
+    S.lastFocus = focus == null ? null : focus;
     if (sel !== S.sel) {
       const prev = S.sel;
       S.sel = sel; S.turned = false; S.userRot = 0; S.userRotV = 0; S.dragging = false;
@@ -243,6 +261,7 @@
   function frame(now) {
     if (!S) return;
     S.raf = 0;
+    if (!S.moving && !reduced() && (S.skipN = (S.skipN || 0) + 1) % 2) { S.raf = requestAnimationFrame(frame); return; }   // idle: about 30 frames a second is plenty for a gentle sway
     const elapsed = Math.min(0.1, (now - S.last) / 1000); S.last = now;
     const steps = Math.max(1, Math.ceil(elapsed / 0.016)), dt = elapsed / steps;   // fixed small steps keep the springs stable
     const still = reduced();
@@ -274,14 +293,22 @@
           Math.abs(g.s - c.s) > 0.0005 || Math.abs(t.swing) > 0.002 || Math.abs(t.swingV) > 0.01 || Math.abs(t.liftV) > 0.005) moving = true;
       const grp = t.group;
       grp.position.set(c.x * S.upp, S.rail.position.y + t.lift * scaleBase, Math.abs(c.ry) < 0.6 ? 0.12 : 0);
-      grp.rotation.y = c.ry + (i === S.sel ? S.spin + S.userRot : 0);
-      grp.rotation.z = (still ? 0 : Math.sin(now / 1300 + t.seed) * 0.012) + t.swing * 0.09;
+      // a breeze runs along the rail: every shirt sways a little, a moment after its neighbour
+      const gust = 0.7 + 0.3 * Math.sin(now / 4300);
+      const br = still ? 0 : gust * (Math.sin(now / 1750 + c.x * 0.0042 + t.seed * 0.35) * 0.03 + Math.sin(now / 790 + t.seed) * 0.008);
+      t.sway = br + t.swing * 0.09;
+      t.uni.uAmp.value = still ? 0 : 0.75 + gust * 0.35 + Math.min(1.6, Math.abs(t.swingV) * 0.7 + Math.abs(t.swing) * 5);
+      grp.rotation.y = c.ry + (i === S.sel ? S.spin + S.userRot : 0) + (still ? 0 : Math.sin(now / 2600 + t.seed * 1.3) * 0.03);
+      grp.rotation.x = still ? 0 : Math.sin(now / 2100 + t.seed) * 0.022 * gust;
+      grp.rotation.z = t.sway;
       grp.scale.setScalar(scaleBase * c.s);
     });
+    S_TIME.value = now / 1000;
     S.renderer.render(S.scene, S.camera);
     placePhoto(scaleBase);
+    S.moving = moving;
     S.still = moving ? 0 : S.still + elapsed;
-    if (S.visible && !document.hidden && (moving || (!still && S.still < 8))) S.raf = requestAnimationFrame(frame);
+    if (S.visible && !document.hidden && (moving || !still)) S.raf = requestAnimationFrame(frame);
   }
 
   /* Crossfade the settled shirt into its photo-real shot, lined up hook-to-hem with the 3D shirt. */
@@ -305,7 +332,8 @@
     const railPx = 9 - t.lift * scaleBase / S.upp;
     img.style.width = w.toFixed(1) + "px";
     img.style.height = h.toFixed(1) + "px";
-    img.style.transform = `translate(${(W / 2 + t.cur.x - w * ph.m.cx).toFixed(1)}px, ${(railPx - 4 - ph.m.top * h).toFixed(1)}px)`;
+    img.style.transformOrigin = `${(w * ph.m.cx).toFixed(1)}px ${(ph.m.top * h).toFixed(1)}px`;   // pivot on the hook
+    img.style.transform = `translate(${(W / 2 + t.cur.x - w * ph.m.cx).toFixed(1)}px, ${(railPx - 4 - ph.m.top * h).toFixed(1)}px) rotate(${(-(t.sway || 0)).toFixed(4)}rad)`;
     if (img.complete && img.naturalWidth) img.classList.add("is-on"); else img.onload = () => { if (S && S.photo === img) wake(); };
   }
 
