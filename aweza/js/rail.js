@@ -60,6 +60,30 @@
     } catch (e) { return false; }
   }
 
+  /* The offers at the bottom: big numbers, one tile each. Savings are worked out from the real tee price. */
+  function offerTiles(c) {
+    const price = Math.max(...AW.products.map(p => p.price), 0), deals = (c.deals || []).slice().sort((a, b) => a.qty - b.qty);
+    if (!deals.length) return "";
+    const tiles = deals.map((d, i) => {
+      const save = price * d.qty - d.price;
+      return `<div class="mf-tile${i === deals.length - 1 ? " mf-tile--hot" : ""}">
+        <span class="mf-tile-n">${d.qty}</span><span class="mf-tile-u">tees for</span>
+        <b class="mf-tile-p">${AW.rand(d.price)}</b>
+        ${save > 0 ? `<span class="mf-tile-s">Save ${AW.rand(save)}</span>` : ""}
+      </div>`;
+    }).join("");
+    const free = c.freeDeliveryOver ? `<div class="mf-tile mf-tile--free"><span class="mf-tile-n">Free</span><span class="mf-tile-u">delivery over</span><b class="mf-tile-p">${AW.rand(c.freeDeliveryOver)}</b><span class="mf-tile-s">Mix any tees and sizes</span></div>` : "";
+    return `<div class="mf-offers" role="group" aria-label="Offers">${tiles}${free}</div>`;
+  }
+
+  function revealOnScroll(root) {
+    const els = [...root.querySelectorAll(".mf-tile, .mf-fact, .mf-ref")];
+    if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    els.forEach((el, i) => { el.classList.add("mf-reveal"); el.style.setProperty("--d", (i % 4) * 90 + "ms"); });
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); } }), { threshold: 0.2 });
+    els.forEach(el => io.observe(el));
+  }
+
   function mountFooter() {
     const old = document.getElementById("footer-root");
     if (old) old.hidden = true;
@@ -68,11 +92,11 @@
     const c = AW.config;
     f.innerHTML = `
       <footer class="mf">
-        ${c.deals ? `<p class="mf-deal"><b>${AW.dealLabel()}</b> <span>Mix any tees and sizes.</span></p>` : ""}
+        ${offerTiles(c)}
         <div class="mf-facts">
-          <p><strong>Delivery</strong> ${AW.rand(c.delivery)} anywhere in South Africa. Free over ${AW.rand(c.freeDeliveryOver)}.</p>
-          <p><strong>Printed to order</strong> Every tee is printed when you buy it, so nothing sits in a warehouse.</p>
-          <p><strong>Payment</strong> Card payment through a secure checkout. Prices in Rand.</p>
+          <p class="mf-fact"><i class="mf-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7.5" cy="17.5" r="1.8"/><circle cx="17.5" cy="17.5" r="1.8"/></svg></i><strong>Delivery</strong> ${AW.rand(c.delivery)} anywhere in South Africa. Free over ${AW.rand(c.freeDeliveryOver)}.</p>
+          <p class="mf-fact"><i class="mf-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3l-5 3 2 4 3-1v11h8V9l3 1 2-4-5-3a4 4 0 0 1-8 0z"/></svg></i><strong>Printed to order</strong> Every tee is printed when you buy it, so nothing sits in a warehouse.</p>
+          <p class="mf-fact"><i class="mf-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg></i><strong>Payment</strong> Card payment through a secure checkout. Prices in Rand.</p>
           ${c.referral ? `<div class="mf-ref"><p><strong>Give ${AW.rand(c.referral.amount)}, get ${AW.rand(c.referral.amount)}</strong> Send a friend your link. They get ${AW.rand(c.referral.amount)} off their order. When they buy, message us your code <b>${AW.esc(AW.referral.mine())}</b> and ${AW.rand(c.referral.amount)} comes off your next tee.</p><div class="mf-ref-btns"><button type="button" class="mf-ref-btn" data-ref-share>Copy my link</button><a class="mf-ref-btn mf-ref-btn--alt" data-ref-wa target="_blank" rel="noopener" href="${AW.esc(refShareLinks().wa)}">WhatsApp</a><a class="mf-ref-btn mf-ref-btn--alt" data-ref-mail href="${AW.esc(refShareLinks().mail)}">Email a friend</a></div></div>` : ""}
         </div>
         <nav class="mf-links" aria-label="Help">
@@ -86,6 +110,7 @@
         </nav>
         <p class="mf-sign"><span class="mf-mark">AWEZA<sup>™</sup></span> Time of your life.</p>
       </footer>`;
+    revealOnScroll(f);
     const share = f.querySelector("[data-ref-share]");
     if (share) share.addEventListener("click", async () => {
       const link = AW.referral.link();
