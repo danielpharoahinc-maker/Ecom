@@ -159,7 +159,7 @@
         const d = i - c;
         ang = d < 0 ? A : -A;
         z = 100 - Math.abs(d) * 4;
-        if (d === 0) { ang = A * (1 - o) * (st.side || 1); s = 0.94 + o * 0.06; z = 200; }
+        if (d === 0) { ang = 0; s = 0.94 + o * 0.06; z = 200; }   // the shirt that comes out faces you square-on, also while you scroll/peek
         else x += Math.sign(d) * (o * w * 0.5 + (o ? 10 : 0) + (st.sel != null ? 70 + Math.abs(d) * 18 : 0));
       }
       items.push({ x, ang, s });
