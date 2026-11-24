@@ -160,8 +160,8 @@
           sh.vertexShader = "uniform float uTime; uniform float uSeed; uniform float uAmp;\n" + sh.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
             float hang = clamp(-position.y / 1.535, 0.0, 1.0);
             float kk = smoothstep(0.2, 1.0, hang); kk = kk * kk;
-            transformed.x += sin(uTime * 1.7 + position.y * 5.0 + uSeed) * 0.016 * kk * uAmp;
-            transformed.z += (sin(uTime * 1.3 + position.y * 4.0 + position.x * 3.0 + uSeed * 1.3) * 0.026 + sin(uTime * 2.6 + position.x * 7.0 + uSeed) * 0.008) * kk * uAmp;`);
+            transformed.x += sin(uTime * 1.7 + position.y * 5.0 + uSeed) * 0.03 * kk * uAmp;
+            transformed.z += (sin(uTime * 1.3 + position.y * 4.0 + position.x * 3.0 + uSeed * 1.3) * 0.05 + sin(uTime * 2.6 + position.x * 7.0 + uSeed) * 0.014) * kk * uAmp;`);
         };
         return m;
       };
@@ -265,6 +265,13 @@
     const elapsed = Math.min(0.1, (now - S.last) / 1000); S.last = now;
     const steps = Math.max(1, Math.ceil(elapsed / 0.016)), dt = elapsed / steps;   // fixed small steps keep the springs stable
     const still = reduced();
+    // every few seconds a gust sweeps the rail from one end to the other
+    if (!still) {
+      if (S.waveT0 == null) S.waveT0 = now + 1200;
+      const age = (now - S.waveT0) / 2600;
+      if (age >= 0 && age <= 1) { const half = S.w * S.tees.length * 0.35 + 200; S.waveX = (S.waveDir || 1) * (-half + 2 * half * age); }
+      else { S.waveX = null; if (age > 1) { S.waveT0 = now + 4500 + Math.random() * 3500; S.waveDir = -(S.waveDir || 1); } }
+    }
     const scaleBase = S.w * S.upp * 1.3 / 1.9;
     let moving = false;
     // turning round: a spring with a little overshoot, like a shirt spun on its hook
@@ -295,11 +302,12 @@
       grp.position.set(c.x * S.upp, S.rail.position.y + t.lift * scaleBase, Math.abs(c.ry) < 0.6 ? 0.12 : 0);
       // a breeze runs along the rail: every shirt sways a little, a moment after its neighbour
       const gust = 0.7 + 0.3 * Math.sin(now / 4300);
-      const br = still ? 0 : gust * (Math.sin(now / 1750 + c.x * 0.0042 + t.seed * 0.35) * 0.03 + Math.sin(now / 790 + t.seed) * 0.008);
+      const wv = S.waveX == null ? 0 : Math.exp(-Math.pow((c.x - S.waveX) / (S.w * 0.9 + 80), 2));      // a gust travelling along the rail
+      const br = still ? 0 : gust * (Math.sin(now / 1750 + c.x * 0.0042 + t.seed * 0.35) * 0.05 + Math.sin(now / 790 + t.seed) * 0.014) + wv * 0.11 * Math.sin(now / 160 - c.x * 0.02);
       t.sway = br + t.swing * 0.09;
-      t.uni.uAmp.value = still ? 0 : 0.75 + gust * 0.35 + Math.min(1.6, Math.abs(t.swingV) * 0.7 + Math.abs(t.swing) * 5);
-      grp.rotation.y = c.ry + (i === S.sel ? S.spin + S.userRot : 0) + (still ? 0 : Math.sin(now / 2600 + t.seed * 1.3) * 0.03);
-      grp.rotation.x = still ? 0 : Math.sin(now / 2100 + t.seed) * 0.022 * gust;
+      t.uni.uAmp.value = still ? 0 : Math.min(2.0, 0.9 + gust * 0.4 + wv * 0.8 + Math.min(0.7, Math.abs(t.swingV) * 0.3 + Math.abs(t.swing) * 2));
+      grp.rotation.y = c.ry + (i === S.sel ? S.spin + S.userRot : 0) + (still ? 0 : Math.sin(now / 2600 + t.seed * 1.3) * 0.05);
+      grp.rotation.x = still ? 0 : Math.sin(now / 2100 + t.seed) * 0.035 * gust;
       grp.rotation.z = t.sway;
       grp.scale.setScalar(scaleBase * c.s);
     });
@@ -351,6 +359,22 @@
   }
 
   AW.on("rail:mount", ({ stage, list }) => { try { build(stage, list); } catch (e) { teardown(); } });
+  // when the shirts first appear they drop in and swing, one after another along the rail
+  AW.on("rail:ready", () => {
+    if (!S || reduced() || S.entered) return;
+    S.entered = true;
+    S.tees.forEach((t, i) => setTimeout(() => { if (S && S.tees[i] === t) { t.swingV += (i % 2 ? -2.6 : 2.6); t.liftV += 1.6; t.cur.s *= 0.9; wake(); } }, 60 * i));
+  });
+  // the pointer pushes the air: shirts near it swing away from a moving mouse or finger
+  document.addEventListener("pointermove", e => {
+    if (!S || S.sel != null || reduced()) return;
+    const r = S.stage.getBoundingClientRect();
+    if (e.clientY < r.top - 20 || e.clientY > r.bottom + 20) return;
+    const px = e.clientX - r.left - r.width / 2, dx = e.movementX || 0;
+    if (!dx) return;
+    S.tees.forEach(t => { const d = Math.abs(t.cur.x - px); if (d < 170) t.swingV += Math.max(-1.2, Math.min(1.2, dx * 0.035)) * (1 - d / 170); });
+    wake();
+  }, { passive: true });
   AW.on("rail:layout", d => onLayout(d));
   AW.on("rail:turn", ({ back }) => { if (S) { S.turned = back; S.userRotV = 0; S.userRot = Math.round(S.userRot / (Math.PI * 2)) * Math.PI * 2; wake(); } });
   AW.on("rail:spin", d => {
