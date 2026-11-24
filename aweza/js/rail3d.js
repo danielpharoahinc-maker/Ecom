@@ -109,6 +109,9 @@
   const texLoader = new T.TextureLoader();
   const loadTex = (src, renderer) => new Promise(res => texLoader.load(src, t => { t.encoding = T.sRGBEncoding; t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); res(t); }, undefined, () => res(null)));
 
+  // shared with js/spin.js (the scroll-spin shirt)
+  AW.rail3d.loadModel = loadModel; AW.rail3d.loadTex = loadTex; AW.rail3d.TEX = TEX;
+
   /* ---------- scene ---------- */
   let S = null; // live scene for the mounted rail
 
